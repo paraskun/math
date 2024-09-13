@@ -12,6 +12,8 @@ struct mtx* mtx_new(uint32_t n);
 struct mtx* mtx_rnd(uint32_t n, uint32_t u);
 struct mtx* mtx_seq(uint32_t n);
 
+struct mtx* mtx_sequ(uint32_t n);
+
 void mtx_fget(FILE* f, struct mtx* a);
 void mtx_fput(FILE* f, struct mtx* a);
 void mtx_cput(struct mtx* a);

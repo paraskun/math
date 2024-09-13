@@ -62,6 +62,12 @@ void vec_add(struct vec* a, struct vec* b, struct vec* c) {
     c->v[i] = a->v[i] + b->v[i];
 }
 
+void vec_cmb(struct vec* a, struct vec* b, struct vec* c, double k) {
+#pragma omp parallel for num_threads(12)
+  for (uint32_t i = 0; i < a->n; ++i)
+    c->v[i] = a->v[i] + b->v[i] * k;
+}
+
 void vec_mlt(struct vec* a, struct vec* b, double* r) {
   double s = 0;
 

@@ -18,6 +18,7 @@ void vec_fput(FILE* f, struct vec* a);
 void vec_cput(struct vec* a);
 
 void vec_add(struct vec* a, struct vec* b, struct vec* r);
+void vec_cmb(struct vec* a, struct vec* b, struct vec* c, double k);
 void vec_mlt(struct vec* a, struct vec* b, double* r);
 void vec_norm(struct vec* a, double* r);
 

@@ -36,6 +36,17 @@ struct mtx* mtx_seq(uint32_t n) {
   return m;
 }
 
+struct mtx* mtx_sequ(uint32_t n) {
+  struct mtx* m = mtx_new(n);
+
+#pragma omp parallel for
+  for (uint32_t i = 0; i < n; ++i)
+    for (uint32_t j = 0; j < n; ++j)
+      m->v[i * n + j] = j >= i ? n - j : 0.0;
+
+  return m;
+}
+
 void mtx_fget(FILE* f, struct mtx* a) {
   for (uint32_t i = 0; i < a->n; ++i)
     for (uint32_t j = 0; j < a->n; ++j)
