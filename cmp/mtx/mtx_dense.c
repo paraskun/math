@@ -1,21 +1,12 @@
-#include "mtx.h"
-
-#include <stdint.h>
-
-struct mtx {
-  double *v;
-  uint32_t n;
-};
-
-#ifndef MTX_H
-#define MTX_H
-
 #include <math.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-struct mtx *mtx_new(uint32_t n) {
-  struct mtx *m = malloc(sizeof(struct mtx));
+#include "mtx_dense.h"
+
+struct mtx* mtx_new(uint32_t n) {
+  struct mtx* m = malloc(sizeof(struct mtx));
 
   m->v = malloc(sizeof(double) * n * n);
   m->n = n;
@@ -23,35 +14,35 @@ struct mtx *mtx_new(uint32_t n) {
   return m;
 }
 
-struct mtx *mtx_rnd(uint32_t n) {
-  struct mtx *m = mtx_new(n);
+struct mtx* mtx_rnd(uint32_t n, uint32_t u) {
+  struct mtx* m = mtx_new(n);
 
 #pragma omp parallel for
   for (uint32_t i = 0; i < n; ++i)
     for (uint32_t j = 0; j < n; ++j)
-      m->v[i * n + j] = (double)rand() / RAND_MAX * 1000.0;
+      m->v[i * n + j] = rand() % (u + 1);
 
   return m;
 }
 
-struct mtx *mtx_seq(uint32_t n) {
-  struct mtx *m = mtx_new(n);
+struct mtx* mtx_seq(uint32_t n) {
+  struct mtx* m = mtx_new(n);
 
 #pragma omp parallel for
   for (uint32_t i = 0; i < n; ++i)
     for (uint32_t j = 0; j < n; ++j)
-      m->v[i * n + j] = i * n + j;
+      m->v[i * n + j] = j;
 
   return m;
 }
 
-void mtx_fget(FILE *f, struct mtx *a) {
+void mtx_fget(FILE* f, struct mtx* a) {
   for (uint32_t i = 0; i < a->n; ++i)
     for (uint32_t j = 0; j < a->n; ++j)
       fscanf(f, "%lf", &a->v[i * a->n + j]);
 }
 
-void mtx_fput(FILE *f, struct mtx *a) {
+void mtx_fput(FILE* f, struct mtx* a) {
   for (uint32_t i = 0; i < a->n; ++i) {
     for (uint32_t j = 0; j < a->n; ++j)
       fprintf(f, "%lf ", a->v[i * a->n + j]);
@@ -60,8 +51,17 @@ void mtx_fput(FILE *f, struct mtx *a) {
   }
 }
 
-void mtx_mmlt(struct mtx *a, struct mtx *b, struct mtx *c) {
-#pragma omp parallel for
+void mtx_cput(struct mtx* a) {
+  for (uint32_t i = 0; i < a->n; ++i) {
+    for (uint32_t j = 0; j < a->n; ++j)
+      printf("%4.1lf ", a->v[i * a->n + j]);
+
+    putchar('\n');
+  }
+}
+
+void mtx_mmlt(struct mtx* a, struct mtx* b, struct mtx* c) {
+#pragma omp parallel for num_threads(12)
   for (uint32_t i = 0; i < a->n; ++i)
     for (uint32_t j = 0; j < a->n; ++j) {
       c->v[i * a->n + j] = 0.0;
@@ -71,7 +71,7 @@ void mtx_mmlt(struct mtx *a, struct mtx *b, struct mtx *c) {
     }
 }
 
-void mtx_vmlt(struct mtx *a, struct vec *b, struct vec *c) {
+void mtx_vmlt(struct mtx* a, struct vec* b, struct vec* c) {
 #pragma omp parallel for
   for (uint32_t i = 0; i < a->n; ++i) {
     c->v[i] = 0.0;
@@ -81,7 +81,7 @@ void mtx_vmlt(struct mtx *a, struct vec *b, struct vec *c) {
   }
 }
 
-void mtx_norm(struct mtx *a, double *r) {
+void mtx_norm(struct mtx* a, double* r) {
   double s = 0;
 
 #pragma omp parallel for reduction(+ : s)
@@ -92,9 +92,7 @@ void mtx_norm(struct mtx *a, double *r) {
   *r = sqrt(s);
 }
 
-void mtx_free(struct mtx *a) {
+void mtx_free(struct mtx* a) {
   free(a->v);
   free(a);
 }
-
-#endif // MTX_H
