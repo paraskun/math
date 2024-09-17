@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 project(math)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
+set(CMAKE_BUILD_TYPE Debug)
 
 file(GLOB vec 
   vec/*.h

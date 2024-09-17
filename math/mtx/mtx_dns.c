@@ -1,3 +1,5 @@
+#include <def.h>
+
 #ifdef MTX_DNS_H
 
 #include <mtx_dns.h>
@@ -6,10 +8,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <threads.h>
-
-#ifndef THRD
-#define THRD 1
-#endif
 
 struct mtx* mtx_new(uint32_t n) {
   struct mtx* m = malloc(sizeof(struct mtx));

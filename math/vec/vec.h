@@ -3,6 +3,7 @@
 
 #include <def.h>
 #include <stdio.h>
+#include <stdint.h>
 
 struct vec {
   real* v;
