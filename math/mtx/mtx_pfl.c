@@ -57,7 +57,13 @@ void mtx_fput(FILE* f, struct mtx* a) {
 }
 
 void mtx_ldu(struct mtx* a) {
+  for (uint32_t i = 0; i < a->n; ++i) {
+    for (uint32_t j = a->p[i]; j < a->p[i + 1]; ++j) {
+      a->d[i] -= a->l[j] * a->u[j];
+    }
 
+    
+  }
 }
 
 void mtx_free(struct mtx* m) {
