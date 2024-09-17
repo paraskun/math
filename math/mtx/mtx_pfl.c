@@ -35,6 +35,8 @@ void mtx_fget(FILE* f, struct mtx* a) {
 }
 
 void mtx_fput(FILE* f, struct mtx* a) {
+  fprintf(f, "%u %u\n", a->n, a->s);
+
   for (uint32_t i = 0; i <= a->n; ++i)
     fprintf(f, "%u ", a->p[i]);
 
@@ -54,7 +56,9 @@ void mtx_fput(FILE* f, struct mtx* a) {
     fprintf(f, "%.4e ", a->u[i]);
 }
 
-void mtx_ldu(struct mtx* a) {}
+void mtx_ldu(struct mtx* a) {
+
+}
 
 void mtx_free(struct mtx* m) {
   free(m->d);

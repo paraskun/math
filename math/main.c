@@ -8,8 +8,7 @@ struct mtx* get() {
   FILE* in = fopen("in", "r");
   uint32_t n, s;
 
-  fscanf(in, "%u", &n);
-  fscanf(in, "%u", &s);
+  fscanf(in, "%u %u", &n, &s);
 
   struct mtx* m = mtx_new(n, s);
   mtx_fget(in, m);
@@ -20,10 +19,7 @@ struct mtx* get() {
 
 void put(struct mtx* m) {
   FILE* out = fopen("out", "w");
-
-  fprintf(out, "%u %u\n", m->n, m->s);
   mtx_fput(out, m);
-
   fclose(out);
 }
 
