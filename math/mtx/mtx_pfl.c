@@ -7,6 +7,8 @@
 #include <mtx_pfl.h>
 #include <stdlib.h>
 
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+
 struct mtx* mtx_new(uint32_t n, uint32_t s) {
   struct mtx* m = malloc(sizeof(struct mtx));
 
@@ -57,12 +59,39 @@ void mtx_fput(FILE* f, struct mtx* a) {
 }
 
 void mtx_ldu(struct mtx* a) {
-  for (uint32_t i = 0; i < a->n; ++i) {
-    for (uint32_t j = a->p[i]; j < a->p[i + 1]; ++j) {
-      a->d[i] -= a->l[j] * a->u[j];
+  for (int i = 0; i < a->n; ++i) {
+    int c = a->p[i + 1] - a->p[i];
+
+    for (int k = 0; k < c; ++k) {
+      a->d[i] -= a->l[a->p[i] + c - 1 - k] * a->u[a->p[i] + c - 1 - k] *
+                 a->d[i - 1 - k];
     }
 
-    
+    for (int j = i + 1; j < a->n; ++j) {
+      int cr = a->p[j + 1] - a->p[j] - j + i;
+      int cc = a->p[i + 1] - a->p[i];
+
+      for (int k = 0; k < MIN(cr, cc); ++k) {
+        a->l[a->p[j] + cr] -= a->l[a->p[j] + cr - 1 - k] *
+                              a->u[a->p[i] + cc - 1 - k] * a->d[i - 1 - k];
+      }
+
+      if (cr > -1)
+        a->l[a->p[j] + cr] /= a->d[i];
+    }
+
+    for (int j = i + 1; j < a->n; ++j) {
+      int cc = a->p[j + 1] - a->p[j] - j + i;
+      int cr = a->p[i + 1] - a->p[i];
+
+      for (int k = 0; k < MIN(cr, cc); ++k) {
+        a->u[a->p[j] + cr] -= a->l[a->p[i] + cr - 1 - k] *
+                              a->u[a->p[j] + cc - 1 - k] * a->d[i - 1 - k];
+      }
+
+      if (cc > -1)
+        a->u[a->p[j] + cc] /= a->d[i];
+    }
   }
 }
 

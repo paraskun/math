@@ -25,8 +25,10 @@ void put(struct mtx* m) {
 
 int main() {
   struct mtx* m = get();
-  put(m);
 
+  mtx_ldu(m);
+
+  put(m);
   mtx_free(m);
   return 0;
 }
