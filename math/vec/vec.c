@@ -52,9 +52,9 @@ void vec_cput(struct vec* a) {
   printf("(");
 
   for (uint32_t i = 0; i < a->n; ++i)
-    printf("%.1lf, ", a->v[i]);
+    printf("%.3e, ", a->v[i]);
 
-  printf("\b\b)");
+  printf("\b\b)\n");
 }
 
 void vec_add(struct vec* a, struct vec* b, struct vec* c) {

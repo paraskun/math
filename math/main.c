@@ -1,8 +1,8 @@
 #include <def.h>
 #include <mtx_pfl.h>
+#include <sle.h>
 #include <stdint.h>
 #include <stdio.h>
-#include "mtx.h"
 
 struct mtx* get() {
   FILE* in = fopen("in", "r");
@@ -26,9 +26,19 @@ void put(struct mtx* m) {
 int main() {
   struct mtx* m = get();
 
-  mtx_ldu(m);
+  struct vec* x = vec_new(m->n);
+  struct vec* b = vec_seq(m->n);
+
+  sle_gauss(m, x, b);
 
   put(m);
+
+  vec_cput(x);
+  vec_cput(b);
+
   mtx_free(m);
+  vec_free(x);
+  vec_free(b);
+
   return 0;
 }
