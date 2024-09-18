@@ -4,13 +4,30 @@
 #include <def.h>
 #include <vec.h>
 
-#include <stdio.h>
-
 struct mtx;
 
-void mtx_fget(FILE* f, struct mtx* a);
-void mtx_fput(FILE* f, struct mtx* a);
+/**
+ * @brief Populate given matrix with values from the file.
+ *
+ * @param fn - file name;
+ * @param m - matrix to fill;
+ */
+void mtx_fget(const char* fn, struct mtx* m);
 
-void mtx_free(struct mtx* a);
+/**
+ * @brief Write the values from the given matrix to a file.
+ *
+ * @param fn - file name;
+
+ * @param m - matrix to write;
+ */
+void mtx_fput(const char* fn, struct mtx* m);
+
+/**
+ * @brief Deallocate matrix memory.
+ *
+ * @param a - matrix to delete;
+ */
+void mtx_free(struct mtx* m);
 
 #endif  // MTX_H

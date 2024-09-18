@@ -1,6 +1,8 @@
 #include <def.h>
 
-#ifdef MTX_PFL_H
+#ifdef MTX_PFL
+#ifndef SLE_PFL_H
+#define SLE_PFL_H
 
 #include <mtx_pfl.h>
 #include <sle.h>
@@ -43,4 +45,5 @@ void sle_gauss(struct mtx* a, struct vec* x, struct vec* b) {
   sle_gauss_u(a, x, b);
 }
 
-#endif  // SLE_PFL
+#endif  // SLE_PFL_H
+#endif  // MTX_PFL

@@ -1,20 +1,20 @@
 #include <def.h>
-#include <stdint.h>
-#include <stdio.h>
 
-#ifdef MTX_PFL_H
+#ifdef MTX_PFL
 
 #include <mtx_pfl.h>
+
+#include <stdio.h>
 #include <stdlib.h>
 
-#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+#define min(x, y) (((x) < (y)) ? (x) : (y))
 
-struct mtx* mtx_new(uint32_t n, uint32_t s) {
+struct mtx* mtx_new(size_t n, size_t s) {
   struct mtx* m = malloc(sizeof(struct mtx));
 
   m->n = n;
   m->s = s;
-  m->p = malloc(sizeof(uint32_t) * (n + 1));
+  m->p = malloc(sizeof(size_t) * (n + 1));
   m->d = malloc(sizeof(real) * n);
   m->l = malloc(sizeof(real) * s);
   m->u = malloc(sizeof(real) * s);
@@ -22,40 +22,46 @@ struct mtx* mtx_new(uint32_t n, uint32_t s) {
   return m;
 }
 
-void mtx_fget(FILE* f, struct mtx* a) {
-  for (uint32_t i = 0; i <= a->n; ++i)
-    fscanf(f, "%u", &a->p[i]);
+void mtx_fget(const char* fn, struct mtx* a) {
+  FILE* f = fopen(fn, "r");
 
-  for (uint32_t i = 0; i < a->n; ++i)
+  for (size_t i = 0; i <= a->n; ++i)
+    fscanf(f, "%lu", &a->p[i]);
+
+  for (size_t i = 0; i < a->n; ++i)
     fscanf(f, "%lf", &a->d[i]);
 
-  for (uint32_t i = 0; i < a->s; ++i)
+  for (size_t i = 0; i < a->s; ++i)
     fscanf(f, "%lf", &a->l[i]);
 
-  for (uint32_t i = 0; i < a->s; ++i)
+  for (size_t i = 0; i < a->s; ++i)
     fscanf(f, "%lf", &a->u[i]);
+
+  fclose(f);
 }
 
-void mtx_fput(FILE* f, struct mtx* a) {
-  fprintf(f, "%u %u\n", a->n, a->s);
+void mtx_fput(const char* fn, struct mtx* a) {
+  FILE* f = fopen(fn, "w");
 
-  for (uint32_t i = 0; i <= a->n; ++i)
-    fprintf(f, "%u ", a->p[i]);
-
-  fputc('\n', f);
-
-  for (uint32_t i = 0; i < a->n; ++i)
-    fprintf(f, "%.4e ", a->d[i]);
+  for (size_t i = 0; i <= a->n; ++i)
+    fprintf(f, "%lu ", a->p[i]);
 
   fputc('\n', f);
 
-  for (uint32_t i = 0; i < a->s; ++i)
-    fprintf(f, "%.4e ", a->l[i]);
+  for (size_t i = 0; i < a->n; ++i)
+    fprintf(f, "%.7e ", a->d[i]);
 
   fputc('\n', f);
 
-  for (uint32_t i = 0; i < a->s; ++i)
-    fprintf(f, "%.4e ", a->u[i]);
+  for (size_t i = 0; i < a->s; ++i)
+    fprintf(f, "%.7e ", a->l[i]);
+
+  fputc('\n', f);
+
+  for (size_t i = 0; i < a->s; ++i)
+    fprintf(f, "%.7e ", a->u[i]);
+
+  fclose(f);
 }
 
 void mtx_ldu(struct mtx* a) {
@@ -71,7 +77,7 @@ void mtx_ldu(struct mtx* a) {
       int cr = a->p[j + 1] - a->p[j] - j + i;
       int cc = a->p[i + 1] - a->p[i];
 
-      for (int k = 0; k < MIN(cr, cc); ++k) {
+      for (int k = 0; k < min(cr, cc); ++k) {
         a->l[a->p[j] + cr] -= a->l[a->p[j] + cr - 1 - k] *
                               a->u[a->p[i] + cc - 1 - k] * a->d[i - 1 - k];
       }
@@ -84,7 +90,7 @@ void mtx_ldu(struct mtx* a) {
       int cc = a->p[j + 1] - a->p[j] - j + i;
       int cr = a->p[i + 1] - a->p[i];
 
-      for (int k = 0; k < MIN(cr, cc); ++k) {
+      for (int k = 0; k < min(cr, cc); ++k) {
         a->u[a->p[j] + cr] -= a->l[a->p[i] + cr - 1 - k] *
                               a->u[a->p[j] + cc - 1 - k] * a->d[i - 1 - k];
       }
@@ -103,4 +109,4 @@ void mtx_free(struct mtx* m) {
   free(m);
 }
 
-#endif  // MTX_PFL_H
+#endif  // MTX_PFL
