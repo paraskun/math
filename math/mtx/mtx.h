@@ -2,7 +2,7 @@
 #define MTX_H
 
 #include <def.h>
-#include <vec.h>
+#include <vec/vec.h>
 
 struct mtx;
 

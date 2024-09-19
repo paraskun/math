@@ -1,6 +1,6 @@
 #ifndef MTX_DNS_H
 
-#include <mtx.h>
+#include <mtx/mtx.h>
 
 #include <stddef.h>
 

@@ -6,8 +6,8 @@
 
 #include <string.h>
 
-#include <mtx_pfl.h>
-#include <sle.h>
+#include <mtx/mtx_pfl.h>
+#include <sle/sle.h>
 
 static void sle_gauss_l(struct mtx* a, struct vec* x, struct vec* b) {
   for (int i = 0; i < x->n; ++i) {

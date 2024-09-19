@@ -1,8 +1,8 @@
 #include <stdlib.h>
 
-#include <mtx_pfl.h>
-#include <sle.h>
-#include <vec.h>
+#include <mtx/mtx_pfl.h>
+#include <sle/sle.h>
+#include <vec/vec.h>
 
 int main(int argc, char* argv[argc]) {
   if (argc < 2)

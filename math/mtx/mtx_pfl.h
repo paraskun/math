@@ -1,6 +1,6 @@
 #ifndef MTX_PFL_H
 
-#include <mtx.h>
+#include <mtx/mtx.h>
 
 #include <stdint.h>
 

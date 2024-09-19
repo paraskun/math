@@ -1,5 +1,5 @@
 #include <def.h>
-#include <vec.h>
+#include <vec/vec.h>
 
 #include <math.h>
 #include <omp.h>

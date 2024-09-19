@@ -2,7 +2,7 @@
 
 #ifdef MTX_DNS
 
-#include <mtx_dns.h>
+#include <mtx/mtx_dns.h>
 
 #include <math.h>
 #include <stdio.h>

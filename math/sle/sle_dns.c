@@ -4,8 +4,8 @@
 #ifndef SLE_DNS_H
 #define SLE_DNS_H
 
-#include <mtx_dns.h>
-#include <sle.h>
+#include <mtx/mtx_dns.h>
+#include <sle/sle.h>
 
 //void sle_gauss(struct mtx* a, struct vec* x, struct vec* b) {
 //  for (size_t i = a->n - 1; i >= 0; --i) {
