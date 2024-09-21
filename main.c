@@ -1,28 +1,60 @@
-#include <stdlib.h>
+#include <bits/time.h>
+#include <stdio.h>
+#include <time.h>
+#include <math.h>
 
-#include <mtx/mtx_pfl.h>
+#include <def.h>
+#include <mtx/mtx_dns.h>
 #include <sle/sle.h>
 #include <vec/vec.h>
+#include "mtx/mtx.h"
+
+#define N 50000
+
+double to_ms(struct timespec* s, struct timespec* e) {
+  double s_ns = s->tv_sec * 1000000000.0 + s->tv_nsec;
+  double e_ns = e->tv_sec * 1000000000.0 + e->tv_nsec;
+
+  return (e_ns - s_ns) / 1000000.0;
+}
+
+struct mtx* mtx_sequ(size_t n) {
+  struct mtx* m = mtx_new(n);
+
+  for (size_t i = 0; i < n; ++i)
+    for (size_t j = 0; j < n; ++j)
+      m->v[i * n + j] = j >= i ? n - j : 0.0;
+
+  return m;
+}
 
 int main(int argc, char* argv[argc]) {
-  if (argc < 2)
-    exit(-1);
+  struct timespec s;
+  struct timespec e;
 
-  size_t n = strtol(argv[1], NULL, 10);
-  size_t s = strtol(argv[2], NULL, 10);
+  struct mtx* a = mtx_sequ(N);
+  struct vec* x = vec_seq(N);
+  struct vec* b = vec_new(N);
 
-  struct mtx* m = mtx_new(n, s);
-  struct vec* b = vec_new(n);
+  real bfr;
+  real aft;
 
-  mtx_fget("mtx", m);
-  vec_fget("vec-b", b);
+  vec_norm(x, &bfr);
+  mtx_vmlt(a, x, b);
+  vec_fput("x-bfr", x);
 
-  sle_gauss(m, b, b);
+  clock_gettime(CLOCK_MONOTONIC_RAW, &s);
+  sle_gauss(a, x, b);
+  clock_gettime(CLOCK_MONOTONIC_RAW, &e);
 
-  mtx_fput("mtx-ldu", m);
-  vec_fput("vec-x", b);
+  vec_norm(x, &aft);
+  vec_fput("x-aft", x);
 
-  mtx_free(m);
+  printf("Norm Difference: %.3e\n", fabs(aft - bfr));
+  printf("Execution time: %.3e ms.\n", to_ms(&s, &e));
+
+  mtx_free(a);
+  vec_free(x);
   vec_free(b);
 
   return 0;

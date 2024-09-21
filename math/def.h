@@ -1,8 +1,8 @@
 #ifndef DEF_H
 #define DEF_H
 
-#define THRD 1
-#define MTX_PFL
+#define THRD 12
+#define MTX_DNS
 
 typedef double real;
 

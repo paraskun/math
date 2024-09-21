@@ -83,7 +83,7 @@ void vec_mlt(struct vec* a, struct vec* b, real* r) {
 void vec_norm(struct vec* a, real* r) {
   real s = 0;
 
-#pragma omp parallel for reduction(+ : s) num_threads(THRD)
+//#pragma omp parallel for reduction(+ : s) num_threads(THRD)
   for (size_t i = 0; i < a->n; ++i)
     s += a->v[i] * a->v[i];
 

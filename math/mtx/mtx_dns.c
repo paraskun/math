@@ -71,7 +71,7 @@ void mtx_cput(struct mtx* a) {
   }
 }
 
-void mtx_mlt_mtx(struct mtx* a, struct mtx* b, struct mtx* c) {
+void mtx_mmlt(struct mtx* a, struct mtx* b, struct mtx* c) {
 #pragma omp parallel for num_threads(THRD)
   for (size_t i = 0; i < a->n; ++i)
     for (size_t j = 0; j < a->n; ++j) {
@@ -82,7 +82,7 @@ void mtx_mlt_mtx(struct mtx* a, struct mtx* b, struct mtx* c) {
     }
 }
 
-void mtx_mlt_vec(struct mtx* a, struct vec* b, struct vec* c) {
+void mtx_vmlt(struct mtx* a, struct vec* b, struct vec* c) {
 #pragma omp parallel for num_threads(THRD)
   for (size_t i = 0; i < a->n; ++i) {
     c->v[i] = 0.0;
@@ -93,14 +93,11 @@ void mtx_mlt_vec(struct mtx* a, struct vec* b, struct vec* c) {
 }
 
 void mtx_norm(struct mtx* a, real* r) {
-  real s = 0;
-
-#pragma omp parallel for reduction(+ : s) num_threads(THRD)
   for (size_t i = 0; i < a->n; ++i)
     for (size_t j = 0; j < a->n; ++j)
-      s += a->v[i * a->n + j] * a->v[i * a->n + j];
+      *r += a->v[i * a->n + j] * a->v[i * a->n + j];
 
-  *r = sqrt(s);
+  *r = sqrt(*r);
 }
 
 void mtx_free(struct mtx* a) {

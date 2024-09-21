@@ -51,7 +51,7 @@ void mtx_cput(struct mtx* a);
  * @param b - right-hand operand;
  * @param c - result;
  */
-void mtx_mlt_mtx(struct mtx* a, struct mtx* b, struct mtx* c);
+void mtx_mmlt(struct mtx* a, struct mtx* b, struct mtx* c);
 
 /**
  * @brief Calculate the matrix-vector product.
@@ -60,7 +60,7 @@ void mtx_mlt_mtx(struct mtx* a, struct mtx* b, struct mtx* c);
  * @param b - right-hand operand;
  * @param c - result;
  */
-void mtx_mlt_vec(struct mtx* a, struct vec* b, struct vec* c);
+void mtx_vmlt(struct mtx* a, struct vec* b, struct vec* c);
 
 /**
  * @brief Calculate the matrix norm.
