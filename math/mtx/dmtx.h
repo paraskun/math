@@ -1,4 +1,4 @@
-#ifndef MTX_DNS_H
+#ifndef DMTX_H
 
 #include <mtx/mtx.h>
 

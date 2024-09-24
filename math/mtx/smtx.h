@@ -1,4 +1,4 @@
-#ifndef MTX_PFL_H
+#ifndef SMTX_H
 
 #include <mtx/mtx.h>
 
@@ -26,6 +26,14 @@ struct mtx {
  * @param s - number of "non-zero" elements;
  */
 struct mtx* mtx_new(size_t n, size_t s);
+
+/**
+ * @brief Allocate memory and return a new diagonally dominant matrix.
+ *
+ * @param n - matrix dimensions;
+ * @param k - factor;
+ */
+struct mtx* mtx_newdd(size_t n, size_t k);
 
 /**
  * @brief Perform LDU decomposition of the given matrix.

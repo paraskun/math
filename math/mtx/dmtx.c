@@ -1,8 +1,8 @@
 #include <def.h>
 
-#ifdef MTX_DNS
+#ifdef DMTX
 
-#include <mtx/mtx_dns.h>
+#include <mtx/dmtx.h>
 
 #include <math.h>
 #include <stdio.h>
@@ -20,7 +20,7 @@ struct mtx* mtx_new(size_t n) {
 struct mtx* mtx_rnd(size_t n, size_t u) {
   struct mtx* m = mtx_new(n);
 
-#pragma omp parallel for num_threads(THRD)
+#pragma omp parallel for num_threads(TN)
   for (size_t i = 0; i < n; ++i)
     for (size_t j = 0; j < n; ++j)
       m->v[i * n + j] = rand() % (u + 1);
@@ -31,7 +31,7 @@ struct mtx* mtx_rnd(size_t n, size_t u) {
 struct mtx* mtx_seq(size_t n) {
   struct mtx* m = mtx_new(n);
 
-#pragma omp parallel for num_threads(THRD)
+#pragma omp parallel for num_threads(TN)
   for (size_t i = 0; i < n; ++i)
     for (size_t j = 0; j < n; ++j)
       m->v[i * n + j] = j;
@@ -72,7 +72,7 @@ void mtx_cput(struct mtx* a) {
 }
 
 void mtx_mmlt(struct mtx* a, struct mtx* b, struct mtx* c) {
-#pragma omp parallel for num_threads(THRD)
+#pragma omp parallel for num_threads(TN)
   for (size_t i = 0; i < a->n; ++i)
     for (size_t j = 0; j < a->n; ++j) {
       c->v[i * a->n + j] = 0.0;
@@ -83,7 +83,7 @@ void mtx_mmlt(struct mtx* a, struct mtx* b, struct mtx* c) {
 }
 
 void mtx_vmlt(struct mtx* a, struct vec* b, struct vec* c) {
-#pragma omp parallel for num_threads(THRD)
+#pragma omp parallel for num_threads(TN)
   for (size_t i = 0; i < a->n; ++i) {
     c->v[i] = 0.0;
 

@@ -18,7 +18,7 @@ struct vec* vec_new(size_t n) {
 struct vec* vec_rnd(size_t n, size_t u) {
   struct vec* vec = vec_new(n);
 
-#pragma omp parallel for num_threads(THRD)
+#pragma omp parallel for num_threads(TN)
   for (size_t i = 0; i < n; ++i)
     vec->v[i] = rand() % (u + 1);
 
@@ -28,7 +28,7 @@ struct vec* vec_rnd(size_t n, size_t u) {
 struct vec* vec_seq(size_t n) {
   struct vec* vec = vec_new(n);
 
-#pragma omp parallel for num_threads(THRD)
+#pragma omp parallel for num_threads(TN)
   for (size_t i = 0; i < n; ++i)
     vec->v[i] = i;
 
@@ -59,13 +59,13 @@ void vec_cput(struct vec* a) {
 }
 
 void vec_add(struct vec* a, struct vec* b, struct vec* c) {
-#pragma omp parallel for num_threads(THRD)
+#pragma omp parallel for num_threads(TN)
   for (size_t i = 0; i < a->n; ++i)
     c->v[i] = a->v[i] + b->v[i];
 }
 
 void vec_cmb(struct vec* a, struct vec* b, struct vec* c, real k) {
-#pragma omp parallel for num_threads(THRD)
+#pragma omp parallel for num_threads(TN)
   for (size_t i = 0; i < a->n; ++i)
     c->v[i] = a->v[i] + b->v[i] * k;
 }
@@ -73,7 +73,7 @@ void vec_cmb(struct vec* a, struct vec* b, struct vec* c, real k) {
 void vec_mlt(struct vec* a, struct vec* b, real* r) {
   real s = 0;
 
-#pragma omp parallel for reduction(+ : s) num_threads(THRD)
+#pragma omp parallel for reduction(+ : s) num_threads(TN)
   for (size_t i = 0; i < a->n; ++i)
     s += a->v[i] * b->v[i];
 
@@ -83,7 +83,6 @@ void vec_mlt(struct vec* a, struct vec* b, real* r) {
 void vec_norm(struct vec* a, real* r) {
   real s = 0;
 
-//#pragma omp parallel for reduction(+ : s) num_threads(THRD)
   for (size_t i = 0; i < a->n; ++i)
     s += a->v[i] * a->v[i];
 
