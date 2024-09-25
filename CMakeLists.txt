@@ -21,7 +21,16 @@ file(GLOB ode
   math/ode/*.c 
 )
 
-add_executable(algo main.c
+add_executable(algo algo.c
+  math/def.h
+
+  ${vec}
+  ${mtx}
+  ${sle}
+  ${ode}
+)
+
+add_executable(num num.c
   math/def.h
 
   ${vec}
@@ -36,3 +45,6 @@ target_include_directories(algo PUBLIC math/)
 target_link_libraries(algo PUBLIC OpenMP::OpenMP_C)
 target_link_libraries(algo PUBLIC m)
 
+target_include_directories(num PUBLIC math/)
+target_link_libraries(num PUBLIC OpenMP::OpenMP_C)
+target_link_libraries(num PUBLIC m)

@@ -5,104 +5,121 @@
 #include <mtx/dmtx.h>
 
 #include <math.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/random.h>
+
+static int rnd() {
+  uint8_t rnd = 255;
+
+  while (rnd > 254)
+    if (getrandom(&rnd, 1, 0) == -1)
+      exit(-1);
+
+  return rnd % 5 - 4;
+}
 
 struct mtx* mtx_new(size_t n) {
-  struct mtx* m = malloc(sizeof(struct mtx));
+  struct mtx* mp = malloc(sizeof(struct mtx));
 
-  m->v = malloc(sizeof(real) * n * n);
-  m->n = n;
+  mp->v = malloc(sizeof(real) * n * n);
+  mp->n = n;
 
-  return m;
+  return mp;
 }
 
-struct mtx* mtx_rnd(size_t n, size_t u) {
-  struct mtx* m = mtx_new(n);
-
-#pragma omp parallel for num_threads(TN)
-  for (size_t i = 0; i < n; ++i)
-    for (size_t j = 0; j < n; ++j)
-      m->v[i * n + j] = rand() % (u + 1);
-
-  return m;
+void mtx_rnd(struct mtx* mp, size_t u) {
+#ifdef OMP_THREADS_NUM
+#pragma omp parallel for num_threads(OMP_THREADS_NUM)
+#endif  // OMP_THREADS_NUM
+  for (size_t i = 0; i < mp->n; ++i)
+    for (size_t j = 0; j < mp->n; ++j)
+      ME(mp, i, j) = rand() % (u + 1);
 }
 
-struct mtx* mtx_seq(size_t n) {
-  struct mtx* m = mtx_new(n);
-
-#pragma omp parallel for num_threads(TN)
-  for (size_t i = 0; i < n; ++i)
-    for (size_t j = 0; j < n; ++j)
-      m->v[i * n + j] = j;
-
-  return m;
+void mtx_seq(struct mtx* mp) {
+#ifdef OMP_THREADS_NUM
+#pragma omp parallel for num_threads(OMP_THREADS_NUM)
+#endif  // OMP_THREADS_NUM
+  for (size_t i = 0; i < mp->n; ++i)
+    for (size_t j = 0; j < mp->n; ++j)
+      ME(mp, i, j) = j;
 }
 
-void mtx_fget(const char* fn, struct mtx* a) {
-  FILE* f = fopen(fn, "r");
+void mtx_ddm(struct mtx* mp, size_t k) {
+  real sum = 0;
 
-  for (size_t i = 0; i < a->n; ++i)
-    for (size_t j = 0; j < a->n; ++j)
-      fscanf(f, "%lf", &a->v[i * a->n + j]);
+  for (size_t i = 0; i < mp->n; ++i)
+    for (size_t j = 0; j < mp->n; ++j)
+      if (i != j) {
+        ME(mp, i, j) = rnd();
+        sum += ME(mp, i, j);
+      }
 
-  fclose(f);
+  ME(mp, 0, 0) = -sum + 1 / pow(10, k);
+
+  for (size_t i = 1; i < mp->n; ++i)
+    ME(mp, i, i) = -sum;
 }
 
-void mtx_fput(const char* fn, struct mtx* a) {
-  FILE* f = fopen(fn, "w");
+void mtx_hlb(struct mtx* mp) {
+  for (size_t i = 1; i <= mp->n; ++i)
+    for (size_t j = 1; j <= mp->n; ++j)
+      ME(mp, i - 1, j - 1) = 1.0 / (i + j - 1.0);
+}
 
-  for (size_t i = 0; i < a->n; ++i) {
-    for (size_t j = 0; j < a->n; ++j)
-      fprintf(f, "%.7e ", a->v[i * a->n + j]);
+void mtx_fget(FILE* f, struct mtx* mp) {
+  for (size_t i = 0; i < mp->n; ++i)
+    for (size_t j = 0; j < mp->n; ++j)
+      fscanf(f, "%lf", &ME(mp, i, j));
+}
+
+void mtx_fput(FILE* f, struct mtx* mp) {
+  for (size_t i = 0; i < mp->n; ++i) {
+    for (size_t j = 0; j < mp->n; ++j)
+      fprintf(f, "%.7e ", ME(mp, i, j));
 
     fputc('\n', f);
   }
-
-  fclose(f);
 }
 
-void mtx_cput(struct mtx* a) {
-  for (size_t i = 0; i < a->n; ++i) {
-    for (size_t j = 0; j < a->n; ++j)
-      printf("%.7e ", a->v[i * a->n + j]);
+void mtx_mmlt(struct mtx* ap, struct mtx* bp, struct mtx* cp) {
+#ifdef OMP_THREADS_NUM
+#pragma omp parallel for num_threads(OMP_THREADS_NUM)
+#endif  // OMP_THREADS_NUM
+  for (size_t i = 0; i < ap->n; ++i)
+    for (size_t j = 0; j < ap->n; ++j) {
+      ME(cp, i, j) = 0.0;
 
-    putchar('\n');
-  }
-}
-
-void mtx_mmlt(struct mtx* a, struct mtx* b, struct mtx* c) {
-#pragma omp parallel for num_threads(TN)
-  for (size_t i = 0; i < a->n; ++i)
-    for (size_t j = 0; j < a->n; ++j) {
-      c->v[i * a->n + j] = 0.0;
-
-      for (size_t e = 0; e < a->n; ++e)
-        c->v[i * a->n + j] += a->v[i * a->n + e] * b->v[e * a->n + j];
+      for (size_t e = 0; e < ap->n; ++e)
+        ME(cp, i, j) += ME(ap, i, e) * ME(bp, e, j);
     }
 }
 
-void mtx_vmlt(struct mtx* a, struct vec* b, struct vec* c) {
-#pragma omp parallel for num_threads(TN)
-  for (size_t i = 0; i < a->n; ++i) {
-    c->v[i] = 0.0;
+void mtx_vmlt(struct mtx* ap, struct vec* bp, struct vec* cp) {
+#ifdef OMP_THREADS_NUM
+#pragma omp parallel for num_threads(OMP_THREADS_NUM)
+#endif  // OMP_THREADS_NUM
+  for (size_t i = 0; i < ap->n; ++i) {
+    cp->v[i] = 0.0;
 
-    for (size_t j = 0; j < a->n; ++j)
-      c->v[i] += a->v[i * a->n + j] * b->v[j];
+    for (size_t j = 0; j < ap->n; ++j)
+      cp->v[i] += ME(ap, i, j) * bp->v[j];
   }
 }
 
-void mtx_norm(struct mtx* a, real* r) {
-  for (size_t i = 0; i < a->n; ++i)
-    for (size_t j = 0; j < a->n; ++j)
-      *r += a->v[i * a->n + j] * a->v[i * a->n + j];
+void mtx_norm(struct mtx* mp, real* rp) {
+  for (size_t i = 0; i < mp->n; ++i)
+    for (size_t j = 0; j < mp->n; ++j)
+      *rp += ME(mp, i, j) * ME(mp, i, j);
 
-  *r = sqrt(*r);
+  *rp = sqrt(*rp);
 }
 
-void mtx_free(struct mtx* a) {
-  free(a->v);
-  free(a);
+void mtx_free(struct mtx* mp) {
+  free(mp->v);
+  free(mp);
 }
 
 #endif  // MTX_DNS

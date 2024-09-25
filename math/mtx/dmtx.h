@@ -4,6 +4,8 @@
 
 #include <stddef.h>
 
+#define ME(m, i, j) (m->v[(i) * m->n + (j)])
+
 /**
  * @class mtx
  * @brief Dense matrix storage.
@@ -21,28 +23,19 @@ struct mtx {
 struct mtx* mtx_new(size_t n);
 
 /**
- * @brief Allocate memory and return a new matrix with randomly generated values. 
+ * @brief Convert given matrix to a matrix with randomly generated values. 
  *
- * @param n - matrix dimensions;
+ * @param n - matrix to convert;
  * @param u - values upper-bound;
  */
-struct mtx* mtx_rnd(size_t n, size_t u);
+void mtx_rnd(struct mtx* mp, size_t u);
 
 /**
- * @brief Allocate memory and return a new matrix with sequential values started from zero.
+ * @brief Convert given matrix to a new matrix with sequential values starting from 1.
  *
  * @param n - matrix dimensions;
  */
-struct mtx* mtx_seq(size_t n);
-
-/**
- * @brief Write the values from the given matrix to standard output.
- *
- * <p> Not recommended for large matrices.
- *
- * @param a - matrix to write;
- */
-void mtx_cput(struct mtx* a);
+void mtx_seq(struct mtx* mp);
 
 /**
  * @brief Calculate the matrix-matrix product.
@@ -51,7 +44,7 @@ void mtx_cput(struct mtx* a);
  * @param b - right-hand operand;
  * @param c - result;
  */
-void mtx_mmlt(struct mtx* a, struct mtx* b, struct mtx* c);
+void mtx_mmlt(struct mtx* ap, struct mtx* bp, struct mtx* cp);
 
 /**
  * @brief Calculate the matrix-vector product.
@@ -60,7 +53,7 @@ void mtx_mmlt(struct mtx* a, struct mtx* b, struct mtx* c);
  * @param b - right-hand operand;
  * @param c - result;
  */
-void mtx_vmlt(struct mtx* a, struct vec* b, struct vec* c);
+void mtx_vmlt(struct mtx* ap, struct vec* bp, struct vec* cp);
 
 /**
  * @brief Calculate the matrix norm.
@@ -68,6 +61,6 @@ void mtx_vmlt(struct mtx* a, struct vec* b, struct vec* c);
  * @param a - operand;
  * @param r - result;
  */
-void mtx_norm(struct mtx* a, real* r);
+void mtx_norm(struct mtx* ap, real* rp);
 
 #endif  // MTX_DNS_H

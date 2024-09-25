@@ -7,7 +7,7 @@
 #include <mtx/smtx.h>
 #include <sle/sle.h>
 
-static void sle_gauss_l(struct mtx* a, struct vec* x, struct vec* b) {
+static void sle_l(struct mtx* a, struct vec* x, struct vec* b) {
   for (size_t i = 0; i < x->n; ++i) {
     size_t c = a->p[i + 1] - a->p[i];
     preal e = b->v[i];
@@ -19,14 +19,14 @@ static void sle_gauss_l(struct mtx* a, struct vec* x, struct vec* b) {
   }
 }
 
-static void sle_gauss_d(struct mtx* a, struct vec* x, struct vec* b) {
+static void sle_d(struct mtx* a, struct vec* x, struct vec* b) {
   for (size_t i = 0; i < x->n; ++i) {
     preal e = b->v[i] / a->d[i];
     x->v[i] = e;
   }
 }
 
-static void sle_gauss_u(struct mtx* a, struct vec* x, struct vec* b) {
+static void sle_u(struct mtx* a, struct vec* x, struct vec* b) {
   memcpy(x->v, b->v, sizeof(real) * x->n);
 
   for (size_t i = x->n - 1; i > 0; --i) {
@@ -37,12 +37,12 @@ static void sle_gauss_u(struct mtx* a, struct vec* x, struct vec* b) {
   }
 }
 
-void sle_gauss(struct mtx* a, struct vec* x, struct vec* b) {
+void sle_ldu(struct mtx* a, struct vec* x, struct vec* b) {
   mtx_ldu(a);
 
-  sle_gauss_l(a, x, b);
-  sle_gauss_d(a, b, x);
-  sle_gauss_u(a, x, b);
+  sle_l(a, x, b);
+  sle_d(a, b, x);
+  sle_u(a, x, b);
 }
 
 #endif  // MTX_PFL

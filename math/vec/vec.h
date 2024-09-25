@@ -3,6 +3,7 @@
 
 #include <def.h>
 #include <stddef.h>
+#include <stdio.h>
 
 struct vec {
   real* v;
@@ -17,19 +18,19 @@ struct vec {
 struct vec* vec_new(size_t n);
 
 /**
- * @brief Allocate memory and return a new vector with randomly generated values. 
+ * @brief Convert given vector to a new vector with randomly generated values. 
  *
- * @param n - vector dimension;
+ * @param v - vector to convert;
  * @param u - values upper-bound;
  */
-struct vec* vec_rnd(size_t n, size_t u);
+void vec_rnd(struct vec* v, size_t u);
 
 /**
- * @brief Allocate memory and return a new vector with sequential values started from zero.
+ * @brief Convert given vector to a vector with sequential values started from zero.
  *
- * @param n - vector dimension;
+ * @param v - vector to convert;
  */
-struct vec* vec_seq(size_t n);
+void vec_seq(struct vec* v);
 
 /**
  * @brief Populate given vector with values from the file.
@@ -37,7 +38,7 @@ struct vec* vec_seq(size_t n);
  * @param fn - file name;
  * @param a - vector to fill;
  */
-void vec_fget(const char* fn, struct vec* a);
+void vec_fget(FILE* f, struct vec* a);
 
 /**
  * @brief Write the values from the given vector to a file.
@@ -46,14 +47,7 @@ void vec_fget(const char* fn, struct vec* a);
 
  * @param a - vector to write;
  */
-void vec_fput(const char* fn, struct vec* a);
-
-/**
- * @brief Write the values from the given vector to standard output.
- *
- * @param a - vector to write;
- */
-void vec_cput(struct vec* a);
+void vec_fput(FILE* f, struct vec* a);
 
 /**
  * @brief Calculate the sum of two vectors.
