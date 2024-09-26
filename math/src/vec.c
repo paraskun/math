@@ -68,6 +68,9 @@ void vec_mlt(struct vec* a, struct vec* b, real* r) {
 void vec_norm(struct vec* a, real* r) {
   real s = 0;
 
+#ifdef OMP_THREADS_NUM
+#pragma omp parallel for reduction(+ : s) num_threads(OMP_THREADS_NUM)
+#endif  // OMP
   for (size_t i = 0; i < a->n; ++i)
     s += a->v[i] * a->v[i];
 

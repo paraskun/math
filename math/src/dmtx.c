@@ -1,7 +1,7 @@
 #ifndef SMTX
 
-#include <mtx.h>
 #include <math.h>
+#include <mtx.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>

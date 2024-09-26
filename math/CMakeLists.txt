@@ -1,6 +1,3 @@
-set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
-set(CMAKE_BUILD_TYPE Debug)
-
 set(SRC
   src/vec.c
   src/dmtx.c
@@ -20,7 +17,7 @@ add_library(math ${SRC} ${HDRS})
 target_compile_definitions(math PUBLIC real=double)
 target_compile_definitions(math PUBLIC preal=double)
 target_compile_definitions(math PUBLIC OMP_THREADS_NUM=2)
-target_compile_definitions(math PUBLIC SMTX)
+target_compile_definitions(math PUBLIC DMTX)
 
 target_include_directories(math PUBLIC include/)
 target_link_libraries(math PRIVATE m)

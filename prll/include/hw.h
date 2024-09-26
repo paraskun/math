@@ -1,6 +1,6 @@
 #ifndef HW_H
 #define HW_H
 
-void hello(int argc, char *argv[argc]);
+void hello(int pc, int id);
 
 #endif  // HW_H

@@ -3,8 +3,8 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include <mtx/dmtx.h>
-#include <sle/sle.h>
+#include <mtx.h>
+#include <sle.h>
 
 static inline void swap(size_t* p, size_t a, size_t b) {
   if (a == b)
