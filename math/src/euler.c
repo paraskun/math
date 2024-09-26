@@ -2,7 +2,7 @@
 #include <stddef.h>
 
 typedef double f64;
-typedef size_t u64;
+typedef int u64;
 
 typedef struct point {
   f64 t;

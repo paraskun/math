@@ -10,12 +10,12 @@
 
 #define min(x, y) (((x) < (y)) ? (x) : (y))
 
-struct mtx* mtx_new(size_t n, size_t s) {
+struct mtx* mtx_new(int n, int s) {
   struct mtx* mp = malloc(sizeof(struct mtx));
 
   mp->n = n;
   mp->s = s;
-  mp->p = malloc(sizeof(size_t) * (n + 1));
+  mp->p = malloc(sizeof(int) * (n + 1));
   mp->d = malloc(sizeof(real) * n);
   mp->l = malloc(sizeof(real) * s);
   mp->u = malloc(sizeof(real) * s);
@@ -33,14 +33,14 @@ static int rnd() {
   return rnd % 5 - 4;
 }
 
-void mtx_ddm(struct mtx* mp, size_t k) {
-  size_t s = mp->n * (mp->n - 1) / 2;
-  size_t bgn = 0;
+void mtx_ddm(struct mtx* mp, int k) {
+  int s = mp->n * (mp->n - 1) / 2;
+  int bgn = 0;
   preal sum = 0;
 
   mp->p[0] = bgn;
 
-  for (size_t i = 1; i < mp->n; ++i) {
+  for (int i = 1; i < mp->n; ++i) {
     bgn += i - 1;
 
     mp->p[i] = bgn;
@@ -55,7 +55,7 @@ void mtx_ddm(struct mtx* mp, size_t k) {
 
     sum += mp->l[bgn] + mp->u[bgn];
 
-    for (size_t j = 1; j < i; ++j) {
+    for (int j = 1; j < i; ++j) {
       mp->l[bgn + j] = rnd();
       mp->u[bgn + j] = rnd();
 
@@ -66,24 +66,24 @@ void mtx_ddm(struct mtx* mp, size_t k) {
   mp->p[mp->n] = s;
   mp->d[0] = 1.0 / pow(10.0, k) - sum;
 
-  for (size_t i = 1; i < mp->n; ++i)
+  for (int i = 1; i < mp->n; ++i)
     mp->d[i] = -sum;
 }
 
 void mtx_hlb(struct mtx* mp) {
-  size_t s = mp->n * (mp->n - 1) / 2;
-  size_t bgn = 0;
+  int s = mp->n * (mp->n - 1) / 2;
+  int bgn = 0;
 
   mp->p[0] = bgn;
   mp->d[0] = 1;
 
-  for (size_t i = 1; i < mp->n; ++i) {
+  for (int i = 1; i < mp->n; ++i) {
     bgn += i - 1;
 
     mp->p[i] = bgn;
     mp->d[i] = 1.0 / (2.0 * i + 1.0);
 
-    for (size_t j = 0; j < i; ++j) {
+    for (int j = 0; j < i; ++j) {
       real v = 1.0 / (i + j + 1.0);
 
       mp->l[bgn + j] = v;
@@ -95,36 +95,36 @@ void mtx_hlb(struct mtx* mp) {
 }
 
 void mtx_fget(FILE* f, struct mtx* a) {
-  for (size_t i = 0; i <= a->n; ++i)
+  for (int i = 0; i <= a->n; ++i)
     fscanf(f, "%lu", &a->p[i]);
 
-  for (size_t i = 0; i < a->n; ++i)
+  for (int i = 0; i < a->n; ++i)
     fscanf(f, "%lf", &a->d[i]);
 
-  for (size_t i = 0; i < a->s; ++i)
+  for (int i = 0; i < a->s; ++i)
     fscanf(f, "%lf", &a->l[i]);
 
-  for (size_t i = 0; i < a->s; ++i)
+  for (int i = 0; i < a->s; ++i)
     fscanf(f, "%lf", &a->u[i]);
 }
 
 void mtx_fput(FILE* f, struct mtx* a) {
-  for (size_t i = 0; i <= a->n; ++i)
+  for (int i = 0; i <= a->n; ++i)
     fprintf(f, "%lu ", a->p[i]);
 
   fputc('\n', f);
 
-  for (size_t i = 0; i < a->n; ++i)
+  for (int i = 0; i < a->n; ++i)
     fprintf(f, "%.7e ", a->d[i]);
 
   fputc('\n', f);
 
-  for (size_t i = 0; i < a->s; ++i)
+  for (int i = 0; i < a->s; ++i)
     fprintf(f, "%.7e ", a->l[i]);
 
   fputc('\n', f);
 
-  for (size_t i = 0; i < a->s; ++i)
+  for (int i = 0; i < a->s; ++i)
     fprintf(f, "%.7e ", a->u[i]);
 }
 

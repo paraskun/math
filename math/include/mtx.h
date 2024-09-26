@@ -30,7 +30,7 @@ void mtx_fput(FILE* f, struct mtx* mp);
  * @param mp - matrix to convert;
  * @param k - factor;
  */
-void mtx_ddm(struct mtx* mp, size_t k);
+void mtx_ddm(struct mtx* mp, int k);
 
 /**
  * @brief Convert given matrix to Hilbert matrix.
@@ -57,10 +57,10 @@ struct mtx {
   real* l;
   real* u;
 
-  size_t* p;
+  int* p;
 
-  size_t n;
-  size_t s;
+  int n;
+  int s;
 };
 
 /**
@@ -69,7 +69,7 @@ struct mtx {
  * @param n - matrix dimensions;
  * @param s - number of "non-zero" elements;
  */
-struct mtx* mtx_new(size_t n, size_t s);
+struct mtx* mtx_new(int n, int s);
 
 /**
  * @brief Perform LDU decomposition of the given matrix.
@@ -88,7 +88,7 @@ void mtx_ldu(struct mtx* mp);
  */
 struct mtx {
   real* v;
-  size_t n;
+  int n;
 };
 
 /**
@@ -96,7 +96,7 @@ struct mtx {
  *
  * @param n - matrix dimensions;
  */
-struct mtx* mtx_new(size_t n);
+struct mtx* mtx_new(int n);
 
 /**
  * @brief Convert given matrix to a matrix with randomly generated values. 
@@ -104,7 +104,7 @@ struct mtx* mtx_new(size_t n);
  * @param n - matrix to convert;
  * @param u - values upper-bound;
  */
-void mtx_rnd(struct mtx* mp, size_t u);
+void mtx_rnd(struct mtx* mp, int u);
 
 /**
  * @brief Convert given matrix to a new matrix with sequential values starting from 1.

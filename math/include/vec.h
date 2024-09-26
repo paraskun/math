@@ -6,7 +6,7 @@
 
 struct vec {
   real* v;
-  size_t n;
+  int n;
 };
 
 /**
@@ -14,7 +14,7 @@ struct vec {
  *
  * @param n - vector dimension;
  */
-struct vec* vec_new(size_t n);
+struct vec* vec_new(int n);
 
 /**
  * @brief Convert given vector to a new vector with randomly generated values. 
@@ -22,7 +22,7 @@ struct vec* vec_new(size_t n);
  * @param v - vector to convert;
  * @param u - values upper-bound;
  */
-void vec_rnd(struct vec* v, size_t u);
+void vec_rnd(struct vec* v, int u);
 
 /**
  * @brief Convert given vector to a vector with sequential values started from zero.
