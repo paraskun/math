@@ -1,8 +1,6 @@
-#include <def.h>
-
 #ifdef SMTX
 
-#include <mtx/smtx.h>
+#include <mtx.h>
 
 #include <math.h>
 #include <stdint.h>
@@ -38,7 +36,7 @@ static int rnd() {
 void mtx_ddm(struct mtx* mp, size_t k) {
   size_t s = mp->n * (mp->n - 1) / 2;
   size_t bgn = 0;
-  double sum = 0;
+  preal sum = 0;
 
   mp->p[0] = bgn;
 

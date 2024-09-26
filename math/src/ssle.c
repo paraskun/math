@@ -1,11 +1,8 @@
-#include <def.h>
-
 #ifdef SMTX
 
 #include <string.h>
-
-#include <mtx/smtx.h>
-#include <sle/sle.h>
+#include <mtx.h>
+#include <sle.h>
 
 static void sle_l(struct mtx* a, struct vec* x, struct vec* b) {
   for (size_t i = 0; i < x->n; ++i) {

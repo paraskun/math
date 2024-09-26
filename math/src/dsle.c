@@ -1,6 +1,4 @@
-#include <def.h>
-
-#ifdef DMTX
+#ifndef SMTX
 
 #include <math.h>
 #include <stdlib.h>

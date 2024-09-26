@@ -1,9 +1,6 @@
-#include <def.h>
+#ifndef SMTX
 
-#ifdef DMTX
-
-#include <mtx/dmtx.h>
-
+#include <mtx.h>
 #include <math.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -32,7 +29,7 @@ struct mtx* mtx_new(size_t n) {
 void mtx_rnd(struct mtx* mp, size_t u) {
 #ifdef OMP_THREADS_NUM
 #pragma omp parallel for num_threads(OMP_THREADS_NUM)
-#endif  // OMP_THREADS_NUM
+#endif  // OMP
   for (size_t i = 0; i < mp->n; ++i)
     for (size_t j = 0; j < mp->n; ++j)
       ME(mp, i, j) = rand() % (u + 1);
@@ -41,7 +38,7 @@ void mtx_rnd(struct mtx* mp, size_t u) {
 void mtx_seq(struct mtx* mp) {
 #ifdef OMP_THREADS_NUM
 #pragma omp parallel for num_threads(OMP_THREADS_NUM)
-#endif  // OMP_THREADS_NUM
+#endif  // OMP
   for (size_t i = 0; i < mp->n; ++i)
     for (size_t j = 0; j < mp->n; ++j)
       ME(mp, i, j) = j;
@@ -87,7 +84,7 @@ void mtx_fput(FILE* f, struct mtx* mp) {
 void mtx_mmlt(struct mtx* ap, struct mtx* bp, struct mtx* cp) {
 #ifdef OMP_THREADS_NUM
 #pragma omp parallel for num_threads(OMP_THREADS_NUM)
-#endif  // OMP_THREADS_NUM
+#endif  // OMP
   for (size_t i = 0; i < ap->n; ++i)
     for (size_t j = 0; j < ap->n; ++j) {
       ME(cp, i, j) = 0.0;
@@ -100,7 +97,7 @@ void mtx_mmlt(struct mtx* ap, struct mtx* bp, struct mtx* cp) {
 void mtx_vmlt(struct mtx* ap, struct vec* bp, struct vec* cp) {
 #ifdef OMP_THREADS_NUM
 #pragma omp parallel for num_threads(OMP_THREADS_NUM)
-#endif  // OMP_THREADS_NUM
+#endif  // OMP
   for (size_t i = 0; i < ap->n; ++i) {
     cp->v[i] = 0.0;
 
@@ -122,4 +119,4 @@ void mtx_free(struct mtx* mp) {
   free(mp);
 }
 
-#endif  // MTX_DNS
+#endif  // DMTX

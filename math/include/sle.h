@@ -1,8 +1,8 @@
 #ifndef SLE_H
 #define SLE_H
 
-#include <mtx/mtx.h>
-#include <vec/vec.h>
+#include <mtx.h>
+#include <vec.h>
 
 /**
  * @brief Solve the system of linear equations using Gauss elimination.

@@ -1,5 +1,4 @@
-#include <def.h>
-#include <vec/vec.h>
+#include <vec.h>
 
 #include <math.h>
 #include <omp.h>
@@ -18,7 +17,7 @@ struct vec* vec_new(size_t n) {
 void vec_rnd(struct vec* v, size_t u) {
 #ifdef OMP_THREADS_NUM
 #pragma omp parallel for num_threads(OMP_THREADS_NUM)
-#endif  // OMP_THREADS_NUM
+#endif  // OMP
   for (size_t i = 0; i < v->n; ++i)
     v->v[i] = rand() % (u + 1);
 }
@@ -26,7 +25,7 @@ void vec_rnd(struct vec* v, size_t u) {
 void vec_seq(struct vec* v) {
 #ifdef OMP_THREADS_NUM
 #pragma omp parallel for num_threads(OMP_THREADS_NUM)
-#endif  // OMP_THREADS_NUM
+#endif  // OMP
   for (size_t i = 0; i < v->n; ++i)
     v->v[i] = i + 1;
 }
@@ -44,7 +43,7 @@ void vec_fput(FILE* f, struct vec* a) {
 void vec_add(struct vec* a, struct vec* b, struct vec* c) {
 #ifdef OMP_THREADS_NUM
 #pragma omp parallel for num_threads(OMP_THREADS_NUM)
-#endif  // OMP_THREADS_NUM
+#endif  // OMP
   for (size_t i = 0; i < a->n; ++i)
     c->v[i] = a->v[i] + b->v[i];
 }
@@ -52,7 +51,7 @@ void vec_add(struct vec* a, struct vec* b, struct vec* c) {
 void vec_cmb(struct vec* a, struct vec* b, struct vec* c, real k) {
 #ifdef OMP_THREADS_NUM
 #pragma omp parallel for num_threads(OMP_THREADS_NUM)
-#endif  // OMP_THREADS_NUM
+#endif  // OMP
   for (size_t i = 0; i < a->n; ++i)
     c->v[i] = a->v[i] + b->v[i] * k;
 }
