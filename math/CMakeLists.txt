@@ -17,7 +17,7 @@ add_library(math ${SRC} ${HDRS})
 target_compile_definitions(math PUBLIC real=double)
 target_compile_definitions(math PUBLIC preal=double)
 target_compile_definitions(math PUBLIC OMP_THREADS_NUM=2)
-target_compile_definitions(math PUBLIC SMTX)
+# target_compile_definitions(math PUBLIC SMTX)
 
 target_include_directories(math PUBLIC include/)
 target_link_libraries(math PRIVATE m)

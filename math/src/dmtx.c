@@ -5,17 +5,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/random.h>
-
-static int rnd() {
-  uint8_t rnd = 255;
-
-  while (rnd > 254)
-    if (getrandom(&rnd, 1, 0) == -1)
-      exit(-1);
-
-  return rnd % 5 - 4;
-}
 
 struct mtx* mtx_new(int n) {
   struct mtx* mp = malloc(sizeof(struct mtx));
@@ -27,89 +16,126 @@ struct mtx* mtx_new(int n) {
 }
 
 void mtx_rnd(struct mtx* mp, int u) {
+  int n = mp->n * mp->n;
+  real* mv = mp->v;
+
 #ifdef OMP_THREADS_NUM
 #pragma omp parallel for num_threads(OMP_THREADS_NUM)
 #endif  // OMP
-  for (int i = 0; i < mp->n; ++i)
-    for (int j = 0; j < mp->n; ++j)
-      ME(mp, i, j) = rand() % (u + 1);
+  for (int i = 0; i < n; ++i)
+    mv[i] = rand() % u;
 }
 
 void mtx_seq(struct mtx* mp) {
+  int n = mp->n;
+  real* mv = mp->v;
+
 #ifdef OMP_THREADS_NUM
 #pragma omp parallel for num_threads(OMP_THREADS_NUM)
 #endif  // OMP
-  for (int i = 0; i < mp->n; ++i)
-    for (int j = 0; j < mp->n; ++j)
-      ME(mp, i, j) = j;
+  for (int i = 0; i < n * n; ++i)
+    mv[i] = i + 1;
 }
 
 void mtx_ddm(struct mtx* mp, int k) {
+  int n = mp->n;
   real sum = 0;
+  real* mv = mp->v;
 
-  for (int i = 0; i < mp->n; ++i)
-    for (int j = 0; j < mp->n; ++j)
-      if (i != j) {
-        ME(mp, i, j) = rnd();
-        sum += ME(mp, i, j);
-      }
+  for (int i = 0, r = 0; i < n; ++i, r += n)
+    for (int j = 0, c = 0; j < i; ++j, c += n) {
+      int e = -(rand() % 5);
+      sum += e;
+      mv[r + j] = e;
 
-  ME(mp, 0, 0) = -sum + 1 / pow(10, k);
+      e = -(rand() % 5);
+      sum += e;
+      mv[c + i] = e;
+    }
 
-  for (int i = 1; i < mp->n; ++i)
-    ME(mp, i, i) = -sum;
+  mv[0] = -sum + 1 / pow(10, k);
+
+  for (int i = 1, r = n; i < n; ++i, r += n)
+    mv[r + i] = -sum;
 }
 
 void mtx_hlb(struct mtx* mp) {
-  for (int i = 1; i <= mp->n; ++i)
-    for (int j = 1; j <= mp->n; ++j)
-      ME(mp, i - 1, j - 1) = 1.0 / (i + j - 1.0);
+  int n = mp->n;
+  real* mv = mp->v;
+
+  for (int i = 0, r = -1; i < n; ++i, r += n)
+    for (int j = 1; j <= n; ++j)
+      mv[r + j] = 1.0 / (i + j);
 }
 
 void mtx_fget(FILE* f, struct mtx* mp) {
-  for (int i = 0; i < mp->n; ++i)
-    for (int j = 0; j < mp->n; ++j)
-      fscanf(f, "%lf", &ME(mp, i, j));
+  int n = mp->n;
+  real* mv = mp->v;
+
+  for (int i = 0; i < n * n; ++i)
+    fscanf(f, "%lf", &mv[i]);
 }
 
 void mtx_fput(FILE* f, struct mtx* mp) {
-  for (int i = 0; i < mp->n; ++i) {
-    for (int j = 0; j < mp->n; ++j)
-      fprintf(f, "%.7e ", ME(mp, i, j));
+  int n = mp->n;
+  real* mv = mp->v;
+
+  for (int i = 0, r = 0; i < n; ++i, r += n) {
+    for (int j = 0; j < n; ++j)
+      fprintf(f, "%.7e ", mv[r + j]);
 
     fputc('\n', f);
   }
 }
 
 void mtx_mmlt(struct mtx* ap, struct mtx* bp, struct mtx* cp) {
+  int n = ap->n;
+
+  real* av = ap->v;
+  real* bv = bp->v;
+  real* cv = cp->v;
+
 #ifdef OMP_THREADS_NUM
 #pragma omp parallel for num_threads(OMP_THREADS_NUM)
 #endif  // OMP
-  for (int i = 0; i < ap->n; ++i)
-    for (int j = 0; j < ap->n; ++j) {
-      ME(cp, i, j) = 0.0;
+  for (int i = 0; i < n; ++i) {
+    int ir = i * n;
 
-      for (int e = 0; e < ap->n; ++e)
-        ME(cp, i, j) += ME(ap, i, e) * ME(bp, e, j);
+    for (int j = 0, ij = ir; j < n; ++j, ++ij) {
+      cv[ij] = 0.0;
+
+      for (int e = 0, er = 0; e < n; ++e, er += n)
+        cv[ij] += av[ir + e] * bv[er + j];
     }
+  }
 }
 
 void mtx_vmlt(struct mtx* ap, struct vec* bp, struct vec* cp) {
+  int n = ap->n;
+
+  real* av = ap->v;
+  real* bv = bp->v;
+  real* cv = cp->v;
+
 #ifdef OMP_THREADS_NUM
 #pragma omp parallel for num_threads(OMP_THREADS_NUM)
 #endif  // OMP
   for (int i = 0; i < ap->n; ++i) {
-    cp->v[i] = 0.0;
+    int ir = i * n;
+
+    cv[i] = 0.0;
 
     for (int j = 0; j < ap->n; ++j)
-      cp->v[i] += ME(ap, i, j) * bp->v[j];
+      cv[i] += av[ir + j] * bv[j];
   }
 }
 
 void mtx_norm(struct mtx* mp, real* rp) {
-  for (int i = 0; i < mp->n; ++i)
-    for (int j = 0; j < mp->n; ++j)
-      *rp += ME(mp, i, j) * ME(mp, i, j);
+  int n = mp->n;
+  real* mv = mp->v;
+
+  for (int i = 0; i < n * n; ++i)
+    *rp += mv[i] * mv[i];
 
   *rp = sqrt(*rp);
 }
