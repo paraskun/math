@@ -1,5 +1,5 @@
-#include <hw.h>
 #include <mpi.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 int main(int argc, char* argv[argc]) {
@@ -16,7 +16,7 @@ int main(int argc, char* argv[argc]) {
   MPI_Comm_size(MPI_COMM_WORLD, &pc);
   MPI_Comm_rank(MPI_COMM_WORLD, &id);
 
-  hello(pc, id);
+  printf("Hello, I'm %d and there are %d of us!\n", id, pc);
 
   MPI_Finalize();
 
