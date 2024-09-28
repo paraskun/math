@@ -7,23 +7,23 @@
 /**
  * @brief Solve the system of linear equations using Gauss elimination.
  *
- * <p> Ax = b
+ * <p> Ay = b
  *
- * @param a - coefficients;
- * @param x - unknowns;
- * @param b - constant terms;
+ * @param mp - coefficients;
+ * @param yp - unknowns;
+ * @param bp - constant terms;
  */
-void sle_gauss(struct mtx* a, struct vec* x, struct vec* b);
+void sle_gauss(struct mtx* mp, struct vec* yp, struct vec* bp);
 
 /**
  * @brief Solve the system of linear equations using LDU decomposition.
  *
- * <p> Ax = b
+ * <p> Ay = b
  *
- * @param a - coefficients;
- * @param x - unknowns;
- * @param b - constant terms;
+ * @param mp - coefficients;
+ * @param yp - unknowns;
+ * @param bp - constant terms;
  */
-void sle_ldu(struct mtx* a, struct vec* x, struct vec* b);
+void sle_ldu(struct mtx* mp, struct vec* yp, struct vec* bp);
 
 #endif  // SLE_H

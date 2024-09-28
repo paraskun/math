@@ -15,46 +15,56 @@ static inline void swap(int* p, int a, int b) {
   p[b] = tmp;
 }
 
-void sle_gauss(struct mtx* mp, struct vec* xp, struct vec* bp) {
-  int* p = malloc(sizeof(int) * mp->n);
+void sle_gauss(struct mtx* mp, struct vec* yp, struct vec* bp) {
+  int n = mp->n;
+  int* pp = malloc(sizeof(int) * n);
 
-  for (int i = 0; i < mp->n; ++i)
-    p[i] = i;
+  real* mvp = mp->v;
+  real* yvp = yp->v;
+  real* bvp = bp->v;
 
-  for (int i = 0; i < mp->n; ++i) {
-    real m = fabs(ME(mp, p[i], i));
-    int mi = i;
+  for (int i = 0; i < n; ++i)
+    pp[i] = i;
 
-    for (int j = i + 1; j < mp->n; ++j)
-      if (fabs(ME(mp, p[j], i)) > m) {
-        m = fabs(ME(mp, p[j], i));
-        mi = j;
+  for (int i = 0; i < n; ++i) {
+    real max = fabs(mvp[pp[i] * n + i]);
+    int maxi = i;
+
+    for (int j = i + 1, rj = pp[i + 1] * n; j < n; ++j, rj += n) {
+      real mij = fabs(mvp[rj + i]);
+
+      if (mij > max) {
+        max = mij;
+        maxi = j;
       }
+    }
 
-    swap(p, i, mi);
+    swap(pp, i, maxi);
 
-    for (int j = i + 1; j < mp->n; ++j) {
-      real k = ME(mp, p[j], i) / ME(mp, p[i], i);
+    int ri = pp[i] * n;
 
-      for (int c = i + 1; c < mp->n; ++c)
-        ME(mp, p[j], c) -= ME(mp, p[i], c) * k;
+    for (int j = i + 1, rj = pp[i + 1] * n; j < n; ++j, rj += n) {
+      real k = mvp[rj + i] / mvp[ri + i];
 
-      bp->v[p[j]] -= bp->v[p[i]] * k;
+      for (int c = i + 1; c < n; ++c)
+        mvp[rj + c] -= mvp[ri + c] * k;
+
+      bvp[pp[j]] -= bvp[pp[i]] * k;
     }
   }
 
-  for (int o = 0, i; o < mp->n; ++o) {
-    i = mp->n - 1 - o;
+  for (int o = 0, i; o < n; ++o) {
+    i = n - 1 - o;
 
-    xp->v[i] = bp->v[p[i]];
+    yvp[i] = bvp[pp[i]];
 
-    for (int j = i + 1; j < mp->n; ++j)
-      xp->v[i] -= xp->v[j] * ME(mp, p[i], j);
+    for (int j = i + 1; j < n; ++j)
+      yvp[i] -= yvp[j] * mvp[pp[i] * n + j];
 
-    xp->v[i] /= ME(mp, p[i], i);
+    yvp[i] /= mvp[pp[i] * n + i];
   }
 
-  free(p);
+  free(pp);
 }
 
 #endif  // DMTX

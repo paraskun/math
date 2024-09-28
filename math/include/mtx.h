@@ -1,8 +1,8 @@
 #ifndef MTX_H
 #define MTX_H
 
-#include <stdio.h>
 #include <stddef.h>
+#include <stdio.h>
 #include <vec.h>
 
 struct mtx;
@@ -11,7 +11,7 @@ struct mtx;
  * @brief Populate given matrix with values from the file.
  *
  * @param fn - file name;
- * @param m - matrix to fill;
+ * @param mp - matrix to fill;
  */
 void mtx_fget(FILE* f, struct mtx* mp);
 
@@ -20,7 +20,7 @@ void mtx_fget(FILE* f, struct mtx* mp);
  *
  * @param fn - file name;
 
- * @param m - matrix to write;
+ * @param mp - matrix to write;
  */
 void mtx_fput(FILE* f, struct mtx* mp);
 
@@ -42,7 +42,7 @@ void mtx_hlb(struct mtx* mp);
 /**
  * @brief Deallocate matrix memory.
  *
- * @param a - matrix to delete;
+ * @param mp - matrix to delete;
  */
 void mtx_free(struct mtx* mp);
 
@@ -74,13 +74,11 @@ struct mtx* mtx_new(int n, int s);
 /**
  * @brief Perform LDU decomposition of the given matrix.
  *
- * @param m - matrix for decomposition;
+ * @param mp - matrix for decomposition;
  */
 void mtx_ldu(struct mtx* mp);
 
 #else
-
-#define ME(m, i, j) (m->v[(i) * m->n + (j)])
 
 /**
  * @class mtx
@@ -101,7 +99,7 @@ struct mtx* mtx_new(int n);
 /**
  * @brief Convert given matrix to a matrix with randomly generated values. 
  *
- * @param n - matrix to convert;
+ * @param mp - matrix to convert;
  * @param u - values upper-bound;
  */
 void mtx_rnd(struct mtx* mp, int u);
@@ -109,33 +107,33 @@ void mtx_rnd(struct mtx* mp, int u);
 /**
  * @brief Convert given matrix to a new matrix with sequential values starting from 1.
  *
- * @param n - matrix dimensions;
+ * @param mp - matrix dimensions;
  */
 void mtx_seq(struct mtx* mp);
 
 /**
  * @brief Calculate the matrix-matrix product.
  *
- * @param a - left-hand operand;
- * @param b - right-hand operand;
- * @param c - result;
+ * @param ap - left-hand operand;
+ * @param bp - right-hand operand;
+ * @param cp - result;
  */
 void mtx_mmlt(struct mtx* ap, struct mtx* bp, struct mtx* cp);
 
 /**
  * @brief Calculate the matrix-vector product.
  *
- * @param a - left-hand operand;
- * @param b - right-hand operand;
- * @param c - result;
+ * @param ap - left-hand operand;
+ * @param bp - right-hand operand;
+ * @param cp - result;
  */
 void mtx_vmlt(struct mtx* ap, struct vec* bp, struct vec* cp);
 
 /**
  * @brief Calculate the matrix norm.
  *
- * @param a - operand;
- * @param r - result;
+ * @param ap - operand;
+ * @param rp - result;
  */
 void mtx_norm(struct mtx* ap, real* rp);
 

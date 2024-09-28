@@ -16,73 +16,74 @@ struct mtx* mtx_new(int n) {
 }
 
 void mtx_rnd(struct mtx* mp, int u) {
-  int n = mp->n * mp->n;
-  real* mv = mp->v;
-
-#ifdef OMP_THREADS_NUM
-#pragma omp parallel for num_threads(OMP_THREADS_NUM)
-#endif  // OMP
-  for (int i = 0; i < n; ++i)
-    mv[i] = rand() % u;
-}
-
-void mtx_seq(struct mtx* mp) {
   int n = mp->n;
-  real* mv = mp->v;
+  real* vp = mp->v;
 
 #ifdef OMP_THREADS_NUM
 #pragma omp parallel for num_threads(OMP_THREADS_NUM)
 #endif  // OMP
   for (int i = 0; i < n * n; ++i)
-    mv[i] = i + 1;
+    vp[i] = rand() % u;
+}
+
+void mtx_seq(struct mtx* mp) {
+  int n = mp->n;
+  real* vp = mp->v;
+
+#ifdef OMP_THREADS_NUM
+#pragma omp parallel for num_threads(OMP_THREADS_NUM)
+#endif  // OMP
+  for (int i = 0; i < n * n; ++i)
+    vp[i] = i + 1;
 }
 
 void mtx_ddm(struct mtx* mp, int k) {
   int n = mp->n;
+  real* vp = mp->v;
+
   real sum = 0;
-  real* mv = mp->v;
 
   for (int i = 0, r = 0; i < n; ++i, r += n)
     for (int j = 0, c = 0; j < i; ++j, c += n) {
       int e = -(rand() % 5);
       sum += e;
-      mv[r + j] = e;
+      vp[r + j] = e;
 
       e = -(rand() % 5);
       sum += e;
-      mv[c + i] = e;
+      vp[c + i] = e;
     }
 
-  mv[0] = -sum + 1 / pow(10, k);
+  vp[0] = -sum + 1 / pow(10, k);
 
   for (int i = 1, r = n; i < n; ++i, r += n)
-    mv[r + i] = -sum;
+    vp[r + i] = -sum;
 }
 
 void mtx_hlb(struct mtx* mp) {
   int n = mp->n;
-  real* mv = mp->v;
+  real* vp = mp->v;
 
   for (int i = 0, r = -1; i < n; ++i, r += n)
     for (int j = 1; j <= n; ++j)
-      mv[r + j] = 1.0 / (i + j);
+      vp[r + j] = 1.0 / (i + j);
 }
 
 void mtx_fget(FILE* f, struct mtx* mp) {
   int n = mp->n;
-  real* mv = mp->v;
+  real* vp = mp->v;
 
   for (int i = 0; i < n * n; ++i)
-    fscanf(f, "%lf", &mv[i]);
+    fscanf(f, "%lf", &vp[i]);
 }
 
 void mtx_fput(FILE* f, struct mtx* mp) {
   int n = mp->n;
-  real* mv = mp->v;
+  real* vp = mp->v;
 
   for (int i = 0, r = 0; i < n; ++i, r += n) {
     for (int j = 0; j < n; ++j)
-      fprintf(f, "%.7e ", mv[r + j]);
+      fprintf(f, "%.7e ", vp[r + j]);
 
     fputc('\n', f);
   }
@@ -91,9 +92,9 @@ void mtx_fput(FILE* f, struct mtx* mp) {
 void mtx_mmlt(struct mtx* ap, struct mtx* bp, struct mtx* cp) {
   int n = ap->n;
 
-  real* av = ap->v;
-  real* bv = bp->v;
-  real* cv = cp->v;
+  real* avp = ap->v;
+  real* bvp = bp->v;
+  real* cvp = cp->v;
 
 #ifdef OMP_THREADS_NUM
 #pragma omp parallel for num_threads(OMP_THREADS_NUM)
@@ -102,10 +103,10 @@ void mtx_mmlt(struct mtx* ap, struct mtx* bp, struct mtx* cp) {
     int ir = i * n;
 
     for (int j = 0, ij = ir; j < n; ++j, ++ij) {
-      cv[ij] = 0.0;
+      cvp[ij] = 0.0;
 
       for (int e = 0, er = 0; e < n; ++e, er += n)
-        cv[ij] += av[ir + e] * bv[er + j];
+        cvp[ij] += avp[ir + e] * bvp[er + j];
     }
   }
 }
@@ -113,9 +114,9 @@ void mtx_mmlt(struct mtx* ap, struct mtx* bp, struct mtx* cp) {
 void mtx_vmlt(struct mtx* ap, struct vec* bp, struct vec* cp) {
   int n = ap->n;
 
-  real* av = ap->v;
-  real* bv = bp->v;
-  real* cv = cp->v;
+  real* avp = ap->v;
+  real* bvp = bp->v;
+  real* cvp = cp->v;
 
 #ifdef OMP_THREADS_NUM
 #pragma omp parallel for num_threads(OMP_THREADS_NUM)
@@ -123,19 +124,19 @@ void mtx_vmlt(struct mtx* ap, struct vec* bp, struct vec* cp) {
   for (int i = 0; i < ap->n; ++i) {
     int ir = i * n;
 
-    cv[i] = 0.0;
+    cvp[i] = 0.0;
 
     for (int j = 0; j < ap->n; ++j)
-      cv[i] += av[ir + j] * bv[j];
+      cvp[i] += avp[ir + j] * bvp[j];
   }
 }
 
 void mtx_norm(struct mtx* mp, real* rp) {
   int n = mp->n;
-  real* mv = mp->v;
+  real* vp = mp->v;
 
   for (int i = 0; i < n * n; ++i)
-    *rp += mv[i] * mv[i];
+    *rp += vp[i] * vp[i];
 
   *rp = sqrt(*rp);
 }

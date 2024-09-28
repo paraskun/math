@@ -19,80 +19,79 @@ struct vec* vec_new(int n);
 /**
  * @brief Convert given vector to a new vector with randomly generated values. 
  *
- * @param v - vector to convert;
+ * @param vp - vector to convert;
  * @param u - values upper-bound;
  */
-void vec_rnd(struct vec* v, int u);
+void vec_rnd(struct vec* vp, int u);
 
 /**
  * @brief Convert given vector to a vector with sequential values started from zero.
  *
- * @param v - vector to convert;
+ * @param vp - vector to convert;
  */
-void vec_seq(struct vec* v);
+void vec_seq(struct vec* vp);
 
 /**
  * @brief Populate given vector with values from the file.
  *
  * @param fn - file name;
- * @param a - vector to fill;
+ * @param vp - vector to fill;
  */
-void vec_fget(FILE* f, struct vec* a);
+void vec_fget(FILE* f, struct vec* vp);
 
 /**
  * @brief Write the values from the given vector to a file.
  *
  * @param fn - file name;
-
- * @param a - vector to write;
+ * @param vp - vector to write;
  */
-void vec_fput(FILE* f, struct vec* a);
+void vec_fput(FILE* f, struct vec* vp);
 
 /**
  * @brief Calculate the sum of two vectors.
  *
- * <p> c = a + b
+ * <p> r = a + b
  *
- * @param a - left-hand operand;
- * @param b - right-hand operand;
- * @param r - result;
+ * @param ap - left-hand operand;
+ * @param bp - right-hand operand;
+ * @param rp - result;
  */
-void vec_add(struct vec* a, struct vec* b, struct vec* r);
+void vec_add(struct vec* ap, struct vec* bp, struct vec* rp);
 
 /**
  * @brief Calculate the linear combination of two vectors.
  *
- * <p> c = a + kb
+ * <p> r = a + kb
  *
- * @param a - left-hand operand;
- * @param b - right-hand operand;
- * @param c - result;
+ * @param ap - left-hand operand;
+ * @param bp - right-hand operand;
+ * @param rp - result;
  * @param k - factor;
  */
-void vec_cmb(struct vec* a, struct vec* b, struct vec* c, real k);
+void vec_cmb(struct vec* ap, struct vec* bp, struct vec* rp, real k);
 
 /**
  * @brief Calculate the scalar product of two vectors.
  *
- * @param a - left-hand operand;
- * @param b - right-hand operand;
- * @param r - result;
+ * @param ap - left-hand operand;
+ * @param bp - right-hand operand;
+ * @param rp - result;
  */
-void vec_mlt(struct vec* a, struct vec* b, real* r);
+void vec_mlt(struct vec* ap, struct vec* bp, real* rp);
 
 /**
  * @brief Calculate the norm of the vector.
  *
- * @param a - operand;
- * @param r - result;
+ * @param vp - operand;
+ * @param rp - result;
  */
-void vec_nrm(struct vec* a, real* r);
+void vec_nrm(struct vec* vp, real* rp);
 
 /**
  * @brief Deallocate vector memory.
  *
- * @param a - vector to delete;
+ * @param vp - vector to delete;
  */
-void vec_free(struct vec* a);
+void vec_free(struct vec* vp);
 
 #endif  // VEC_H

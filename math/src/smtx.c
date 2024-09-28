@@ -6,7 +6,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/random.h>
 
 #define min(x, y) (((x) < (y)) ? (x) : (y))
 
@@ -23,109 +22,120 @@ struct mtx* mtx_new(int n, int s) {
   return mp;
 }
 
-static int rnd() {
-  uint8_t rnd = 255;
-
-  while (rnd > 254)
-    if (getrandom(&rnd, 1, 0) == -1)
-      exit(-1);
-
-  return rnd % 5 - 4;
-}
-
 void mtx_ddm(struct mtx* mp, int k) {
-  int s = mp->n * (mp->n - 1) / 2;
-  int bgn = 0;
+  int n = mp->n;
+
+  real* mlp = mp->l;
+  real* mup = mp->u;
+  real* mdp = mp->d;
+  int* mpp = mp->p;
+
+  int ir = 0;
   preal sum = 0;
 
-  mp->p[0] = bgn;
+  mpp[0] = ir;
 
-  for (int i = 1; i < mp->n; ++i) {
-    bgn += i - 1;
+  for (int i = 1; i < n; ++i) {
+    ir += i - 1;
 
-    mp->p[i] = bgn;
-    mp->l[bgn] = rnd();
-    mp->u[bgn] = rnd();
+    mpp[i] = ir;
+    mlp[ir] = -(rand() % 4) - 1;
+    mup[ir] = -(rand() % 4) - 1;
 
-    while (mp->l[bgn] == 0)
-      mp->l[bgn] = rnd();
-
-    while (mp->u[bgn] == 0)
-      mp->u[bgn] = rnd();
-
-    sum += mp->l[bgn] + mp->u[bgn];
+    sum += mlp[ir] + mup[ir];
 
     for (int j = 1; j < i; ++j) {
-      mp->l[bgn + j] = rnd();
-      mp->u[bgn + j] = rnd();
+      mlp[ir + j] = -(rand() % 5);
+      mup[ir + j] = -(rand() % 5);
 
-      sum += mp->l[bgn + j] + mp->u[bgn + j];
+      sum += mlp[ir + j] + mup[ir + j];
     }
   }
 
-  mp->p[mp->n] = s;
-  mp->d[0] = 1.0 / pow(10.0, k) - sum;
+  mpp[n] = n * (n - 1) / 2;
+  mdp[0] = 1.0 / pow(10.0, k) - sum;
 
-  for (int i = 1; i < mp->n; ++i)
-    mp->d[i] = -sum;
+  for (int i = 1; i < n; ++i)
+    mdp[i] = -sum;
 }
 
 void mtx_hlb(struct mtx* mp) {
-  int s = mp->n * (mp->n - 1) / 2;
-  int bgn = 0;
+  int n = mp->n;
+  int ir = 0;
 
-  mp->p[0] = bgn;
-  mp->d[0] = 1;
+  real* mlp = mp->l;
+  real* mup = mp->u;
+  real* mdp = mp->d;
+  int* mpp = mp->p;
 
-  for (int i = 1; i < mp->n; ++i) {
-    bgn += i - 1;
+  mpp[0] = ir;
+  mdp[0] = 1;
 
-    mp->p[i] = bgn;
-    mp->d[i] = 1.0 / (2.0 * i + 1.0);
+  for (int i = 1, i2 = 2; i < n; ++i, i2 += 2) {
+    ir += i - 1;
+
+    mpp[i] = ir;
+    mdp[i] = 1.0 / (i2 + 1.0);
 
     for (int j = 0; j < i; ++j) {
       real v = 1.0 / (i + j + 1.0);
 
-      mp->l[bgn + j] = v;
-      mp->u[bgn + j] = v;
+      mlp[ir + j] = v;
+      mup[ir + j] = v;
     }
   }
 
-  mp->p[mp->n] = s;
+  mpp[n] = n * (n - 1) / 2;
 }
 
-void mtx_fget(FILE* f, struct mtx* a) {
-  for (int i = 0; i <= a->n; ++i)
-    fscanf(f, "%lu", &a->p[i]);
+void mtx_fget(FILE* f, struct mtx* mp) {
+  int n = mp->n;
+  int s = mp->s;
 
-  for (int i = 0; i < a->n; ++i)
-    fscanf(f, "%lf", &a->d[i]);
+  real* mlp = mp->l;
+  real* mup = mp->u;
+  real* mdp = mp->d;
+  int* mpp = mp->p;
 
-  for (int i = 0; i < a->s; ++i)
-    fscanf(f, "%lf", &a->l[i]);
+  for (int i = 0; i <= n; ++i)
+    fscanf(f, "%u", &mpp[i]);
 
-  for (int i = 0; i < a->s; ++i)
-    fscanf(f, "%lf", &a->u[i]);
+  for (int i = 0; i < n; ++i)
+    fscanf(f, "%lf", &mdp[i]);
+
+  for (int i = 0; i < s; ++i)
+    fscanf(f, "%lf", &mlp[i]);
+
+  for (int i = 0; i < s; ++i)
+    fscanf(f, "%lf", &mup[i]);
 }
 
-void mtx_fput(FILE* f, struct mtx* a) {
-  for (int i = 0; i <= a->n; ++i)
-    fprintf(f, "%lu ", a->p[i]);
+void mtx_fput(FILE* f, struct mtx* mp) {
+  int n = mp->n;
+  int s = mp->s;
+
+  real* mlp = mp->l;
+  real* mup = mp->u;
+  real* mdp = mp->d;
+  int* mpp = mp->p;
+
+  for (int i = 0; i <= n; ++i)
+    fprintf(f, "%u ", mpp[i]);
 
   fputc('\n', f);
 
-  for (int i = 0; i < a->n; ++i)
-    fprintf(f, "%.7e ", a->d[i]);
+  for (int i = 0; i < n; ++i)
+    fprintf(f, "%.7e ", mdp[i]);
 
   fputc('\n', f);
 
-  for (int i = 0; i < a->s; ++i)
-    fprintf(f, "%.7e ", a->l[i]);
+  for (int i = 0; i < s; ++i)
+    fprintf(f, "%.7e ", mlp[i]);
 
   fputc('\n', f);
 
-  for (int i = 0; i < a->s; ++i)
-    fprintf(f, "%.7e ", a->u[i]);
+  for (int i = 0; i < s; ++i)
+    fprintf(f, "%.7e ", mup[i]);
 }
 
 void mtx_ldu(struct mtx* a) {
