@@ -56,12 +56,12 @@ void sle_gauss(struct mtx* mp, struct vec* yp, struct vec* bp) {
   for (int o = 0, i; o < n; ++o) {
     i = n - 1 - o;
 
-    yvp[i] = bvp[pp[i]];
+    preal sum = bvp[pp[i]];
 
     for (int j = i + 1; j < n; ++j)
-      yvp[i] -= yvp[j] * mvp[pp[i] * n + j];
+      sum -= yvp[j] * mvp[pp[i] * n + j];
 
-    yvp[i] /= mvp[pp[i] * n + i];
+    yvp[i] = sum / mvp[pp[i] * n + i];
   }
 
   free(pp);

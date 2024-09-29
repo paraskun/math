@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define min(x, y) (((x) < (y)) ? (x) : (y))
 
@@ -30,14 +31,11 @@ void mtx_ddm(struct mtx* mp, int k) {
   real* mdp = mp->d;
   int* mpp = mp->p;
 
-  int ir = 0;
   preal sum = 0;
 
-  mpp[0] = ir;
+  mpp[0] = 0;
 
-  for (int i = 1; i < n; ++i) {
-    ir += i - 1;
-
+  for (int i = 1, ir = 0; i < n; ++i, ir += i - 1) {
     mpp[i] = ir;
     mlp[ir] = -(rand() % 4) - 1;
     mup[ir] = -(rand() % 4) - 1;
@@ -110,6 +108,19 @@ void mtx_fget(FILE* f, struct mtx* mp) {
     fscanf(f, "%lf", &mup[i]);
 }
 
+void mtx_vmlt(struct mtx* ap, struct vec* bp, struct vec* rp) {
+  int n = ap->n;
+
+  int* app = ap->p;
+  real* adp = ap->d;
+  real* alp = ap->l;
+  real* aup = ap->u;
+  real* bvp = bp->v;
+  real* rvp = rp->v;
+
+  memset(rvp, 0, n * sizeof(real));
+}
+
 void mtx_fput(FILE* f, struct mtx* mp) {
   int n = mp->n;
   int s = mp->s;
@@ -138,41 +149,48 @@ void mtx_fput(FILE* f, struct mtx* mp) {
     fprintf(f, "%.7e ", mup[i]);
 }
 
-void mtx_ldu(struct mtx* a) {
-  for (int i = 0; i < a->n; ++i) {
-    int c = a->p[i + 1] - a->p[i];
-    preal r = a->d[i];
+void mtx_ldu(struct mtx* mp) {
+  int n = mp->n;
 
-    for (int k = 1; k <= c; ++k)
-      r -= a->l[a->p[i] + c - k] * a->u[a->p[i] + c - k] * a->d[i - k];
+  int* mpp = mp->p;
+  real* mdp = mp->d;
+  real* mlp = mp->l;
+  real* mup = mp->u;
 
-    a->d[i] = r;
+  for (int i = 0; i < n; ++i) {
+    int ic = mpp[i + 1] - mpp[i];
+    preal dsum = mdp[i];
 
-    for (int j = i + 1; j < a->n; ++j) {
-      int cc = a->p[j + 1] - a->p[j] - j + i;
+    for (int k = 1; k <= ic; ++k)
+      dsum -= mlp[mpp[i] + ic - k] * mup[mpp[i] + ic - k] * mdp[i - k];
 
-      if (cc > -1) {
-        preal l = a->l[a->p[j] + cc];
-        preal u = a->u[a->p[j] + cc];
+    mdp[i] = dsum;
 
-        for (int k = 1; k <= min(cc, c); ++k) {
-          l -= a->l[a->p[j] + cc - k] * a->u[a->p[i] + c - k] * a->d[i - k];
-          u -= a->l[a->p[i] + c - k] * a->u[a->p[j] + cc - k] * a->d[i - k];
+    for (int j = i + 1; j < n; ++j) {
+      int jc = mpp[j + 1] - mpp[j] - j + i;
+
+      if (jc > -1) {
+        preal lsum = mlp[mpp[j] + jc];
+        preal usum = mup[mpp[j] + jc];
+
+        for (int k = 1; k <= min(jc, ic); ++k) {
+          lsum -= mlp[mpp[j] + jc - k] * mup[mpp[i] + ic - k] * mdp[i - k];
+          usum -= mup[mpp[j] + jc - k] * mlp[mpp[i] + ic - k] * mdp[i - k];
         }
 
-        a->l[a->p[j] + cc] = l / a->d[i];
-        a->u[a->p[j] + cc] = u / a->d[i];
+        mlp[mpp[j] + jc] = lsum / mdp[i];
+        mup[mpp[j] + jc] = usum / mdp[i];
       }
     }
   }
 }
 
-void mtx_free(struct mtx* m) {
-  free(m->d);
-  free(m->l);
-  free(m->u);
-  free(m->p);
-  free(m);
+void mtx_free(struct mtx* mp) {
+  free(mp->d);
+  free(mp->l);
+  free(mp->u);
+  free(mp->p);
+  free(mp);
 }
 
-#endif  // MTX_PFL
+#endif  // SMTX

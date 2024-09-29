@@ -40,6 +40,15 @@ void mtx_ddm(struct mtx* mp, int k);
 void mtx_hlb(struct mtx* mp);
 
 /**
+ * @brief Calculate the matrix-vector product.
+ *
+ * @param ap - left-hand operand;
+ * @param bp - right-hand operand;
+ * @param rp - result;
+ */
+void mtx_vmlt(struct mtx* ap, struct vec* bp, struct vec* rp);
+
+/**
  * @brief Deallocate matrix memory.
  *
  * @param mp - matrix to delete;
@@ -119,15 +128,6 @@ void mtx_seq(struct mtx* mp);
  * @param cp - result;
  */
 void mtx_mmlt(struct mtx* ap, struct mtx* bp, struct mtx* cp);
-
-/**
- * @brief Calculate the matrix-vector product.
- *
- * @param ap - left-hand operand;
- * @param bp - right-hand operand;
- * @param cp - result;
- */
-void mtx_vmlt(struct mtx* ap, struct vec* bp, struct vec* cp);
 
 /**
  * @brief Calculate the matrix norm.
