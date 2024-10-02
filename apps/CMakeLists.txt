@@ -1,3 +1,4 @@
-add_subdirectory(prll-hw)
-add_subdirectory(prll-nrm)
-add_subdirectory(sle-ddm)
+# add_subdirectory(prll-hw)
+# add_subdirectory(prll-nrm)
+
+add_subdirectory(sle-dct)

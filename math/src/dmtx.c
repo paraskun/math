@@ -1,13 +1,11 @@
-#ifndef SMTX
-
+#include <dmtx.h>
 #include <math.h>
-#include <mtx.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-struct mtx* mtx_new(int n) {
-  struct mtx* mp = malloc(sizeof(struct mtx));
+struct dmtx* dmtx_new(int n) {
+  struct dmtx* mp = malloc(sizeof(struct dmtx));
 
   mp->v = malloc(sizeof(real) * n * n);
   mp->n = n;
@@ -15,7 +13,7 @@ struct mtx* mtx_new(int n) {
   return mp;
 }
 
-void mtx_rnd(struct mtx* mp, int u) {
+void dmtx_rnd(struct dmtx* mp, int u) {
   int n = mp->n;
   real* vp = mp->v;
 
@@ -26,7 +24,7 @@ void mtx_rnd(struct mtx* mp, int u) {
     vp[i] = rand() % u;
 }
 
-void mtx_seq(struct mtx* mp) {
+void dmtx_seq(struct dmtx* mp) {
   int n = mp->n;
   real* vp = mp->v;
 
@@ -37,7 +35,7 @@ void mtx_seq(struct mtx* mp) {
     vp[i] = i + 1;
 }
 
-void mtx_ddm(struct mtx* mp, int k) {
+void dmtx_ddm(struct dmtx* mp, int k) {
   int n = mp->n;
   real* vp = mp->v;
 
@@ -60,7 +58,7 @@ void mtx_ddm(struct mtx* mp, int k) {
     vp[r + i] = -sum;
 }
 
-void mtx_hlb(struct mtx* mp) {
+void dmtx_hlb(struct dmtx* mp) {
   int n = mp->n;
   real* vp = mp->v;
 
@@ -69,7 +67,7 @@ void mtx_hlb(struct mtx* mp) {
       vp[r + j] = 1.0 / (i + j);
 }
 
-void mtx_fget(FILE* f, struct mtx* mp) {
+void dmtx_fget(FILE* f, struct dmtx* mp) {
   int n = mp->n;
   real* vp = mp->v;
 
@@ -77,19 +75,19 @@ void mtx_fget(FILE* f, struct mtx* mp) {
     fscanf(f, "%lf", &vp[i]);
 }
 
-void mtx_fput(FILE* f, struct mtx* mp) {
+void dmtx_fput(FILE* f, struct dmtx* mp) {
   int n = mp->n;
   real* vp = mp->v;
 
   for (int i = 0, r = 0; i < n; ++i, r += n) {
     for (int j = 0; j < n; ++j)
-      fprintf(f, "%.7e ", vp[r + j]);
+      fprintf(f, "%10.3e ", vp[r + j]);
 
     fputc('\n', f);
   }
 }
 
-void mtx_mmlt(struct mtx* ap, struct mtx* bp, struct mtx* cp) {
+void dmtx_mmlt(struct dmtx* ap, struct dmtx* bp, struct dmtx* cp) {
   int n = ap->n;
 
   real* avp = ap->v;
@@ -111,7 +109,7 @@ void mtx_mmlt(struct mtx* ap, struct mtx* bp, struct mtx* cp) {
   }
 }
 
-void mtx_vmlt(struct mtx* ap, struct vec* bp, struct vec* cp) {
+void dmtx_vmlt(struct dmtx* ap, struct vec* bp, struct vec* cp) {
   int n = ap->n;
 
   real* avp = ap->v;
@@ -131,19 +129,21 @@ void mtx_vmlt(struct mtx* ap, struct vec* bp, struct vec* cp) {
   }
 }
 
-void mtx_norm(struct mtx* mp, real* rp) {
+void dmtx_nrm(struct dmtx* mp, real* rp) {
   int n = mp->n;
   real* vp = mp->v;
+  real r = 0.0;
 
+#ifdef OMP_THREADS_NUM
+#pragma omp parallel for reduction(+ : r) num_threads(OMP_THREADS_NUM)
+#endif  // OMP
   for (int i = 0; i < n * n; ++i)
-    *rp += vp[i] * vp[i];
+    r += vp[i] * vp[i];
 
-  *rp = sqrt(*rp);
+  *rp = sqrt(r);
 }
 
-void mtx_free(struct mtx* mp) {
+void dmtx_free(struct dmtx* mp) {
   free(mp->v);
   free(mp);
 }
-
-#endif  // DMTX

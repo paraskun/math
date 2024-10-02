@@ -49,7 +49,7 @@ void vec_fput(FILE* f, struct vec* vp) {
   real* vvp = vp->v;
 
   for (int i = 0; i < n; ++i)
-    fprintf(f, "%.7e ", vvp[i]);
+    fprintf(f, "%.3e ", vvp[i]);
 }
 
 void vec_add(struct vec* ap, struct vec* bp, struct vec* rp) {
@@ -87,6 +87,9 @@ void vec_mlt(struct vec* ap, struct vec* bp, real* rp) {
   real* bvp = bp->v;
   real s = 0;
 
+#ifdef OMP_THREADS_NUM
+#pragma omp parallel for reduction(+ : s) num_threads(OMP_THREADS_NUM)
+#endif  // OMP
   for (int i = 0; i < n; ++i)
     s += avp[i] * bvp[i];
 

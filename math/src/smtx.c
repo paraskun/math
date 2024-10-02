@@ -1,6 +1,4 @@
-#ifdef SMTX
-
-#include <mtx.h>
+#include <smtx.h>
 
 #include <math.h>
 #include <stdint.h>
@@ -10,8 +8,8 @@
 
 #define min(x, y) (((x) < (y)) ? (x) : (y))
 
-struct mtx* mtx_new(int n, int s) {
-  struct mtx* mp = malloc(sizeof(struct mtx));
+struct smtx* smtx_new(int n, int s) {
+  struct smtx* mp = malloc(sizeof(struct smtx));
 
   mp->n = n;
   mp->s = s;
@@ -23,7 +21,7 @@ struct mtx* mtx_new(int n, int s) {
   return mp;
 }
 
-void mtx_ddm(struct mtx* mp, int k) {
+void smtx_ddm(struct smtx* mp, int k) {
   int n = mp->n;
 
   real* mlp = mp->l;
@@ -57,7 +55,7 @@ void mtx_ddm(struct mtx* mp, int k) {
     mdp[i] = -sum;
 }
 
-void mtx_hlb(struct mtx* mp) {
+void smtx_hlb(struct smtx* mp) {
   int n = mp->n;
   int ir = 0;
 
@@ -86,7 +84,7 @@ void mtx_hlb(struct mtx* mp) {
   mpp[n] = n * (n - 1) / 2;
 }
 
-void mtx_fget(FILE* f, struct mtx* mp) {
+void smtx_fget(FILE* f, struct smtx* mp) {
   int n = mp->n;
   int s = mp->s;
 
@@ -96,7 +94,7 @@ void mtx_fget(FILE* f, struct mtx* mp) {
   int* mpp = mp->p;
 
   for (int i = 0; i <= n; ++i)
-    fscanf(f, "%u", &mpp[i]);
+    fscanf(f, "%d", &mpp[i]);
 
   for (int i = 0; i < n; ++i)
     fscanf(f, "%lf", &mdp[i]);
@@ -108,7 +106,7 @@ void mtx_fget(FILE* f, struct mtx* mp) {
     fscanf(f, "%lf", &mup[i]);
 }
 
-void mtx_vmlt(struct mtx* ap, struct vec* bp, struct vec* rp) {
+void smtx_vmlt(struct smtx* ap, struct vec* bp, struct vec* rp) {
   int n = ap->n;
 
   int* app = ap->p;
@@ -119,9 +117,21 @@ void mtx_vmlt(struct mtx* ap, struct vec* bp, struct vec* rp) {
   real* rvp = rp->v;
 
   memset(rvp, 0, n * sizeof(real));
+
+  for (int i = 0; i < n; ++i) {
+    rvp[i] += adp[i] * bvp[i];
+
+    int k0 = app[i + 1] - 1;
+    int k1 = app[i];
+
+    for (int k = k0, j = i - 1; k >= k1; --k, --j) {
+      rvp[i] += alp[k] * bvp[j];
+      rvp[j] += aup[k] * bvp[i];
+    }
+  }
 }
 
-void mtx_fput(FILE* f, struct mtx* mp) {
+void smtx_fput(FILE* f, struct smtx* mp) {
   int n = mp->n;
   int s = mp->s;
 
@@ -149,7 +159,7 @@ void mtx_fput(FILE* f, struct mtx* mp) {
     fprintf(f, "%.7e ", mup[i]);
 }
 
-void mtx_ldu(struct mtx* mp) {
+void smtx_ldu(struct smtx* mp) {
   int n = mp->n;
 
   int* mpp = mp->p;
@@ -185,12 +195,10 @@ void mtx_ldu(struct mtx* mp) {
   }
 }
 
-void mtx_free(struct mtx* mp) {
+void smtx_free(struct smtx* mp) {
   free(mp->d);
   free(mp->l);
   free(mp->u);
   free(mp->p);
   free(mp);
 }
-
-#endif  // SMTX

@@ -1,10 +1,8 @@
-#ifdef SMTX
-
-#include <mtx.h>
-#include <sle.h>
+#include <smtx.h>
+#include <ssle.h>
 #include <string.h>
 
-static void sle_l(struct mtx* a, struct vec* y, struct vec* b) {
+static void ssle_l(struct smtx* a, struct vec* y, struct vec* b) {
   int n = y->n;
   int* pp = a->p;
 
@@ -26,7 +24,7 @@ static void sle_l(struct mtx* a, struct vec* y, struct vec* b) {
   }
 }
 
-static void sle_d(struct mtx* a, struct vec* y, struct vec* b) {
+static void ssle_d(struct smtx* a, struct vec* y, struct vec* b) {
   int n = y->n;
 
   real* dp = a->d;
@@ -39,7 +37,7 @@ static void sle_d(struct mtx* a, struct vec* y, struct vec* b) {
   }
 }
 
-static void sle_u(struct mtx* a, struct vec* y, struct vec* b) {
+static void ssle_u(struct smtx* a, struct vec* y, struct vec* b) {
   int n = y->n;
   int* pp = a->p;
 
@@ -59,12 +57,10 @@ static void sle_u(struct mtx* a, struct vec* y, struct vec* b) {
   }
 }
 
-void sle_ldu(struct mtx* a, struct vec* x, struct vec* b) {
-  mtx_ldu(a);
+void ssle_ldu(struct smtx* a, struct vec* x, struct vec* b) {
+  smtx_ldu(a);
 
-  sle_l(a, x, b);
-  sle_d(a, b, x);
-  sle_u(a, x, b);
+  ssle_l(a, x, b);
+  ssle_d(a, b, x);
+  ssle_u(a, x, b);
 }
-
-#endif  // MTX_PFL

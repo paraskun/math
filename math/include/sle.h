@@ -1,29 +1,16 @@
 #ifndef SLE_H
 #define SLE_H
 
-#include <mtx.h>
-#include <vec.h>
+#ifdef DMTX
 
-/**
- * @brief Solve the system of linear equations using Gauss elimination.
- *
- * <p> Ay = b
- *
- * @param mp - coefficients;
- * @param yp - unknowns;
- * @param bp - constant terms;
- */
-void sle_gauss(struct mtx* mp, struct vec* yp, struct vec* bp);
+#define sle dsle_gauss
+#include <dsle.h>
 
-/**
- * @brief Solve the system of linear equations using LDU decomposition.
- *
- * <p> Ay = b
- *
- * @param mp - coefficients;
- * @param yp - unknowns;
- * @param bp - constant terms;
- */
-void sle_ldu(struct mtx* mp, struct vec* yp, struct vec* bp);
+#elifdef SMTX
+
+#define sle ssle_ldu
+#include <ssle.h>
+
+#endif
 
 #endif  // SLE_H

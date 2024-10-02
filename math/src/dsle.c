@@ -1,10 +1,8 @@
-#ifndef SMTX
+#include <dmtx.h>
+#include <dsle.h>
 
 #include <math.h>
 #include <stdlib.h>
-
-#include <mtx.h>
-#include <sle.h>
 
 static inline void swap(int* p, int a, int b) {
   if (a == b)
@@ -15,7 +13,7 @@ static inline void swap(int* p, int a, int b) {
   p[b] = tmp;
 }
 
-void sle_gauss(struct mtx* mp, struct vec* yp, struct vec* bp) {
+void dsle_gauss(struct dmtx* mp, struct vec* yp, struct vec* bp) {
   int n = mp->n;
   int* pp = malloc(sizeof(int) * n);
 
@@ -66,5 +64,3 @@ void sle_gauss(struct mtx* mp, struct vec* yp, struct vec* bp) {
 
   free(pp);
 }
-
-#endif  // DMTX
