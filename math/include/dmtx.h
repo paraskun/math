@@ -63,7 +63,7 @@ void dmtx_vmlt(struct dmtx* ap, struct vec* bp, struct vec* rp);
 void dmtx_mmlt(struct dmtx* ap, struct dmtx* bp, struct dmtx* cp);
 
 /**
- * @brief Convert given matrix to a matrix with randomly generated values. 
+ * @brief Convert given matrix to a matrix with randomly generated values.
  *
  * @param mp - matrix to convert;
  * @param u - values upper-bound;

@@ -18,6 +18,11 @@ struct smtx {
 
 struct smtx* smtx_new(int n, int s);
 
+/**
+ * @brief Perform matrix LDU decomposition.
+ *
+ * @param mp - matrix to decompose;
+ */
 void smtx_ldu(struct smtx* mp);
 
 /**

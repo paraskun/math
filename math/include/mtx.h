@@ -1,32 +1,41 @@
 #ifndef MTX_H
 #define MTX_H
 
-#ifdef DMTX
-
-typedef struct dmtx mtx;
-
-#define mtx_fget dmtx_fget
-#define mtx_fput dmtx_fput
-#define mtx_ddm dmtx_ddm
-#define mtx_hlb dmtx_hlb
-#define mtx_vmlt dmtx_vmlt
-#define mtx_free dmtx_free
-
 #include <dmtx.h>
-
-#elifdef SMTX
-
-typedef struct smtx mtx;
-
-#define mtx_fget smtx_fget
-#define mtx_fput smtx_fput
-#define mtx_ddm smtx_ddm
-#define mtx_hlb smtx_hlb
-#define mtx_vmlt smtx_vmlt
-#define mtx_free smtx_free
-
 #include <smtx.h>
+#include <pmtx.h>
 
-#endif
+#define mtx_fget(f, X) _Generic((X),    \
+    struct dmtx *: dmtx_fget,           \
+    struct smtx *: smtx_fget,           \
+    struct pmtx *: pmtx_fget            \
+    ) (f, X)
+
+#define mtx_fput(f, X) _Generic((X),    \
+    struct dmtx *: dmtx_fget,           \
+    struct smtx *: smtx_fget            \
+    ) (f, X)
+
+#define mtx_ddm(X, k) _Generic((X),     \
+    struct dmtx *: dmtx_ddm,            \
+    struct smtx *: smtx_ddm             \
+    ) (X, k)
+
+#define mtx_hlb(X) _Generic((X),        \
+    struct dmtx *: dmtx_hlb,            \
+    struct smtx *: smtx_hlb             \
+    ) (X)
+
+#define mtx_vmlt(X, b, r) _Generic((X), \
+    struct dmtx *: dmtx_vmlt,           \
+    struct smtx *: smtx_vmlt,           \
+    struct pmtx *: pmtx_vmlt            \
+    ) (X, b, r)
+
+#define mtx_free(X) _Generic((X),       \
+    struct dmtx *: dmtx_free,           \
+    struct smtx *: smtx_free,           \
+    struct pmtx *: pmtx_free            \
+    ) (X)
 
 #endif  // MTX_H

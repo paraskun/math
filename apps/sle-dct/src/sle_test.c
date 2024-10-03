@@ -4,14 +4,14 @@
 #include <stdio.h>
 
 int main() {
+  FILE* fdms = fopen("dms.in", "r");
+
 #ifdef SMTX
-  FILE* fdms = fopen("smtx-dms.in", "r");
-  FILE* fmtx = fopen("smtx-mtx.in", "r");
-  FILE* fmo = fopen("smtx-mtx.out", "w+");
+  FILE* fmtx = fopen("smtx.in", "r");
+  FILE* fmo = fopen("smtx.out", "w+");
 #elifdef DMTX
-  FILE* fdms = fopen("dmtx-dms.in", "r");
-  FILE* fmtx = fopen("dmtx-mtx.in", "r");
-  FILE* fmo = fopen("dmtx-mtx.out", "w+");
+  FILE* fmtx = fopen("dmtx.in", "r");
+  FILE* fmo = fopen("dmtx.out", "w+");
 #endif
 
   FILE* fb = fopen("b.in", "r");
@@ -20,11 +20,11 @@ int main() {
 #ifdef SMTX
   int n, s;
   fscanf(fdms, "%d %d", &n, &s);
-  mtx* mp = smtx_new(n, s);
+  struct smtx* mp = smtx_new(n, s);
 #elifdef DMTX
   int n;
   fscanf(fdms, "%d", &n);
-  mtx* mp = dmtx_new(n);
+  struct dmtx* mp = dmtx_new(n);
 #endif
 
   struct vec* bp = vec_new(n);
@@ -33,7 +33,11 @@ int main() {
   mtx_fget(fmtx, mp);
   vec_fget(fb, bp);
 
-  sle(mp, xp, bp);
+#ifdef DMTX
+  dsle_gauss(mp, xp, bp);
+#elifdef SMTX
+  ssle_ldu(ap, xp, fp);
+#endif
 
   mtx_fput(fmo, mp);
   vec_fput(fx, xp);

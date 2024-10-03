@@ -14,10 +14,10 @@ int main() {
 
 #ifdef DMTX
   FILE* out = fopen("gauss-ddm.data", "w+");
-  mtx* ap = dmtx_new(N);
+  struct dmtx* ap = dmtx_new(N);
 #elifdef SMTX
   FILE* out = fopen("ldu-ddm.data", "w+");
-  mtx* ap = smtx_new(N, N * (N - 1) / 2);
+  struct smtx* ap = smtx_new(N, N * (N - 1) / 2);
 #endif
 
   struct vec* xxp = vec_new(N);
@@ -30,7 +30,11 @@ int main() {
     vec_seq(xxp);
     mtx_vmlt(ap, xxp, fp);
 
-    sle(ap, xp, fp);
+#ifdef DMTX
+    dsle_gauss(ap, xp, fp);
+#elifdef SMTX
+    ssle_ldu(ap, xp, fp);
+#endif
 
     fprintf(out, "%d\t", k);
 

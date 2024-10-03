@@ -2,6 +2,7 @@ set(SRC
   src/vec.c
   src/dmtx.c
   src/smtx.c
+  src/pmtx.c
   src/dsle.c
   src/ssle.c
 )
@@ -12,6 +13,7 @@ set(HDRS
   include/sle.h
   include/dmtx.h
   include/smtx.h
+  include/pmtx.h
   include/dsle.h
   include/ssle.h
 )

@@ -19,9 +19,9 @@ int main() {
 
   for (int k = 3; k <= K; ++k) {
 #ifdef DMTX
-    mtx* ap = dmtx_new(k);
+    struct dmtx* ap = dmtx_new(k);
 #elifdef SMTX
-    mtx* ap = smtx_new(k, k * (k - 1) / 2);
+    struct smtx* ap = smtx_new(k, k * (k - 1) / 2);
 #endif
 
     struct vec* xxp = vec_new(k);
@@ -33,7 +33,11 @@ int main() {
     vec_seq(xxp);
     mtx_vmlt(ap, xxp, fp);
 
-    sle(ap, xp, fp);
+#ifdef DMTX
+    dsle_gauss(ap, xp, fp);
+#elifdef SMTX
+    ssle_ldu(ap, xp, fp);
+#endif
 
     fprintf(out, "%d\t", k);
 
