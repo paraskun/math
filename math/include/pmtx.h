@@ -8,11 +8,11 @@ struct pmtx {
   real* v;
 
   int n;
-  int r;
-  int i;
+  int rf;
+  int rc;
 };
 
-struct pmtx* pmtx_new(int n, int r, int i);
+struct pmtx* pmtx_new(int n, int rf, int rc);
 
 int pmtx_fget(FILE* f, struct pmtx* mp);
 int pmtx_vmlt(struct pmtx* mp, struct vec* xp, struct vec* bp);
