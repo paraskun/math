@@ -8,7 +8,7 @@ static inline void swap(int* p, int a, int b) {
   if (a == b)
     return;
 
-  real tmp = p[a];
+  int tmp = p[a];
   p[a] = p[b];
   p[b] = tmp;
 }
@@ -28,8 +28,8 @@ void dsle_gauss(struct dmtx* mp, struct vec* yp, struct vec* bp) {
     real max = fabs(mvp[pp[i] * n + i]);
     int maxi = i;
 
-    for (int j = i + 1, rj = pp[i + 1] * n; j < n; ++j, rj += n) {
-      real mij = fabs(mvp[rj + i]);
+    for (int j = i + 1; j < n; ++j) {
+      real mij = fabs(mvp[pp[j] * n + i]);
 
       if (mij > max) {
         max = mij;
@@ -37,23 +37,50 @@ void dsle_gauss(struct dmtx* mp, struct vec* yp, struct vec* bp) {
       }
     }
 
+    printf("max: %d\n", maxi);
+
     swap(pp, i, maxi);
 
-    int ri = pp[i] * n;
+    for (int j = 0; j < mp->n; ++j)
+      printf("%.2lf ", mvp[pp[i] * n + j]);
 
-    for (int j = i + 1, rj = pp[i + 1] * n; j < n; ++j, rj += n) {
-      real k = mvp[rj + i] / mvp[ri + i];
+    putchar('\n');
+
+    for (int j = i + 1; j < n; ++j) {
+      real k = mvp[pp[j] * n + i] / mvp[pp[i] * n + i];
+
+      printf("%lf\n", k);
+
+      for (int c = 0; c <= i; ++c)
+        mvp[pp[j] * n + c] = 0;
 
       for (int c = i + 1; c < n; ++c)
-        mvp[rj + c] -= mvp[ri + c] * k;
+        mvp[pp[j] * n + c] -= mvp[pp[i] * n + c] * k;
 
       bvp[pp[j]] -= bvp[pp[i]] * k;
+
+      for (int k = 0; k < mp->n; ++k)
+        printf("%.2lf ", mvp[pp[j] * n + k]);
+
+      putchar('\n');
     }
   }
 
-  for (int o = 0, i; o < n; ++o) {
-    i = n - 1 - o;
+  FILE* f = fopen("test", "w+");
 
+  dmtx_fput(f, mp);
+
+  for (int i = 0; i < mp->n; ++i)
+    fprintf(f, "%d ", pp[i]);
+
+  fputc('\n', f);
+
+  for (int i = 0; i < mp->n; ++i)
+    fprintf(f, "%.2lf ", bvp[i]);
+
+  fclose(f);
+
+  for (int o = 0, i = n - 1; o < n; ++o, --i) {
     preal sum = bvp[pp[i]];
 
     for (int j = i + 1; j < n; ++j)

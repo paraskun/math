@@ -10,7 +10,7 @@
 #define K 100
 
 int main() {
-  srand(time(NULL));
+  srand(0);
 
 #ifdef DMTX
   FILE* out = fopen("gauss-ddm.data", "w+");

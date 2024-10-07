@@ -36,7 +36,7 @@ int main() {
 #ifdef DMTX
   dsle_gauss(mp, xp, bp);
 #elifdef SMTX
-  ssle_ldu(ap, xp, fp);
+  ssle_ldu(mp, xp, bp);
 #endif
 
   mtx_fput(fmo, mp);

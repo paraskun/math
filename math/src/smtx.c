@@ -29,30 +29,35 @@ void smtx_ddm(struct smtx* mp, int k) {
   real* mdp = mp->d;
   int* mpp = mp->p;
 
-  preal sum = 0;
+  real *sum = malloc(sizeof(real) * n);
 
   mpp[0] = 0;
 
   for (int i = 1, ir = 0; i < n; ++i, ir += i - 1) {
     mpp[i] = ir;
+
     mlp[ir] = -(rand() % 4) - 1;
     mup[ir] = -(rand() % 4) - 1;
 
-    sum += mlp[ir] + mup[ir];
+    sum[i] += mlp[ir];
+    sum[0] += mup[ir];
 
     for (int j = 1; j < i; ++j) {
       mlp[ir + j] = -(rand() % 5);
       mup[ir + j] = -(rand() % 5);
 
-      sum += mlp[ir + j] + mup[ir + j];
+      sum[i] += mlp[ir + j];
+      sum[j] += mup[ir + j]; 
     }
   }
 
   mpp[n] = n * (n - 1) / 2;
-  mdp[0] = 1.0 / pow(10.0, k) - sum;
+  mdp[0] = 1.0 / pow(10.0, k) - sum[0];
 
   for (int i = 1; i < n; ++i)
-    mdp[i] = -sum;
+    mdp[i] = -sum[i];
+
+  free(sum);
 }
 
 void smtx_hlb(struct smtx* mp) {
