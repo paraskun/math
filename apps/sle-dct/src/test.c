@@ -4,18 +4,18 @@
 #include <stdio.h>
 
 int main() {
-  FILE* fdms = fopen("dms.in", "r");
+  FILE* fdms = fopen("data/dms.in", "r");
 
 #ifdef SMTX
   FILE* fmtx = fopen("smtx.in", "r");
   FILE* fmo = fopen("smtx.out", "w+");
 #elifdef DMTX
-  FILE* fmtx = fopen("dmtx.in", "r");
-  FILE* fmo = fopen("dmtx.out", "w+");
+  FILE* fmtx = fopen("data/dmtx.in", "r");
+  FILE* fmo = fopen("data/dmtx.out", "w+");
 #endif
 
-  FILE* fb = fopen("b.in", "r");
-  FILE* fx = fopen("x.out", "w+");
+  FILE* fb = fopen("data/b.in", "r");
+  FILE* fx = fopen("data/x.out", "w+");
 
 #ifdef SMTX
   int n, s;

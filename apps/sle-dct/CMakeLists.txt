@@ -1,13 +1,13 @@
-set(MTX DMTX)
+set(MTX SMTX)
 
-add_executable(sle-ddm src/sle_ddm.c)
-add_executable(sle-hlb src/sle_hlb.c)
-add_executable(sle-test src/sle_test.c)
+add_executable(ddm src/ddm.c)
+add_executable(hlb src/hlb.c)
+add_executable(test src/test.c)
 
-target_link_libraries(sle-ddm PUBLIC math)
-target_link_libraries(sle-hlb PUBLIC math)
-target_link_libraries(sle-test PUBLIC math)
+target_link_libraries(ddm PUBLIC math)
+target_link_libraries(hlb PUBLIC math)
+target_link_libraries(test PUBLIC math)
 
-target_compile_definitions(sle-ddm PUBLIC ${MTX})
-target_compile_definitions(sle-hlb PUBLIC ${MTX})
-target_compile_definitions(sle-test PUBLIC ${MTX})
+target_compile_definitions(ddm PUBLIC ${MTX})
+target_compile_definitions(hlb PUBLIC ${MTX})
+target_compile_definitions(test PUBLIC ${MTX})

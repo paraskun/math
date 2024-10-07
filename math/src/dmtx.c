@@ -73,7 +73,7 @@ void dmtx_fget(FILE* f, struct dmtx* mp) {
   real* vp = mp->v;
 
   for (int i = 0; i < n * n; ++i)
-    fscanf(f, "%lf", &vp[i]);
+    fscanf(f, FMT, &vp[i]);
 }
 
 void dmtx_fput(FILE* f, struct dmtx* mp) {
@@ -123,10 +123,12 @@ void dmtx_vmlt(struct dmtx* ap, struct vec* bp, struct vec* cp) {
   for (int i = 0; i < ap->n; ++i) {
     int ir = i * n;
 
-    cvp[i] = 0.0;
+    preal sum = 0.0;
 
     for (int j = 0; j < ap->n; ++j)
-      cvp[i] += avp[ir + j] * bvp[j];
+      sum += avp[ir + j] * bvp[j];
+
+    cvp[i] = sum;
   }
 }
 

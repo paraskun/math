@@ -41,7 +41,7 @@ void vec_fget(FILE* f, struct vec* vp) {
   real* vvp = vp->v;
 
   for (int i = 0; i < n; ++i)
-    fscanf(f, "%lf", &vvp[i]);
+    fscanf(f, FMT, &vvp[i]);
 }
 
 void vec_fput(FILE* f, struct vec* vp) {
@@ -96,11 +96,11 @@ void vec_mlt(struct vec* ap, struct vec* bp, real* rp) {
   *rp = s;
 }
 
-void vec_nrm(struct vec* vp, real* rp) {
+void vec_nrm(struct vec* vp, double* rp) {
   int n = vp->n;
 
   real* vvp = vp->v;
-  real s = 0;
+  preal s = 0;
 
 #ifdef OMP_THREADS_NUM
 #pragma omp parallel for reduction(+ : s) num_threads(OMP_THREADS_NUM)

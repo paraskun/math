@@ -12,8 +12,8 @@
     ) (f, X)
 
 #define mtx_fput(f, X) _Generic((X),    \
-    struct dmtx *: dmtx_fget,           \
-    struct smtx *: smtx_fget            \
+    struct dmtx *: dmtx_fput,           \
+    struct smtx *: smtx_fput            \
     ) (f, X)
 
 #define mtx_ddm(X, k) _Generic((X),     \

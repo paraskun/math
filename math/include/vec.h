@@ -85,7 +85,7 @@ void vec_mlt(struct vec* ap, struct vec* bp, real* rp);
  * @param vp - operand;
  * @param rp - result;
  */
-void vec_nrm(struct vec* vp, real* rp);
+void vec_nrm(struct vec* vp, double* rp);
 
 /**
  * @brief Deallocate vector memory.

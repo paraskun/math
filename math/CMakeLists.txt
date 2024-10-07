@@ -18,13 +18,15 @@ set(HDRS
   include/ssle.h
 )
 
-set(MATH_REAL double)   # default
-set(MATH_PREAL double)  # default
+set(MATH_REAL "float")
+set(MATH_PREAL "double")
+set(MATH_FMT "\"%f\"")
 
 add_library(math ${SRC} ${HDRS})
 target_include_directories(math PUBLIC include/)
 
-target_compile_definitions(math PUBLIC real=${MATH_REAL})
+target_compile_definitions(math PUBLIC real=${MATH_REAL} FMT=${MATH_FMT})
+target_compile_definitions(math PUBLIC FMT=${MATH_FMT})
 target_compile_definitions(math PUBLIC preal=${MATH_PREAL})
 
 target_compile_options(math PUBLIC ${COMPILE_OPTIONS})

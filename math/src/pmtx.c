@@ -20,7 +20,7 @@ int pmtx_fget(FILE* f, struct pmtx* mp) {
   fseek(f, mp->rf * WIDTH * mp->n, SEEK_SET);
 
   for (int i = 0; i < mp->n * mp->rc; ++i)
-    if (fscanf(f, "%lf", &mp->v[i]) != 1)
+    if (fscanf(f, FMT, &mp->v[i]) != 1)
       return -1;
 
   return 0;

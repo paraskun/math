@@ -29,7 +29,9 @@ void smtx_ddm(struct smtx* mp, int k) {
   real* mdp = mp->d;
   int* mpp = mp->p;
 
-  real *sum = malloc(sizeof(real) * n);
+  real* sum = malloc(sizeof(preal) * n);
+
+  memset(sum, 0, sizeof(preal) * n);
 
   mpp[0] = 0;
 
@@ -47,7 +49,7 @@ void smtx_ddm(struct smtx* mp, int k) {
       mup[ir + j] = -(rand() % 5);
 
       sum[i] += mlp[ir + j];
-      sum[j] += mup[ir + j]; 
+      sum[j] += mup[ir + j];
     }
   }
 
@@ -79,7 +81,7 @@ void smtx_hlb(struct smtx* mp) {
     mdp[i] = 1.0 / (i2 + 1.0);
 
     for (int j = 0; j < i; ++j) {
-      real v = 1.0 / (i + j + 1.0);
+      preal v = 1.0 / (i + j + 1.0);
 
       mlp[ir + j] = v;
       mup[ir + j] = v;
@@ -102,13 +104,13 @@ void smtx_fget(FILE* f, struct smtx* mp) {
     fscanf(f, "%d", &mpp[i]);
 
   for (int i = 0; i < n; ++i)
-    fscanf(f, "%lf", &mdp[i]);
+    fscanf(f, FMT, &mdp[i]);
 
   for (int i = 0; i < s; ++i)
-    fscanf(f, "%lf", &mlp[i]);
+    fscanf(f, FMT, &mlp[i]);
 
   for (int i = 0; i < s; ++i)
-    fscanf(f, "%lf", &mup[i]);
+    fscanf(f, FMT, &mup[i]);
 }
 
 void smtx_vmlt(struct smtx* ap, struct vec* bp, struct vec* rp) {
@@ -151,17 +153,17 @@ void smtx_fput(FILE* f, struct smtx* mp) {
   fputc('\n', f);
 
   for (int i = 0; i < n; ++i)
-    fprintf(f, "%.7e ", mdp[i]);
+    fprintf(f, "%.4e ", mdp[i]);
 
   fputc('\n', f);
 
   for (int i = 0; i < s; ++i)
-    fprintf(f, "%.7e ", mlp[i]);
+    fprintf(f, "%.4e ", mlp[i]);
 
   fputc('\n', f);
 
   for (int i = 0; i < s; ++i)
-    fprintf(f, "%.7e ", mup[i]);
+    fprintf(f, "%.4e ", mup[i]);
 }
 
 void smtx_ldu(struct smtx* mp) {
