@@ -39,23 +39,24 @@ void dmtx_ddm(struct dmtx* mp, int k) {
   int n = mp->n;
   real* vp = mp->v;
 
-  real sum = 0;
+  for (int i = 0, r = 0; i < n; ++i, r += n) {
+    real sum = 0;
 
-  for (int i = 0, r = 0; i < n; ++i, r += n)
-    for (int j = 0, c = 0; j < i; ++j, c += n) {
-      int e = -(rand() % 5);
-      sum += e;
-      vp[r + j] = e;
-
-      e = -(rand() % 5);
-      sum += e;
-      vp[c + i] = e;
+    for (int j = 0; j < i; ++j) {
+      vp[r + j] = -(rand() % 5);
+      sum += vp[r + j];
     }
 
-  vp[0] = -sum + 1 / pow(10, k);
+    for (int j = i + 1; j < n; ++j) {
+      vp[r + j] = -(rand() % 5);
+      sum += vp[r + j];
+    }
 
-  for (int i = 1, r = n; i < n; ++i, r += n)
-    vp[r + i] = -sum;
+    if (i == 0)
+      vp[r + i] = -sum + 1 / pow(10, k);
+    else
+      vp[r + i] = -sum;
+  }
 }
 
 void dmtx_hlb(struct dmtx* mp) {
