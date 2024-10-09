@@ -1,7 +1,7 @@
+#include <errno.h>
 #include <mpi.h>
 #include <stdlib.h>
 #include <time.h>
-#include <unistd.h>
 #include <vec.h>
 
 #define N 100000
@@ -12,64 +12,59 @@
 #define ANY MPI_ANY_SOURCE
 #define ROOT 0
 
-void recv(int pc);
-void send(int id);
-
 int main(int argc, char* argv[argc]) {
-  int e;
+  if ((errno = MPI_Init(&argc, &argv)))
+    goto err;
+
   int pc;
   int id;
 
-  if ((e = MPI_Init(&argc, &argv))) {
-    MPI_Abort(COM, e);
-    exit(-1);
-  }
+  if ((errno = MPI_Comm_size(COM, &pc)))
+    goto err;
 
-  MPI_Comm_size(COM, &pc);
-  MPI_Comm_rank(COM, &id);
+  if ((errno = MPI_Comm_rank(COM, &id)))
+    goto err;
+
+  double nrm;
 
   if (id == ROOT)
-    recv(pc);
-  else
-    send(id);
+    for (int i = 0; i < pc - 1; ++i) {
+      MPI_Status stat;
 
-  MPI_Finalize();
+      if ((errno = MPI_Recv(&nrm, 1, DBL, ANY, TAG, COM, &stat)))
+        goto err;
 
-  return 0;
-}
+      time_t epoch = time(0);
+      char buf[64];
 
-void recv(int pc) {
-  MPI_Status stat;
-  double nrm;
+      strftime(buf, 64, "%T", localtime(&epoch));
+      printf("%lf [%d] --- %s\n", nrm, stat.MPI_SOURCE, buf);
+    }
+  else {
+    srand(time(NULL) + id);
 
-  char buf[64];
-  time_t epoch;
+    struct vec* v = vec_new(N);
 
-  for (int i = 0, e; i < pc - 1; ++i) {
-    if ((e = MPI_Recv(&nrm, 1, DBL, ANY, TAG, COM, &stat))) {
-      MPI_Abort(COM, e);
-      exit(-1);
+    if (!v)
+      goto err;
+
+    vec_rnd(v, 100);
+    vec_nrm(v, &nrm);
+
+    if ((errno = MPI_Send(&nrm, 1, DBL, ROOT, TAG, COM))) {
+      vec_free(v);
+      goto err;
     }
 
-    epoch = time(0);
-
-    strftime(buf, 64, "%T", localtime(&epoch));
-    printf("%lf [%d] --- %s\n", nrm, stat.MPI_SOURCE, buf);
+    vec_free(v);
   }
-}
 
-void send(int id) {
-  srand(time(NULL) + id);
+  if ((errno = MPI_Finalize()))
+    goto err;
 
-  struct vec* v = vec_new(N);
-  double nrm;
-  int e;
+  return 0;
 
-  vec_rnd(v, 100);
-  vec_nrm(v, &nrm);
-
-  if ((e = MPI_Send(&nrm, 1, DBL, ROOT, TAG, COM))) {
-    MPI_Abort(COM, e);
-    exit(-1);
-  }
+err:
+  MPI_Abort(COM, errno);
+  return -1;
 }

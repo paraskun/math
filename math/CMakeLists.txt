@@ -18,9 +18,9 @@ set(HDRS
   include/ssle.h
 )
 
-set(MATH_REAL "float")
+set(MATH_REAL "double")
 set(MATH_PREAL "double")
-set(MATH_FMT "\"%f\"")
+set(MATH_FMT "\"%lf\"")
 
 add_library(math ${SRC} ${HDRS})
 target_include_directories(math PUBLIC include/)

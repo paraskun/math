@@ -36,20 +36,26 @@ void vec_seq(struct vec* vp) {
     vvp[i] = i + 1;
 }
 
-void vec_fget(FILE* f, struct vec* vp) {
+int vec_fget(FILE* f, struct vec* vp) {
   int n = vp->n;
   real* vvp = vp->v;
 
   for (int i = 0; i < n; ++i)
-    fscanf(f, FMT, &vvp[i]);
+    if (fscanf(f, FMT, &vvp[i]) != 1)
+      return -1;
+
+  return 0;
 }
 
-void vec_fput(FILE* f, struct vec* vp) {
+int vec_fput(FILE* f, struct vec* vp) {
   int n = vp->n;
   real* vvp = vp->v;
 
   for (int i = 0; i < n; ++i)
-    fprintf(f, "%.3e ", vvp[i]);
+    if (fprintf(f, "%.3e ", vvp[i]) < 0)
+      return -1;
+
+  return 0;
 }
 
 void vec_add(struct vec* ap, struct vec* bp, struct vec* rp) {

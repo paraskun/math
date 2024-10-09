@@ -37,7 +37,7 @@ void vec_seq(struct vec* vp);
  * @param fn - file name;
  * @param vp - vector to fill;
  */
-void vec_fget(FILE* f, struct vec* vp);
+int vec_fget(FILE* f, struct vec* vp);
 
 /**
  * @brief Write the values from the given vector to a file.
@@ -45,7 +45,7 @@ void vec_fget(FILE* f, struct vec* vp);
  * @param fn - file name;
  * @param vp - vector to write;
  */
-void vec_fput(FILE* f, struct vec* vp);
+int vec_fput(FILE* f, struct vec* vp);
 
 /**
  * @brief Calculate the sum of two vectors.

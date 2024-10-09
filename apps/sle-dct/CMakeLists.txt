@@ -1,4 +1,4 @@
-set(MTX SMTX)
+set(MTX DMTX)
 
 add_executable(ddm src/ddm.c)
 add_executable(hlb src/hlb.c)

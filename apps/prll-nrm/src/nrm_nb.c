@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <mpi.h>
 #include <stdlib.h>
 #include <time.h>
@@ -11,85 +12,109 @@
 #define COM MPI_COMM_WORLD
 #define ROOT 0
 
-void recv(int pc);
-void send(int id);
-
 int main(int argc, char* argv[argc]) {
-  int e;
+  if ((errno = MPI_Init(&argc, &argv)))
+    goto err;
+
   int pc;
   int id;
 
-  if ((e = MPI_Init(&argc, &argv))) {
-    MPI_Abort(COM, e);
-    exit(-1);
+  if ((errno = MPI_Comm_size(COM, &pc)))
+    goto err;
+
+  if ((errno = MPI_Comm_rank(COM, &id)))
+    goto err;
+
+  if (id == ROOT) {
+    MPI_Request* req = malloc(sizeof(MPI_Request) * (pc - 1));
+
+    if (!req)
+      goto err;
+
+    double* nrm = malloc(sizeof(double) * (pc - 1));
+
+    if (!nrm) {
+      free(req);
+      goto err;
+    }
+
+    int* f = malloc(sizeof(int) * (pc - 1));
+
+    if (!f) {
+      free(req);
+      free(nrm);
+      goto err;
+    }
+
+    for (int i = 0; i < pc - 1; ++i) {
+      f[i] = 0;
+
+      if ((errno = MPI_Irecv(&nrm[i], 1, DBL, i + 1, TAG, COM, &req[i]))) {
+        free(req);
+        free(nrm);
+        free(f);
+
+        goto err;
+      }
+    }
+
+    int s = 0;
+
+    while (s != pc - 1)
+      for (int i = 0; i < pc - 1; ++i)
+        if (!f[i]) {
+          if ((errno = MPI_Test(&req[i], &f[i], NULL))) {
+            free(req);
+            free(nrm);
+            free(f);
+
+            goto err;
+          }
+
+          if (f[i]) {
+            s += 1;
+
+            char buf[64];
+            time_t epoch = time(0);
+
+            strftime(buf, 64, "%T", localtime(&epoch));
+            printf("%lf [%d] --- %s\n", nrm[i], i + 1, buf);
+          }
+        }
+
+    free(req);
+    free(nrm);
+    free(f);
+  } else {
+    srand(time(NULL) + id);
+
+    struct vec* v = vec_new(N);
+
+    if (!v)
+      goto err;
+
+    double nrm;
+
+    vec_rnd(v, 100);
+    vec_nrm(v, &nrm);
+
+    if (id == 1)
+      sleep(10);
+
+    if ((errno = MPI_Send(&nrm, 1, DBL, ROOT, TAG, COM))) {
+      vec_free(v);
+      goto err;
+    }
+
+    vec_free(v);
   }
 
-  MPI_Comm_size(COM, &pc);
-  MPI_Comm_rank(COM, &id);
-
-  if (id == ROOT)
-    recv(pc);
-  else
-    send(id);
-
-  MPI_Finalize();
+  if ((errno = MPI_Finalize()))
+    goto err;
 
   return 0;
-}
 
-void recv(int pc) {
-  int e;
-
-  MPI_Request req[pc - 1];
-  double nrm[pc - 1];
-  int f[pc - 1];
-
-  for (int i = 0; i < pc - 1; ++i) {
-    f[i] = 0;
-
-    if ((e = MPI_Irecv(&nrm[i], 1, DBL, i + 1, TAG, COM, &req[i]))) {
-      MPI_Abort(COM, e);
-      exit(-1);
-    }
-  }
-
-  int s = 0;
-  time_t epoch;
-  char buf[64];
-
-  while (s != pc - 1)
-    for (int i = 0; i < pc - 1; ++i)
-      if (!f[i]) {
-        if ((e = MPI_Test(&req[i], &f[i], NULL))) {
-          MPI_Abort(COM, e);
-          exit(-1);
-        }
-
-        if (f[i]) {
-          s += 1;
-          epoch = time(0);
-
-          strftime(buf, 64, "%T", localtime(&epoch));
-          printf("%lf [%d] --- %s\n", nrm[i], i + 1, buf);
-        }
-      }
-}
-
-void send(int id) {
-  srand(time(NULL) + id);
-
-  struct vec* v = vec_new(N);
-  double nrm;
-  int e;
-
-  vec_rnd(v, 100);
-  vec_nrm(v, &nrm);
-
-  if (id == 1)
-    sleep(10);
-
-  if ((e = MPI_Send(&nrm, 1, DBL, ROOT, TAG, COM))) {
-    MPI_Abort(COM, e);
-    exit(-1);
-  }
+err:
+  MPI_Abort(COM, errno);
+  return -1;
 }

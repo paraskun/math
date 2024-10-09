@@ -5,21 +5,21 @@
 
 #define WIDTH 10
 
-struct pmtx* pmtx_new(int n, int rf, int rc) {
+struct pmtx* pmtx_new(int n, int s, int c) {
   struct pmtx* mp = malloc(sizeof(struct pmtx));
 
-  mp->v = malloc(sizeof(real) * n * rc);
+  mp->v = malloc(sizeof(real) * n * c);
   mp->n = n;
-  mp->rf = rf;
-  mp->rc = rc;
+  mp->s = s;
+  mp->c = c;
 
   return mp;
 }
 
 int pmtx_fget(FILE* f, struct pmtx* mp) {
-  fseek(f, mp->rf * WIDTH * mp->n, SEEK_SET);
+  fseek(f, mp->s * mp->n * WIDTH, SEEK_SET);
 
-  for (int i = 0; i < mp->n * mp->rc; ++i)
+  for (int i = 0; i < mp->n * mp->c; ++i)
     if (fscanf(f, FMT, &mp->v[i]) != 1)
       return -1;
 
@@ -32,13 +32,13 @@ int pmtx_vmlt(struct pmtx* mp, struct vec* xp, struct vec* bp) {
 #ifdef OMP_THREADS_NUM
 #pragma omp parallel for num_threads(OMP_THREADS_NUM)
 #endif  // OMP
-  for (int i = mp->rf; i < mp->rf + mp->rc; ++i) {
+  for (int i = mp->s; i < mp->s + mp->c; ++i) {
     bp->v[i] = 0;
 
     for (int j = 0; j < mp->n; ++j)
-      bp->v[i] += mp->v[r * mp->n + j] * xp->v[i];
+      bp->v[i] += mp->v[r + j] * xp->v[j];
 
-    r += 1;
+    r += mp->n;
   }
 
   return 0;
