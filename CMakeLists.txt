@@ -1,10 +1,14 @@
 cmake_minimum_required(VERSION 3.10)
-project(algo)
+project(math C)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 set(CMAKE_BUILD_TYPE Debug)
 set(C_STANDARD C23)
-set(COMPILE_OPTIONS -Wall -Werror -Wextra -Wpedantic -std=c23)
 
-add_subdirectory(math)
-add_subdirectory(apps)
+add_compile_options(-Wall -Werror -Wextra -Wpedantic -std=c23)
+
+add_subdirectory(vec)
+add_subdirectory(ode)
+add_subdirectory(pde)
+
+# add_subdirectory(app)

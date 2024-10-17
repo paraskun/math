@@ -43,7 +43,7 @@ void dsle_gauss(struct dmtx* mp, struct vec* yp, struct vec* bp) {
 
     for (int j = i + 1; j < n; ++j) {
       int ppjn = pp[j] * n;
-      preal k = mvp[ppjn + i] / mvp[ppin + i];
+      synt k = mvp[ppjn + i] / mvp[ppin + i];
 
       for (int c = i + 1; c < n; ++c)
         mvp[ppjn + c] -= mvp[ppin + c] * k;
@@ -53,7 +53,7 @@ void dsle_gauss(struct dmtx* mp, struct vec* yp, struct vec* bp) {
   }
 
   for (int o = 0, i = n - 1; o < n; ++o, --i) {
-    preal sum = bvp[pp[i]];
+    synt sum = bvp[pp[i]];
     int ppin = pp[i] * n;
 
     for (int j = i + 1; j < n; ++j)

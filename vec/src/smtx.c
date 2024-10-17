@@ -29,9 +29,9 @@ void smtx_ddm(struct smtx* mp, int k) {
   real* mdp = mp->d;
   int* mpp = mp->p;
 
-  real* sum = malloc(sizeof(preal) * n);
+  real* sum = malloc(sizeof(synt) * n);
 
-  memset(sum, 0, sizeof(preal) * n);
+  memset(sum, 0, sizeof(synt) * n);
 
   mpp[0] = 0;
 
@@ -81,7 +81,7 @@ void smtx_hlb(struct smtx* mp) {
     mdp[i] = 1.0 / (i2 + 1.0);
 
     for (int j = 0; j < i; ++j) {
-      preal v = 1.0 / (i + j + 1.0);
+      synt v = 1.0 / (i + j + 1.0);
 
       mlp[ir + j] = v;
       mup[ir + j] = v;
@@ -176,7 +176,7 @@ void smtx_ldu(struct smtx* mp) {
 
   for (int i = 0; i < n; ++i) {
     int ic = mpp[i + 1] - mpp[i];
-    preal dsum = mdp[i];
+    synt dsum = mdp[i];
 
     for (int k = 1; k <= ic; ++k)
       dsum -= mlp[mpp[i] + ic - k] * mup[mpp[i] + ic - k] * mdp[i - k];
@@ -187,8 +187,8 @@ void smtx_ldu(struct smtx* mp) {
       int jc = mpp[j + 1] - mpp[j] - j + i;
 
       if (jc > -1) {
-        preal lsum = mlp[mpp[j] + jc];
-        preal usum = mup[mpp[j] + jc];
+        synt lsum = mlp[mpp[j] + jc];
+        synt usum = mup[mpp[j] + jc];
 
         for (int k = 1; k <= min(jc, ic); ++k) {
           lsum -= mlp[mpp[j] + jc - k] * mup[mpp[i] + ic - k] * mdp[i - k];

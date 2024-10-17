@@ -1,4 +1,5 @@
-#include <dmtx.h>
+#include <mtx.h>
+
 #include <math.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -123,7 +124,7 @@ void dmtx_vmlt(struct dmtx* ap, struct vec* bp, struct vec* cp) {
   for (int i = 0; i < ap->n; ++i) {
     int ir = i * n;
 
-    preal sum = 0.0;
+    synt sum = 0.0;
 
     for (int j = 0; j < ap->n; ++j)
       sum += avp[ir + j] * bvp[j];

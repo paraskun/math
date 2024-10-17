@@ -1,8 +1,9 @@
 #ifndef PMTX_H
 #define PMTX_H
 
-#include <stdio.h>
 #include <vec.h>
+
+#include <stdio.h>
 
 struct pmtx {
   real* v;

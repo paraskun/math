@@ -1,9 +1,10 @@
 #ifndef SMTX_H
 #define SMTX_H
 
+#include <vec.h>
+
 #include <stddef.h>
 #include <stdio.h>
-#include <vec.h>
 
 struct smtx {
   real* d;

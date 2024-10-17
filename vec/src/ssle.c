@@ -1,5 +1,6 @@
 #include <smtx.h>
 #include <ssle.h>
+
 #include <string.h>
 
 static void ssle_l(struct smtx* a, struct vec* y, struct vec* b) {
@@ -11,7 +12,7 @@ static void ssle_l(struct smtx* a, struct vec* y, struct vec* b) {
   real* bp = b->v;
 
   for (int i = 0; i < n; ++i) {
-    preal sum = 0;
+    synt sum = 0;
 
     int k0 = pp[i];
     int k1 = pp[i + 1];
@@ -32,7 +33,7 @@ static void ssle_d(struct smtx* a, struct vec* y, struct vec* b) {
   real* bp = b->v;
 
   for (int i = 0; i < n; ++i) {
-    preal e = bp[i] / dp[i];
+    synt e = bp[i] / dp[i];
     yp[i] = e;
   }
 }

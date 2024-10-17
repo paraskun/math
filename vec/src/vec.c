@@ -106,7 +106,7 @@ void vec_nrm(struct vec* vp, double* rp) {
   int n = vp->n;
 
   real* vvp = vp->v;
-  preal s = 0;
+  synt s = 0;
 
 #ifdef OMP_THREADS_NUM
 #pragma omp parallel for reduction(+ : s) num_threads(OMP_THREADS_NUM)
