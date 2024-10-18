@@ -1,5 +1,5 @@
-#include <dmtx.h>
-#include <dsle.h>
+#include <mtx_dns.h>
+#include <sle_dns.h>
 
 #include <math.h>
 #include <stdlib.h>

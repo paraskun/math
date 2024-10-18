@@ -1,6 +1,6 @@
 #include <errno.h>
 #include <mpi.h>
-#include <stdlib.h>
+#include <stdarg.h>
 #include <time.h>
 #include <vec.h>
 
@@ -11,6 +11,21 @@
 #define COM MPI_COMM_WORLD
 #define ANY MPI_ANY_SOURCE
 #define ROOT 0
+
+void trace(const char* fmt, ...) {
+  time_t t = time(0);
+  char tb[25];
+  va_list args;
+
+  strftime(tb, 25, "%F %T", localtime(&t));
+  printf("[%s]: ", tb);
+
+  va_start(args, fmt);
+  vprintf(fmt, args);
+  va_end(args);
+
+  putchar('\n');
+}
 
 int main(int argc, char* argv[argc]) {
   if ((errno = MPI_Init(&argc, &argv)))
@@ -34,21 +49,15 @@ int main(int argc, char* argv[argc]) {
       if ((errno = MPI_Recv(&nrm, 1, DBL, ANY, TAG, COM, &stat)))
         goto err;
 
-      time_t epoch = time(0);
-      char buf[64];
-
-      strftime(buf, 64, "%T", localtime(&epoch));
-      printf("%lf [%d] --- %s\n", nrm, stat.MPI_SOURCE, buf);
+      trace("%d -> %lf", stat.MPI_SOURCE, nrm);
     }
   else {
-    srand(time(NULL) + id);
-
     struct vec* v = vec_new(N);
 
     if (!v)
       goto err;
 
-    vec_rnd(v, 100);
+    vec_seq(v, id);
     vec_nrm(v, &nrm);
 
     if ((errno = MPI_Send(&nrm, 1, DBL, ROOT, TAG, COM))) {

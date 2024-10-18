@@ -25,15 +25,15 @@ void vec_rnd(struct vec* vp, int u) {
     vvp[i] = rand() % (u + 1);
 }
 
-void vec_seq(struct vec* vp) {
+void vec_seq(struct vec* vp, int s) {
   int n = vp->n;
   real* vvp = vp->v;
 
 #ifdef OMP_THREADS_NUM
 #pragma omp parallel for num_threads(OMP_THREADS_NUM)
 #endif  // OMP
-  for (int i = 0; i < n; ++i)
-    vvp[i] = i + 1;
+  for (int i = 0, v = s; i < n; ++i, ++v)
+    vvp[i] = v;
 }
 
 int vec_fget(FILE* f, struct vec* vp) {

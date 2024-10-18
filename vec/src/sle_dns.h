@@ -1,7 +1,7 @@
 #ifndef DSLE_H
 #define DSLE_H
 
-#include <dmtx.h>
+#include <mtx_dns.h>
 #include <vec.h>
 
 /**

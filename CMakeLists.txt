@@ -11,4 +11,4 @@ add_subdirectory(vec)
 add_subdirectory(ode)
 add_subdirectory(pde)
 
-# add_subdirectory(app)
+add_subdirectory(app)

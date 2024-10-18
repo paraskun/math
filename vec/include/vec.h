@@ -28,8 +28,9 @@ void vec_rnd(struct vec* vp, int u);
  * @brief Convert given vector to a vector with sequential values started from zero.
  *
  * @param vp - vector to convert;
+ * @param s - start (including);
  */
-void vec_seq(struct vec* vp);
+void vec_seq(struct vec* vp, int s);
 
 /**
  * @brief Populate given vector with values from the file.

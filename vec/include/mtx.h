@@ -1,9 +1,9 @@
 #ifndef MTX_H
 #define MTX_H
 
-#include <dmtx.h>
-#include <pmtx.h>
-#include <smtx.h>
+#include <mtx_dns.h>
+#include <mtx_pfl.h>
+#include <mtx_pie.h>
 
 #define mtx_fget(f, X)          \
   _Generic((X),                 \
@@ -11,8 +11,11 @@
       struct smtx *: smtx_fget, \
       struct pmtx *: pmtx_fget)(f, X)
 
-#define mtx_fput(f, X) \
-  _Generic((X), struct dmtx *: dmtx_fput, struct smtx *: smtx_fput)(f, X)
+#define mtx_fput(f, X)          \
+  _Generic((X),                 \
+      struct dmtx *: dmtx_fput, \
+      struct smtx *: smtx_fput, \
+      struct pmtx *: pmtx_fput)(f, X)
 
 #define mtx_ddm(X, k) \
   _Generic((X), struct dmtx *: dmtx_ddm, struct smtx *: smtx_ddm)(X, k)

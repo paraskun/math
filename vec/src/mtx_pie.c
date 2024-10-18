@@ -1,4 +1,4 @@
-#include <pmtx.h>
+#include <mtx_pie.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,6 +22,26 @@ int pmtx_fget(FILE* f, struct pmtx* mp) {
   for (int i = 0; i < mp->n * mp->c; ++i)
     if (fscanf(f, FMT, &mp->v[i]) != 1)
       return -1;
+
+  return 0;
+}
+
+int pmtx_fput(FILE* f, struct pmtx* mp) {
+  fseek(f, mp->s * mp->n * WIDTH, SEEK_SET);
+
+  for (int i = mp->s, k = 0; i < mp->s + mp->c; ++i) {
+    for (int j = 0; j < mp->n; ++j, ++k) {
+      fprintf(f, "%9lf", mp->v[k]);
+      fputc(j == mp->n - 1 ? '\n' : ' ', f);
+    }
+  }
+
+  return 0;
+}
+
+int pmtx_seq(struct pmtx* mp, int s) {
+  for (int i = 0, v = s; i < mp->c * mp->n; ++i, ++v)
+    mp->v[i] = v;
 
   return 0;
 }
