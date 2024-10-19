@@ -8,10 +8,14 @@ struct mtx_dg7 {
   int m;
   int k;
 
-  real** dpp;
+  real* dp;
+  real** lpp;
+  real** upp;
+
+  int* s;
 };
 
-struct mtx_dg7* mtx_dg7_new(int n, int m);
+struct mtx_dg7* mtx_dg7_new(int n, int m, int k);
 
 int mtx_dg7_fget(FILE* f, struct mtx_dg7* mp);
 int mtx_dg7_fput(FILE* f, struct mtx_dg7* mp);
