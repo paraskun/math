@@ -12,13 +12,13 @@ int main() {
   srand(0);
 
 #ifdef DMTX
-  FILE* data = fopen("data/gauss-dmtx-ddm.data", "w+");
-  FILE* mout = fopen("data/dmtx-ddm.out", "w+");
-  struct dmtx* ap = dmtx_new(N);  // A^k
+  FILE* data = fopen("data/gauss-mtx_dns-ddm.data", "w+");
+  FILE* mout = fopen("data/mtx_dns-ddm.out", "w+");
+  struct mtx_dns* ap = mtx_dns_new(N);  // A^k
 #elifdef SMTX
-  FILE* data = fopen("data/ldu-smtx-ddm.data", "w+");
-  FILE* mout = fopen("data/smtx-ddm.out", "w+");
-  struct smtx* ap = smtx_new(N, N * (N - 1) / 2);
+  FILE* data = fopen("data/ldu-mtx_pfl-ddm.data", "w+");
+  FILE* mout = fopen("data/mtx_pfl-ddm.out", "w+");
+  struct mtx_pfl* ap = mtx_pfl_new(N, N * (N - 1) / 2);
 #endif
 
   struct vec* yp = vec_new(N);  // x*

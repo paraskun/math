@@ -7,11 +7,11 @@ int main() {
   FILE* fdms = fopen("data/dms.in", "r");
 
 #ifdef SMTX
-  FILE* fmtx = fopen("smtx.in", "r");
-  FILE* fmo = fopen("smtx.out", "w+");
+  FILE* fmtx = fopen("mtx_pfl.in", "r");
+  FILE* fmo = fopen("mtx_pfl.out", "w+");
 #elifdef DMTX
-  FILE* fmtx = fopen("data/dmtx.in", "r");
-  FILE* fmo = fopen("data/dmtx.out", "w+");
+  FILE* fmtx = fopen("data/mtx_dns.in", "r");
+  FILE* fmo = fopen("data/mtx_dns.out", "w+");
 #endif
 
   FILE* fb = fopen("data/b.in", "r");
@@ -20,11 +20,11 @@ int main() {
 #ifdef SMTX
   int n, s;
   fscanf(fdms, "%d %d", &n, &s);
-  struct smtx* mp = smtx_new(n, s);
+  struct mtx_pfl* mp = mtx_pfl_new(n, s);
 #elifdef DMTX
   int n;
   fscanf(fdms, "%d", &n);
-  struct dmtx* mp = dmtx_new(n);
+  struct mtx_dns* mp = mtx_dns_new(n);
 #endif
 
   struct vec* bp = vec_new(n);

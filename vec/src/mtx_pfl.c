@@ -8,8 +8,8 @@
 
 #define min(x, y) (((x) < (y)) ? (x) : (y))
 
-struct smtx* smtx_new(int n, int s) {
-  struct smtx* mp = malloc(sizeof(struct smtx));
+struct mtx_pfl* mtx_pfl_new(int n, int s) {
+  struct mtx_pfl* mp = malloc(sizeof(struct mtx_pfl));
 
   mp->n = n;
   mp->s = s;
@@ -21,7 +21,7 @@ struct smtx* smtx_new(int n, int s) {
   return mp;
 }
 
-void smtx_ddm(struct smtx* mp, int k) {
+void mtx_pfl_ddm(struct mtx_pfl* mp, int k) {
   int n = mp->n;
 
   real* mlp = mp->l;
@@ -62,7 +62,7 @@ void smtx_ddm(struct smtx* mp, int k) {
   free(sum);
 }
 
-void smtx_hlb(struct smtx* mp) {
+void mtx_pfl_hlb(struct mtx_pfl* mp) {
   int n = mp->n;
   int ir = 0;
 
@@ -91,7 +91,7 @@ void smtx_hlb(struct smtx* mp) {
   mpp[n] = n * (n - 1) / 2;
 }
 
-void smtx_fget(FILE* f, struct smtx* mp) {
+void mtx_pfl_fget(FILE* f, struct mtx_pfl* mp) {
   int n = mp->n;
   int s = mp->s;
 
@@ -113,7 +113,7 @@ void smtx_fget(FILE* f, struct smtx* mp) {
     fscanf(f, FMT, &mup[i]);
 }
 
-void smtx_vmlt(struct smtx* ap, struct vec* bp, struct vec* rp) {
+void mtx_pfl_vmlt(struct mtx_pfl* ap, struct vec* bp, struct vec* rp) {
   int n = ap->n;
 
   int* app = ap->p;
@@ -138,7 +138,7 @@ void smtx_vmlt(struct smtx* ap, struct vec* bp, struct vec* rp) {
   }
 }
 
-void smtx_fput(FILE* f, struct smtx* mp) {
+void mtx_pfl_fput(FILE* f, struct mtx_pfl* mp) {
   int n = mp->n;
   int s = mp->s;
 
@@ -166,7 +166,7 @@ void smtx_fput(FILE* f, struct smtx* mp) {
     fprintf(f, "%.4e ", mup[i]);
 }
 
-void smtx_ldu(struct smtx* mp) {
+void mtx_pfl_ldu(struct mtx_pfl* mp) {
   int n = mp->n;
 
   int* mpp = mp->p;
@@ -202,7 +202,7 @@ void smtx_ldu(struct smtx* mp) {
   }
 }
 
-void smtx_free(struct smtx* mp) {
+void mtx_pfl_free(struct mtx_pfl* mp) {
   free(mp->d);
   free(mp->l);
   free(mp->u);

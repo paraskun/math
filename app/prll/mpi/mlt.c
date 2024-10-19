@@ -13,7 +13,7 @@
 #define DBL MPI_DOUBLE
 #define INT MPI_INT
 
-#define N 5
+#define N 10
 
 int main(int argc, char* argv[argc]) {
 
@@ -37,7 +37,7 @@ int main(int argc, char* argv[argc]) {
 
   struct vec* xp = 0;
   struct vec* fp = 0;
-  struct pmtx* mp = 0;
+  struct mtx_pie* mp = 0;
 
   int* t = 0;
   int* td = 0;
@@ -111,13 +111,13 @@ int main(int argc, char* argv[argc]) {
   if (errno)
     goto end;
 
-  mp = pmtx_new(N, 0, id == ROOT ? N : *t);
+  mp = mtx_pie_new(N, 0, id == ROOT ? N : *t);
 
   if (!mp)
     goto end;
 
   if (id == ROOT)
-    pmtx_seq(mp, 1);
+    mtx_pie_seq(mp, 1);
 
   errno = MPI_Scatterv(mp->v, vc, vd, DBL, mp->v, *t * N, DBL, ROOT, COM);
 

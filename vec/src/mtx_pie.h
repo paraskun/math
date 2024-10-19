@@ -5,7 +5,7 @@
 
 #include <stdio.h>
 
-struct pmtx {
+struct mtx_pie {
   real* v;
 
   int n;  // Matrix dimentsions
@@ -13,14 +13,14 @@ struct pmtx {
   int c;  // Number of rows
 };
 
-struct pmtx* pmtx_new(int n, int s, int c);
+struct mtx_pie* mtx_pie_new(int n, int s, int c);
 
-int pmtx_fget(FILE* f, struct pmtx* mp);
-int pmtx_fput(FILE* f, struct pmtx* mp);
-int pmtx_seq(struct pmtx* mp, int s);
+int mtx_pie_fget(FILE* f, struct mtx_pie* mp);
+int mtx_pie_fput(FILE* f, struct mtx_pie* mp);
+int mtx_pie_seq(struct mtx_pie* mp, int s);
 
-int pmtx_vmlt(struct pmtx* mp, struct vec* xp, struct vec* bp);
+int mtx_pie_vmlt(struct mtx_pie* mp, struct vec* xp, struct vec* bp);
 
-int pmtx_free(struct pmtx* mp);
+int mtx_pie_free(struct mtx_pie* mp);
 
 #endif  // PMTX_H

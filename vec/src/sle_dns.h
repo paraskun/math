@@ -13,6 +13,6 @@
  * @param yp - unknowns;
  * @param bp - constant terms;
  */
-void dsle_gauss(struct dmtx* mp, struct vec* yp, struct vec* bp);
+void dsle_gauss(struct mtx_dns* mp, struct vec* yp, struct vec* bp);
 
 #endif  // DSLE_H

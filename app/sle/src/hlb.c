@@ -11,18 +11,18 @@ int main() {
   srand(0);
 
 #ifdef DMTX
-  FILE* data = fopen("data/gauss-dmtx-hlb.data", "w+");
-  FILE* mout = fopen("data/dmtx-hlb.out", "w+");
+  FILE* data = fopen("data/gauss-mtx_dns-hlb.data", "w+");
+  FILE* mout = fopen("data/mtx_dns-hlb.out", "w+");
 #elifdef SMTX
-  FILE* data = fopen("data/ldu-smtx-hlb.data", "w+");
-  FILE* mout = fopen("data/smtx-hlb.out", "w+");
+  FILE* data = fopen("data/ldu-mtx_pfl-hlb.data", "w+");
+  FILE* mout = fopen("data/mtx_pfl-hlb.out", "w+");
 #endif
 
   for (int k = 3; k <= K; ++k) {
 #ifdef DMTX
-    struct dmtx* ap = dmtx_new(k);
+    struct mtx_dns* ap = mtx_dns_new(k);
 #elifdef SMTX
-    struct smtx* ap = smtx_new(k, k * (k - 1) / 2);
+    struct mtx_pfl* ap = mtx_pfl_new(k, k * (k - 1) / 2);
 #endif
 
     struct vec* yp = vec_new(k);  // x*

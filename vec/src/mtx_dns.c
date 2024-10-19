@@ -5,8 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct dmtx* dmtx_new(int n) {
-  struct dmtx* mp = malloc(sizeof(struct dmtx));
+struct mtx_dns* mtx_dns_new(int n) {
+  struct mtx_dns* mp = malloc(sizeof(struct mtx_dns));
 
   mp->v = malloc(sizeof(real) * n * n);
   mp->n = n;
@@ -14,7 +14,7 @@ struct dmtx* dmtx_new(int n) {
   return mp;
 }
 
-void dmtx_rnd(struct dmtx* mp, int u) {
+void mtx_dns_rnd(struct mtx_dns* mp, int u) {
   int n = mp->n;
   real* vp = mp->v;
 
@@ -25,7 +25,7 @@ void dmtx_rnd(struct dmtx* mp, int u) {
     vp[i] = rand() % u;
 }
 
-void dmtx_seq(struct dmtx* mp) {
+void mtx_dns_seq(struct mtx_dns* mp) {
   int n = mp->n;
   real* vp = mp->v;
 
@@ -36,7 +36,7 @@ void dmtx_seq(struct dmtx* mp) {
     vp[i] = i + 1;
 }
 
-void dmtx_ddm(struct dmtx* mp, int k) {
+void mtx_dns_ddm(struct mtx_dns* mp, int k) {
   int n = mp->n;
   real* vp = mp->v;
 
@@ -60,7 +60,7 @@ void dmtx_ddm(struct dmtx* mp, int k) {
   }
 }
 
-void dmtx_hlb(struct dmtx* mp) {
+void mtx_dns_hlb(struct mtx_dns* mp) {
   int n = mp->n;
   real* vp = mp->v;
 
@@ -69,7 +69,7 @@ void dmtx_hlb(struct dmtx* mp) {
       vp[r + j] = 1.0 / (i + j);
 }
 
-void dmtx_fget(FILE* f, struct dmtx* mp) {
+void mtx_dns_fget(FILE* f, struct mtx_dns* mp) {
   int n = mp->n;
   real* vp = mp->v;
 
@@ -77,7 +77,7 @@ void dmtx_fget(FILE* f, struct dmtx* mp) {
     fscanf(f, FMT, &vp[i]);
 }
 
-void dmtx_fput(FILE* f, struct dmtx* mp) {
+void mtx_dns_fput(FILE* f, struct mtx_dns* mp) {
   int n = mp->n;
   real* vp = mp->v;
 
@@ -89,7 +89,7 @@ void dmtx_fput(FILE* f, struct dmtx* mp) {
   }
 }
 
-void dmtx_mmlt(struct dmtx* ap, struct dmtx* bp, struct dmtx* cp) {
+void mtx_dns_mmlt(struct mtx_dns* ap, struct mtx_dns* bp, struct mtx_dns* cp) {
   int n = ap->n;
 
   real* avp = ap->v;
@@ -111,7 +111,7 @@ void dmtx_mmlt(struct dmtx* ap, struct dmtx* bp, struct dmtx* cp) {
   }
 }
 
-void dmtx_vmlt(struct dmtx* ap, struct vec* bp, struct vec* cp) {
+void mtx_dns_vmlt(struct mtx_dns* ap, struct vec* bp, struct vec* cp) {
   int n = ap->n;
 
   real* avp = ap->v;
@@ -133,7 +133,7 @@ void dmtx_vmlt(struct dmtx* ap, struct vec* bp, struct vec* cp) {
   }
 }
 
-void dmtx_nrm(struct dmtx* mp, real* rp) {
+void mtx_dns_nrm(struct mtx_dns* mp, real* rp) {
   int n = mp->n;
   real* vp = mp->v;
   real r = 0.0;
@@ -147,7 +147,7 @@ void dmtx_nrm(struct dmtx* mp, real* rp) {
   *rp = sqrt(r);
 }
 
-void dmtx_free(struct dmtx* mp) {
+void mtx_dns_free(struct mtx_dns* mp) {
   free(mp->v);
   free(mp);
 }

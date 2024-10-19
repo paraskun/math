@@ -5,8 +5,8 @@
 
 #define WIDTH 10
 
-struct pmtx* pmtx_new(int n, int s, int c) {
-  struct pmtx* mp = malloc(sizeof(struct pmtx));
+struct mtx_pie* mtx_pie_new(int n, int s, int c) {
+  struct mtx_pie* mp = malloc(sizeof(struct mtx_pie));
 
   mp->v = malloc(sizeof(real) * n * c);
   mp->n = n;
@@ -16,7 +16,7 @@ struct pmtx* pmtx_new(int n, int s, int c) {
   return mp;
 }
 
-int pmtx_fget(FILE* f, struct pmtx* mp) {
+int mtx_pie_fget(FILE* f, struct mtx_pie* mp) {
   fseek(f, mp->s * mp->n * WIDTH, SEEK_SET);
 
   for (int i = 0; i < mp->n * mp->c; ++i)
@@ -26,7 +26,7 @@ int pmtx_fget(FILE* f, struct pmtx* mp) {
   return 0;
 }
 
-int pmtx_fput(FILE* f, struct pmtx* mp) {
+int mtx_pie_fput(FILE* f, struct mtx_pie* mp) {
   fseek(f, mp->s * mp->n * WIDTH, SEEK_SET);
 
   for (int i = mp->s, k = 0; i < mp->s + mp->c; ++i) {
@@ -39,14 +39,14 @@ int pmtx_fput(FILE* f, struct pmtx* mp) {
   return 0;
 }
 
-int pmtx_seq(struct pmtx* mp, int s) {
+int mtx_pie_seq(struct mtx_pie* mp, int s) {
   for (int i = 0, v = s; i < mp->c * mp->n; ++i, ++v)
     mp->v[i] = v;
 
   return 0;
 }
 
-int pmtx_vmlt(struct pmtx* mp, struct vec* xp, struct vec* bp) {
+int mtx_pie_vmlt(struct mtx_pie* mp, struct vec* xp, struct vec* bp) {
   int r = 0;
 
 #ifdef OMP_THREADS_NUM
@@ -64,7 +64,7 @@ int pmtx_vmlt(struct pmtx* mp, struct vec* xp, struct vec* bp) {
   return 0;
 }
 
-int pmtx_free(struct pmtx* mp) {
+int mtx_pie_free(struct mtx_pie* mp) {
   free(mp->v);
   free(mp);
 

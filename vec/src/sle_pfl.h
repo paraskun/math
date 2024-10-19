@@ -13,6 +13,6 @@
  * @param yp - unknowns;
  * @param bp - constant terms;
  */
-void ssle_ldu(struct smtx* mp, struct vec* yp, struct vec* bp);
+void ssle_ldu(struct mtx_pfl* mp, struct vec* yp, struct vec* bp);
 
 #endif  // SSLE_H

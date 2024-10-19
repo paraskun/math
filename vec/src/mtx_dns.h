@@ -5,12 +5,12 @@
 #include <stdio.h>
 #include <vec.h>
 
-struct dmtx {
+struct mtx_dns {
   real* v;
   int n;
 };
 
-struct dmtx* dmtx_new(int n);
+struct mtx_dns* mtx_dns_new(int n);
 
 /**
  * @brief Populate given matrix with values from the file.
@@ -18,7 +18,7 @@ struct dmtx* dmtx_new(int n);
  * @param fn - file name;
  * @param mp - matrix to fill;
  */
-void dmtx_fget(FILE* f, struct dmtx* mp);
+void mtx_dns_fget(FILE* f, struct mtx_dns* mp);
 
 /**
  * @brief Write the values from the given matrix to a file.
@@ -27,7 +27,7 @@ void dmtx_fget(FILE* f, struct dmtx* mp);
 
  * @param mp - matrix to write;
  */
-void dmtx_fput(FILE* f, struct dmtx* mp);
+void mtx_dns_fput(FILE* f, struct mtx_dns* mp);
 
 /**
  * @brief Convert given matrix to diagonally dominant matrix.
@@ -35,14 +35,14 @@ void dmtx_fput(FILE* f, struct dmtx* mp);
  * @param mp - matrix to convert;
  * @param k - factor;
  */
-void dmtx_ddm(struct dmtx* mp, int k);
+void mtx_dns_ddm(struct mtx_dns* mp, int k);
 
 /**
  * @brief Convert given matrix to Hilbert matrix.
  *
  * @param mp - matrix to convert;
  */
-void dmtx_hlb(struct dmtx* mp);
+void mtx_dns_hlb(struct mtx_dns* mp);
 
 /**
  * @brief Calculate the matrix-vector product.
@@ -51,7 +51,7 @@ void dmtx_hlb(struct dmtx* mp);
  * @param bp - right-hand operand;
  * @param rp - result;
  */
-void dmtx_vmlt(struct dmtx* ap, struct vec* bp, struct vec* rp);
+void mtx_dns_vmlt(struct mtx_dns* ap, struct vec* bp, struct vec* rp);
 
 /**
  * @brief Calculate the matrix-matrix product.
@@ -60,7 +60,7 @@ void dmtx_vmlt(struct dmtx* ap, struct vec* bp, struct vec* rp);
  * @param bp - right-hand operand;
  * @param cp - result;
  */
-void dmtx_mmlt(struct dmtx* ap, struct dmtx* bp, struct dmtx* cp);
+void mtx_dns_mmlt(struct mtx_dns* ap, struct mtx_dns* bp, struct mtx_dns* cp);
 
 /**
  * @brief Convert given matrix to a matrix with randomly generated values.
@@ -68,7 +68,7 @@ void dmtx_mmlt(struct dmtx* ap, struct dmtx* bp, struct dmtx* cp);
  * @param mp - matrix to convert;
  * @param u - values upper-bound;
  */
-void dmtx_rnd(struct dmtx* mp, int u);
+void mtx_dns_rnd(struct mtx_dns* mp, int u);
 
 /**
  * @brief Calculate the matrix norm.
@@ -76,13 +76,13 @@ void dmtx_rnd(struct dmtx* mp, int u);
  * @param ap - operand;
  * @param rp - result;
  */
-void dmtx_nrm(struct dmtx* ap, real* rp);
+void mtx_dns_nrm(struct mtx_dns* ap, real* rp);
 
 /**
  * @brief Deallocate matrix memory.
  *
  * @param mp - matrix to delete;
  */
-void dmtx_free(struct dmtx* mp);
+void mtx_dns_free(struct mtx_dns* mp);
 
 #endif  // MTX_H

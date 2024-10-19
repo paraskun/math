@@ -3,7 +3,7 @@
 
 #include <string.h>
 
-static void ssle_l(struct smtx* a, struct vec* y, struct vec* b) {
+static void ssle_l(struct mtx_pfl* a, struct vec* y, struct vec* b) {
   int n = y->n;
   int* pp = a->p;
 
@@ -25,7 +25,7 @@ static void ssle_l(struct smtx* a, struct vec* y, struct vec* b) {
   }
 }
 
-static void ssle_d(struct smtx* a, struct vec* y, struct vec* b) {
+static void ssle_d(struct mtx_pfl* a, struct vec* y, struct vec* b) {
   int n = y->n;
 
   real* dp = a->d;
@@ -38,7 +38,7 @@ static void ssle_d(struct smtx* a, struct vec* y, struct vec* b) {
   }
 }
 
-static void ssle_u(struct smtx* a, struct vec* y, struct vec* b) {
+static void ssle_u(struct mtx_pfl* a, struct vec* y, struct vec* b) {
   int n = y->n;
   int* pp = a->p;
 
@@ -58,8 +58,8 @@ static void ssle_u(struct smtx* a, struct vec* y, struct vec* b) {
   }
 }
 
-void ssle_ldu(struct smtx* a, struct vec* x, struct vec* b) {
-  smtx_ldu(a);
+void ssle_ldu(struct mtx_pfl* a, struct vec* x, struct vec* b) {
+  mtx_pfl_ldu(a);
 
   ssle_l(a, x, b);
   ssle_d(a, b, x);

@@ -13,7 +13,7 @@ static inline void swap(int* p, int a, int b) {
   p[b] = tmp;
 }
 
-void dsle_gauss(struct dmtx* mp, struct vec* yp, struct vec* bp) {
+void dsle_gauss(struct mtx_dns* mp, struct vec* yp, struct vec* bp) {
   int n = mp->n;
   int* pp = malloc(sizeof(int) * n);
 
