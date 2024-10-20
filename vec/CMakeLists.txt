@@ -8,11 +8,17 @@ set(SRC
     src/mtx_pie.c
     src/mtx_pie.h
 
+    src/mtx_dg7.c
+    src/mtx_dg7.h
+
     src/sle_dns.c
     src/sle_dns.h
 
     src/sle_pfl.c
     src/sle_pfl.h
+
+    src/sle_dg7.c
+    src/sle_dg7.h
 
     src/vec.c)
 
