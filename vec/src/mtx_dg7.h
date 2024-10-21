@@ -5,14 +5,8 @@
 
 struct mtx_dg7 {
   int n;
-  int m;
-  int k;
-
-  real* dp;
-  real** lpp;
-  real** upp;
-
-  int* s;
+  int* off;
+  real** vpp;
 };
 
 struct mtx_dg7* mtx_dg7_new(int n, int m, int k);

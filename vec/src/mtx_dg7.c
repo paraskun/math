@@ -8,23 +8,22 @@ struct mtx_dg7* mtx_dg7_new(int n, int m, int k) {
   struct mtx_dg7* mp = malloc(sizeof(struct mtx_dg7));
 
   mp->n = n;
-  mp->m = m;
-  mp->k = k;
 
-  mp->s = malloc(sizeof(int) * 3);
+  mp->vpp = malloc(sizeof(real*) * 7);
+  mp->off = malloc(sizeof(int) * 7);
 
-  mp->s[0] = n - 1;
-  mp->s[1] = mp->s[0] - 1 - m;
-  mp->s[2] = mp->s[1] - 1 - k;
-
-  mp->dp = malloc(sizeof(real) * n);
-  mp->lpp = malloc(sizeof(real*) * 3);
-  mp->upp = malloc(sizeof(real*) * 3);
-
-  for (int i = 0; i < 3; ++i) {
-    mp->lpp[i] = malloc(sizeof(real) * mp->s[i]);
-    mp->upp[i] = malloc(sizeof(real) * mp->s[i]);
+  for (int i = 0; i < 7; ++i) {
+    mp->vpp[i] = malloc(sizeof(real) * n);
+    memset(mp->vpp[i], 0, sizeof(real) * n);
   }
+
+  mp->off[0] = -2 - m - k;
+  mp->off[1] = -1 - m;
+  mp->off[2] = -1;
+  mp->off[3] = 0;
+  mp->off[4] = -mp->off[2];
+  mp->off[5] = -mp->off[1];
+  mp->off[6] = -mp->off[0];
 
   return mp;
 }
@@ -83,14 +82,10 @@ int mtx_dg7_ddm(struct mtx_dg7* mp, int k) {
 }
 
 void mtx_dg7_free(struct mtx_dg7* mp) {
-  free(mp->dp);
+  for (int i = 0; i < 7; ++i)
+    free(mp->vpp[i]);
 
-  for (int i = 0; i < 3; ++i) {
-    free(mp->lpp[i]);
-    free(mp->upp[i]);
-  }
-
-  free(mp->lpp);
-  free(mp->upp);
+  free(mp->off);
+  free(mp->vpp);
   free(mp);
 }
