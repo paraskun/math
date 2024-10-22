@@ -8,4 +8,5 @@ set(C_STANDARD C23)
 
 # add_subdirectory(vec)
 add_subdirectory(gmp)
+add_subdirectory(cmd)
 # add_subdirectory(ode) add_subdirectory(pde) add_subdirectory(cmd)

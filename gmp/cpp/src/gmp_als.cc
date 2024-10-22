@@ -10,9 +10,6 @@
 using namespace std;
 
 int gmp_als::fget(ifstream& f) {
-  if (!f.is_open())
-    return -1;
-
   int a, b, ec;
 
   f >> a >> ec;
@@ -23,23 +20,30 @@ int gmp_als::fget(ifstream& f) {
       return -1;
 
     f >> a >> b;
-    al[a].push_back(b);
+
+    al[a - 1].push_back(b - 1);
+    al[b - 1].push_back(a - 1);
   }
 
   return 0;
 }
 
 int gmp_als::fput(ofstream& f) {
-  for (size_t i = 0; i < al.size(); ++i) {
-    sort(al[i].begin(), al[i].end(), less<int>());
+  for (size_t i = 0; i < al.size(); ++i)
+    vput(f, i);
 
-    f << i + 1 << ": ";
+  return 0;
+}
 
-    for (int v : al[i])
-      f << v << " ";
+int gmp_als::vput(ofstream& f, int v) {
+  sort(al[v].begin(), al[v].end(), less<int>());
 
-    f << endl;
-  }
+  f << v + 1 << ": ";
+
+  for (int s : al[v])
+    f << s + 1 << " ";
+
+  f << endl;
 
   return 0;
 }
@@ -49,18 +53,19 @@ int gmp_als::bfs(int sp, function<bool(int, int)> f) {
   queue<pair<int, int>> que;
 
   que.push(pair(sp, 0));
+  chk[sp] = true;
 
   while (!que.empty()) {
     pair v = que.front();
 
-    chk[v.first] = true;
-
-    if (f && !f(v.first, v.second))
+    if (!f(v.first, v.second))
       break;
 
     for (int c : al[v.first])
-      if (!chk[c])
+      if (!chk[c]) {
         que.push(pair(c, v.second + 1));
+        chk[c] = true;
+      }
 
     que.pop();
   }
