@@ -8,7 +8,4 @@ set(C_STANDARD C23)
 add_compile_options(-Wall -Werror -Wextra -Wpedantic -std=c23)
 
 add_subdirectory(vec)
-add_subdirectory(ode)
-add_subdirectory(pde)
-
-add_subdirectory(cmd)
+# add_subdirectory(ode) add_subdirectory(pde) add_subdirectory(cmd)

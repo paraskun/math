@@ -6,17 +6,18 @@
 #include <stdio.h>
 
 struct mtx_pie {
-  real* v;
+  int n;
+  int sr;
+  int rc;
 
-  int n;  // Matrix dimentsions
-  int s;  // Initial row
-  int c;  // Number of rows
+  double* vp;
 };
 
-struct mtx_pie* mtx_pie_new(int n, int s, int c);
+struct mtx_pie* mtx_pie_new(int n, int sr, int rc);
 
 int mtx_pie_fget(FILE* f, struct mtx_pie* mp);
 int mtx_pie_fput(FILE* f, struct mtx_pie* mp);
+
 int mtx_pie_seq(struct mtx_pie* mp, int s);
 
 int mtx_pie_vmlt(struct mtx_pie* mp, struct vec* xp, struct vec* bp);

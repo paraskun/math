@@ -8,40 +8,44 @@
 struct vec* vec_new(int n) {
   struct vec* vec = malloc(sizeof(struct vec));
 
-  vec->v = malloc(sizeof(real) * n);
+  vec->vp = malloc(sizeof(double) * n);
   vec->n = n;
 
   return vec;
 }
 
-void vec_rnd(struct vec* vp, int u) {
+int vec_rnd(struct vec* vp, int u) {
   int n = vp->n;
-  real* vvp = vp->v;
+  double* vvp = vp->vp;
 
 #ifdef OMP_THREADS_NUM
 #pragma omp parallel for num_threads(OMP_THREADS_NUM)
 #endif  // OMP
   for (int i = 0; i < n; ++i)
     vvp[i] = rand() % (u + 1);
+
+  return 0;
 }
 
-void vec_seq(struct vec* vp, int s) {
+int vec_seq(struct vec* vp, int s) {
   int n = vp->n;
-  real* vvp = vp->v;
+  double* vvp = vp->vp;
 
 #ifdef OMP_THREADS_NUM
 #pragma omp parallel for num_threads(OMP_THREADS_NUM)
 #endif  // OMP
   for (int i = 0, v = s; i < n; ++i, ++v)
     vvp[i] = v;
+
+  return 0;
 }
 
 int vec_fget(FILE* f, struct vec* vp) {
   int n = vp->n;
-  real* vvp = vp->v;
+  double* vvp = vp->vp;
 
   for (int i = 0; i < n; ++i)
-    if (fscanf(f, FMT, &vvp[i]) != 1)
+    if (fscanf(f, "%lf", &vvp[i]) != 1)
       return -1;
 
   return 0;
@@ -49,7 +53,7 @@ int vec_fget(FILE* f, struct vec* vp) {
 
 int vec_fput(FILE* f, struct vec* vp) {
   int n = vp->n;
-  real* vvp = vp->v;
+  double* vvp = vp->vp;
 
   for (int i = 0; i < n; ++i)
     if (fprintf(f, "%.3e ", vvp[i]) < 0)
@@ -58,40 +62,60 @@ int vec_fput(FILE* f, struct vec* vp) {
   return 0;
 }
 
-void vec_add(struct vec* ap, struct vec* bp, struct vec* rp) {
+int vec_add(struct vec* ap, struct vec* bp, struct vec* rp) {
   int n = ap->n;
 
-  real* avp = ap->v;
-  real* bvp = bp->v;
-  real* rvp = rp->v;
+  double* avp = ap->vp;
+  double* bvp = bp->vp;
+  double* rvp = rp->vp;
 
 #ifdef OMP_THREADS_NUM
 #pragma omp parallel for num_threads(OMP_THREADS_NUM)
 #endif  // OMP
   for (int i = 0; i < n; ++i)
     rvp[i] = avp[i] + bvp[i];
+
+  return 0;
 }
 
-void vec_cmb(struct vec* ap, struct vec* bp, struct vec* rp, real k) {
+int vec_sub(struct vec* ap, struct vec* bp, struct vec* rp) {
   int n = ap->n;
 
-  real* avp = ap->v;
-  real* bvp = bp->v;
-  real* rvp = rp->v;
+  double* avp = ap->vp;
+  double* bvp = bp->vp;
+  double* rvp = rp->vp;
+
+#ifdef OMP_THREADS_NUM
+#pragma omp parallel for num_threads(OMP_THREADS_NUM)
+#endif  // OMP
+  for (int i = 0; i < n; ++i)
+    rvp[i] = avp[i] - bvp[i];
+
+  return 0;
+}
+
+int vec_cmb(struct vec* ap, struct vec* bp, struct vec* rp, double k) {
+  int n = ap->n;
+
+  double* avp = ap->vp;
+  double* bvp = bp->vp;
+  double* rvp = rp->vp;
 
 #ifdef OMP_THREADS_NUM
 #pragma omp parallel for num_threads(OMP_THREADS_NUM)
 #endif  // OMP
   for (int i = 0; i < n; ++i)
     rvp[i] = avp[i] + bvp[i] * k;
+
+  return 0;
 }
 
-void vec_mlt(struct vec* ap, struct vec* bp, real* rp) {
+int vec_mlt(struct vec* ap, struct vec* bp, double* rp) {
   int n = ap->n;
 
-  real* avp = ap->v;
-  real* bvp = bp->v;
-  real s = 0;
+  double* avp = ap->vp;
+  double* bvp = bp->vp;
+  double s = 0;
 
 #ifdef OMP_THREADS_NUM
 #pragma omp parallel for reduction(+ : s) num_threads(OMP_THREADS_NUM)
@@ -100,13 +124,14 @@ void vec_mlt(struct vec* ap, struct vec* bp, real* rp) {
     s += avp[i] * bvp[i];
 
   *rp = s;
+  return 0;
 }
 
-void vec_nrm(struct vec* vp, double* rp) {
+int vec_nrm(struct vec* vp, double* rp) {
   int n = vp->n;
 
-  real* vvp = vp->v;
-  synt s = 0;
+  double* vvp = vp->vp;
+  double s = 0;
 
 #ifdef OMP_THREADS_NUM
 #pragma omp parallel for reduction(+ : s) num_threads(OMP_THREADS_NUM)
@@ -115,9 +140,10 @@ void vec_nrm(struct vec* vp, double* rp) {
     s += vvp[i] * vvp[i];
 
   *rp = sqrt(s);
+  return 0;
 }
 
 void vec_free(struct vec* vp) {
-  free(vp->v);
+  free(vp->vp);
   free(vp);
 }

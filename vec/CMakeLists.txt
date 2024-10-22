@@ -1,38 +1,8 @@
-set(SRC
-    src/mtx_dns.c
-    src/mtx_dns.h
+add_library(vec vec.c vec.h)
 
-    src/mtx_pfl.c
-    src/mtx_pfl.h
+target_include_directories(vec PUBLIC .)
 
-    src/mtx_pie.c
-    src/mtx_pie.h
-
-    src/mtx_dg7.c
-    src/mtx_dg7.h
-
-    src/sle_dns.c
-    src/sle_dns.h
-
-    src/sle_pfl.c
-    src/sle_pfl.h
-
-    src/sle_dg7.c
-    src/sle_dg7.h
-
-    src/vec.c)
-
-add_library(vec ${SRC})
-
-set(REAL "double")
-set(SYNT "double")
-set(RFMT "\"%lf\"")
-
-target_compile_definitions(vec PUBLIC real=${REAL})
-target_compile_definitions(vec PUBLIC synt=${SYNT})
-target_compile_definitions(vec PUBLIC FMT=${RFMT})
-
-target_include_directories(vec PUBLIC include/)
-target_include_directories(vec PUBLIC src/)
-
-target_link_libraries(vec PUBLIC -lm)
+add_subdirectory(dfs)
+add_subdirectory(dss)
+add_subdirectory(iss)
+add_subdirectory(mtx)
