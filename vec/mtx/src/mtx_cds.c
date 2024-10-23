@@ -64,8 +64,9 @@ int mtx_cds_fput(FILE* f, struct mtx_cds* mp) {
 
     for (int i = i0; i < i1; ++i) {
       fprintf(f, "%10.3e ", ad[i][k]);
-      fputc('\n', f);
     }
+
+    fputc('\n', f);
   }
 
   return 0;
@@ -89,37 +90,42 @@ int mtx_cds_vmlt(struct mtx_cds* ap, struct vec* xp, struct vec* rp) {
 
     for (int i = i0; i < i1; ++i) {
       int j = i + la[k];
-      rvp[j] += ad[i][k] * xvp[j];
+      rvp[i] += ad[i][k] * xvp[j];
     }
   }
 
   return 0;
 }
 
-int mtx_cds_ddm(struct mtx_cds* mp, int k) {
+int mtx_cds_ddm(struct mtx_cds* mp, int m, int k) {
   int n = mp->n;
   int c = mp->c;
-  int d = mp->d;
+
+  if (c != 7)
+    return -1;
 
   int* la = mp->la;
   double** ad = mp->ad;
 
-  memset(ad[mp->d], 0, sizeof(double) * n);
+  la[0] = 0;
+  la[1] = 1;
+  la[2] = 2 + m;
+  la[3] = 3 + m + k;
+  la[4] = -la[1];
+  la[5] = -la[2];
+  la[6] = -la[3];
 
-  for (int k = 0; k < c; ++k) {
-    if (k == d)
-      continue;
+  mp->d = 0;
 
+  for (int k = 1; k < c; ++k) {
     int i0 = la[k] < 0 ? -la[k] : 0;
     int i1 = la[k] < 0 ? n : n - la[k];
 
     for (int i = i0; i < i1; ++i) {
       ad[i][k] = -(rand() % 5);
-      ad[i][d] -= ad[i][k];
+      ad[i][0] -= ad[i][k];
     }
   }
-
-  ad[0][d] += 1 / pow(10, k);
 
   return 0;
 }

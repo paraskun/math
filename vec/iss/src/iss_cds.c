@@ -38,7 +38,7 @@ static inline void swap(struct vec* ap, struct vec* bp) {
 }
 
 int iss_cds_jac_solve(struct mtx_cds* mp, struct vec* xp, struct vec* fp,
-                      struct props p) {
+                      struct pps p) {
   struct vec* tp = vec_new(xp->n);
 
   double nd;
@@ -55,6 +55,8 @@ int iss_cds_jac_solve(struct mtx_cds* mp, struct vec* xp, struct vec* fp,
     vec_sub(fp, tp, tp);
     vec_nrm(tp, &nd);
 
+    printf("[jac] no. %d\t%lf\n", s + 1, nd / nf);
+
     if (nd / nf < p.eps)
       break;
   }
@@ -64,7 +66,7 @@ int iss_cds_jac_solve(struct mtx_cds* mp, struct vec* xp, struct vec* fp,
 }
 
 int sle_cds_rlx_solve(struct mtx_cds* mp, struct vec* xp, struct vec* fp,
-                      struct props p) {
+                      struct pps p) {
   struct vec* tp = vec_new(xp->n);
 
   double nd;
@@ -88,12 +90,12 @@ int sle_cds_rlx_solve(struct mtx_cds* mp, struct vec* xp, struct vec* fp,
   return 0;
 }
 
-static int blk_lu(struct mtx_cds* mp, int bs, int bc);
-static int blk_lu_solve(struct mtx_cds* mp, int bs, int bn, struct vec* xp,
+static int brx_lu(struct mtx_cds* mp, int bs, int bc);
+static int brx_lu_solve(struct mtx_cds* mp, int bs, int bn, struct vec* xp,
                         struct vec* rp);
 
 int sle_cds_brx_solve(struct mtx_cds* mp, struct vec* xp, struct vec* fp,
-                      struct props p) {
+                      struct pps p) {
   struct vec* rp = vec_new(xp->n);
 
   int n = mp->n;
@@ -109,7 +111,7 @@ int sle_cds_brx_solve(struct mtx_cds* mp, struct vec* xp, struct vec* fp,
   double* rvp = rp->vp;
 
   for (int b = 0; b < bc; ++b)
-    blk_lu(mp, bs, bc);
+    brx_lu(mp, bs, bc);
 
   double nd;
   double nf;
@@ -137,7 +139,7 @@ int sle_cds_brx_solve(struct mtx_cds* mp, struct vec* xp, struct vec* fp,
         rvp[ir] *= p.omg;
       }
 
-      blk_lu_solve(mp, bs, b, xp, rp);
+      brx_lu_solve(mp, bs, b, xp, rp);
     }
 
     mtx_cds_vmlt(mp, xp, rp);
@@ -155,5 +157,10 @@ int sle_cds_brx_solve(struct mtx_cds* mp, struct vec* xp, struct vec* fp,
 }
 
 static int brx_lu(struct mtx_cds* mp, int bs, int bc) {
-  return 0;
+  return mp->n + bs + bc;
+}
+
+static int brx_lu_solve(struct mtx_cds* mp, int bs, int bn, struct vec* xp,
+                        struct vec* rp) {
+  return mp->n + bs + bn + xp->n + rp->n;
 }

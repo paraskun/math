@@ -21,7 +21,7 @@ int mtx_cds_fput(FILE* f, struct mtx_cds* mp);
 
 int mtx_cds_vmlt(struct mtx_cds* ap, struct vec* xp, struct vec* rp);
 
-int mtx_cds_ddm(struct mtx_cds* mp, int k);
+int mtx_cds_ddm(struct mtx_cds* mp, int m, int k);
 
 void mtx_cds_free(struct mtx_cds* mp);
 
