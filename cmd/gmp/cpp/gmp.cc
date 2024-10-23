@@ -1,48 +1,68 @@
-#include <gmp_als.hpp>
+#include <gmp_ucg.hpp>
 
+#include <cerrno>
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <list>
 
 using namespace std;
 
 int main(int argc, char** argv) {
-  if (argc < 3)
-    return -1;
-
-  int sp = strtod(argv[1], 0);
-  int ep = strtod(argv[2], 0);
-
-  struct gmp_als g;
+  struct gmp_ucg g;
 
   std::ifstream in;
   std::ofstream out;
 
-  in.open("gmpcc-in.txt");
+  list<int> path;
 
-  if (!in.is_open())
+  int sp, ep;
+
+  if (argc < 4) {
+    errno = EINVAL;
     goto end;
+  }
+
+  sp = strtod(argv[2], 0);
+  ep = strtod(argv[3], 0);
+
+  if (sp == 0 || ep == 0) {
+    errno = EINVAL;
+    goto end;
+  }
+
+  in.open(argv[1]);
+
+  if (!in.is_open()) {
+    errno = EIO;
+    goto end;
+  }
 
   if (g.fget(in))
     goto end;
 
   out.open("gmpcc-out.txt");
 
-  if (!out.is_open())
+  if (!out.is_open()) {
+    errno = EIO;
     goto end;
+  }
 
-  g.bfs(sp - 1, [&g, &out](int v, int lvl) {
-    g.vput(out, v);
+  g.bfs(sp - 1, [&g, &out](gmp_vtx vtx) {
+    g.vput(out, vtx.v);
     return true;
   });
 
-  int spath;
+  g.spp(sp - 1, ep - 1, path);
 
-  g.spp(sp - 1, ep - 1, spath);
+  if (path.size() != 0) {
+    cout << "Shortest path: ";
 
-  if (spath >= 0)
-    cout << "Shortest path: " << spath << endl;
-  else
+    for (int v : path)
+      cout << v << " ";
+
+    cout << endl;
+  } else
     cout << "Path does not exists." << endl;
 
 end:
@@ -51,6 +71,11 @@ end:
 
   if (out.is_open())
     out.close();
+
+  if (errno) {
+    cout << "fatal: " << strerror(errno) << endl;
+    return -1;
+  }
 
   return 0;
 }
