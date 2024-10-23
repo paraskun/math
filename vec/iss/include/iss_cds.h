@@ -8,7 +8,8 @@ struct props {
   double omg;
   double eps;
 
-  int mk;
+  int ms;
+  int bs;
 };
 
 int iss_cds_jac_solve(struct mtx_cds* mp, struct vec* xp, struct vec* fp,
