@@ -11,7 +11,7 @@ int main(int argc, char* argv[argc]) {
 
   struct mtx_cds* mp = mtx_cds_new(n, c);
 
-  FILE* fmo = fopen("cds-ddm.mtx", "w+");
+  FILE* fmo = fopen("ddm.cds.mtx", "w+");
 
   mtx_cds_ddm(mp, m, k);
   mtx_cds_fput(fmo, mp);
