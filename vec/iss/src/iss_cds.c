@@ -38,139 +38,64 @@ static inline void swap(struct vec* ap, struct vec* bp) {
 }
 
 int iss_cds_jac_solve(struct mtx_cds* mp, struct vec* xp, struct vec* fp,
-                      struct pps pps, struct rep* rep) {
+                      struct iss_jac_pps pps, void (*f)(int, double)) {
   struct vec* tp = vec_new(xp->n);
 
-  double nf;
+  double nfp = 0;
 
-  vec_nrm(fp, &nf);
+  vec_nrm(fp, &nfp);
 
-  double nd = nf;
-  double r = 1;
+  double ntp = 0;
+  double res = 1;
+  double eps = pps.pps.eps;
+  double omg = pps.omg;
 
-  for (int s = 0; s < pps.ms && r >= pps.eps; ++s) {
-    step(mp, xp, fp, tp, pps.omg);
+  int ms = pps.pps.ms;
+
+  for (int s = 0; s < ms && res >= eps; ++s) {
+    step(mp, xp, fp, tp, omg);
     swap(xp, tp);
 
     mtx_cds_vmlt(mp, xp, tp);
     vec_sub(fp, tp, tp);
-    vec_nrm(tp, &nd);
+    vec_nrm(tp, &ntp);
 
-    r = nd / nf;
+    res = ntp / nfp;
 
-    rep->sc = s;
-    rep->res = r;
-
-    if (pps.dbg)
-      printf("\rIteration: %d; Residual: %.7e", s + 1, r);
+    f(s, res);
   }
-
-  if (pps.dbg)
-    putchar('\n');
 
   vec_free(tp);
   return 0;
 }
 
 int iss_cds_rlx_solve(struct mtx_cds* mp, struct vec* xp, struct vec* fp,
-                      struct pps pps, struct rep* rep) {
+                      struct iss_jac_pps pps, void (*f)(int, double)) {
   struct vec* tp = vec_new(xp->n);
 
-  double nf;
+  double nfp = 0;
 
-  vec_nrm(fp, &nf);
+  vec_nrm(fp, &nfp);
 
-  double nd = nf;
-  double r = 1;
+  double ntp = 0;
+  double res = 1;
+  double eps = pps.pps.eps;
+  double omg = pps.omg;
 
-  for (int s = 0; s < pps.ms && r >= pps.eps; ++s) {
-    step(mp, xp, fp, xp, pps.omg);
+  int ms = pps.pps.ms;
+
+  for (int s = 0; s < ms && res >= eps; ++s) {
+    step(mp, xp, fp, xp, omg);
 
     mtx_cds_vmlt(mp, xp, tp);
     vec_sub(fp, tp, tp);
-    vec_nrm(tp, &nd);
+    vec_nrm(tp, &ntp);
 
-    r = nd / nf;
+    res = ntp / nfp;
 
-    rep->sc = s;
-    rep->res = r;
+    f(s, res);
   }
 
   vec_free(tp);
   return 0;
-}
-
-static int brx_lu(struct mtx_cds* mp, int bs, int bc);
-static int brx_lu_solve(struct mtx_cds* mp, int bs, int bn, struct vec* xp,
-                        struct vec* rp);
-
-int iss_cds_brx_solve(struct mtx_cds* mp, struct vec* xp, struct vec* fp,
-                      struct pps p) {
-  struct vec* rp = vec_new(xp->n);
-
-  int n = mp->n;
-  int c = mp->c;
-  int ms = p.ms;
-  int bs = p.bs;
-  int bc = n / bs;
-
-  int* la = mp->la;
-  double** ad = mp->ad;
-  double* xvp = xp->vp;
-  double* fvp = fp->vp;
-  double* rvp = rp->vp;
-
-  for (int b = 0; b < bc; ++b)
-    brx_lu(mp, bs, bc);
-
-  double nd;
-  double nf;
-
-  vec_nrm(fp, &nf);
-
-  for (int s = 0; s < ms; ++s) {
-    for (int b = 0; b < bc; ++b) {
-      int i0 = b * bs;
-      int i1 = i0 + bs;
-
-      for (int i = i0, ir = 0; i < i1; ++i, ++ir)
-        rvp[ir] = fvp[i];
-
-      for (int i = i0, ir = 0; i < i1; ++i, ++ir) {
-        for (int k = 0; k < c; ++k) {
-          int j = la[k] + i;
-
-          if (j < 0 || j >= n)
-            continue;
-
-          rvp[ir] -= ad[i][k] * xvp[j];
-        }
-
-        rvp[ir] *= p.omg;
-      }
-
-      brx_lu_solve(mp, bs, b, xp, rp);
-    }
-
-    mtx_cds_vmlt(mp, xp, rp);
-
-    vec_sub(fp, rp, rp);
-    vec_nrm(rp, &nd);
-
-    if (nd / nf < p.eps)
-      break;
-  }
-
-  vec_free(rp);
-
-  return 0;
-}
-
-static int brx_lu(struct mtx_cds* mp, int bs, int bc) {
-  return mp->n + bs + bc;
-}
-
-static int brx_lu_solve(struct mtx_cds* mp, int bs, int bn, struct vec* xp,
-                        struct vec* rp) {
-  return mp->n + bs + bn + xp->n + rp->n;
 }

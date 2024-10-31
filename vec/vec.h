@@ -10,7 +10,6 @@ struct vec {
 
 struct vec* vec_new(int n);
 
-int vec_rnd(struct vec* vp, int u);
 int vec_seq(struct vec* vp, int s);
 
 int vec_fget(FILE* f, struct vec* vp);

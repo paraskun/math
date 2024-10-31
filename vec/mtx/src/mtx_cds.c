@@ -1,6 +1,5 @@
 #include <mtx_cds.h>
 
-#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 

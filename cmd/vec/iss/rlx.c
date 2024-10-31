@@ -2,9 +2,18 @@
 
 #include <iss_cds.h>
 
+static int itr;
+static double res;
+
+void f(int i, double r) {
+  printf("\rIteration: %d; Residual: %lf", i, r);
+
+  itr = i;
+  res = r;
+}
+
 int main(int argc, char* argv[argc]) {
-  struct pps pps;
-  struct rep rep;
+  struct iss_jac_pps pps;
 
   int n;
   int c;
@@ -13,7 +22,7 @@ int main(int argc, char* argv[argc]) {
   FILE* fmi = fopen(argv[1], "r");
 
   fscanf(fpi, "%d %d", &n, &c);
-  fscanf(fpi, "%lf %lf %d", &pps.omg, &pps.eps, &pps.ms);
+  fscanf(fpi, "%lf %lf %d", &pps.omg, &pps.pps.eps, &pps.pps.ms);
 
   struct mtx_cds* mp = mtx_cds_new(n, c);
   struct vec* xp = vec_new(n);
@@ -32,7 +41,9 @@ int main(int argc, char* argv[argc]) {
     for (int i = 0; i < xp->n; ++i)
       xp->vp[i] = 0;
 
-    iss_cds_rlx_solve(mp, xp, fp, pps, &rep);
+    iss_cds_rlx_solve(mp, xp, fp, pps, &f);
+
+    putchar('\n');
 
     double nxp;
     double ntp;
@@ -43,8 +54,8 @@ int main(int argc, char* argv[argc]) {
     vec_nrm(xp, &nd);
     vec_nrm(xt, &ntp);
 
-    printf("%.2lf\t%.7e\t%.7e\t%.7e\t%.7e\t%d\n", pps.omg, nxp, ntp, nd,
-           rep.res, rep.sc + 1);
+    printf("%.2lf\t%.7e\t%.7e\t%.7e\t%.7e\t%d\n", pps.omg, nxp, ntp, nd, res,
+           itr + 1);
   }
 
   fclose(fpi);

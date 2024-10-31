@@ -1,4 +1,4 @@
-#include <mtx_pfl.h>
+#include <mtx_sky.h>
 
 #include <math.h>
 #include <stdint.h>
@@ -8,30 +8,120 @@
 
 #define min(x, y) (((x) < (y)) ? (x) : (y))
 
-struct mtx_pfl* mtx_pfl_new(int n, int s) {
-  struct mtx_pfl* mp = malloc(sizeof(struct mtx_pfl));
+struct mtx_sky* mtx_sky_new(int n, int s) {
+  struct mtx_sky* mp = malloc(sizeof(struct mtx_sky));
 
   mp->n = n;
   mp->s = s;
   mp->p = malloc(sizeof(int) * (n + 1));
-  mp->d = malloc(sizeof(real) * n);
-  mp->l = malloc(sizeof(real) * s);
-  mp->u = malloc(sizeof(real) * s);
+
+  mp->dv = malloc(sizeof(double) * n);
+  mp->lv = malloc(sizeof(double) * s);
+  mp->uv = malloc(sizeof(double) * s);
 
   return mp;
 }
 
-void mtx_pfl_ddm(struct mtx_pfl* mp, int k) {
+void mtx_sky_fget(FILE* f, struct mtx_sky* mp) {
   int n = mp->n;
+  int s = mp->s;
 
-  real* mlp = mp->l;
-  real* mup = mp->u;
-  real* mdp = mp->d;
   int* mpp = mp->p;
 
-  real* sum = malloc(sizeof(synt) * n);
+  double* mlp = mp->lv;
+  double* mup = mp->uv;
+  double* mdp = mp->dv;
 
-  memset(sum, 0, sizeof(synt) * n);
+  for (int i = 0; i <= n; ++i)
+    fscanf(f, "%d", &mpp[i]);
+
+  for (int i = 0; i < n; ++i)
+    fscanf(f, "%lf", &mdp[i]);
+
+  for (int i = 0; i < s; ++i)
+    fscanf(f, "%lf", &mlp[i]);
+
+  for (int i = 0; i < s; ++i)
+    fscanf(f, "%lf", &mup[i]);
+}
+
+void mtx_sky_fput(FILE* f, struct mtx_sky* mp) {
+  int n = mp->n;
+  int s = mp->s;
+
+  int* mpp = mp->p;
+
+  double* mlp = mp->lv;
+  double* mup = mp->uv;
+  double* mdp = mp->dv;
+
+  for (int i = 0; i <= n; ++i)
+    fprintf(f, "%u ", mpp[i]);
+
+  fputc('\n', f);
+
+  for (int i = 0; i < n; ++i)
+    fprintf(f, "%.4e ", mdp[i]);
+
+  fputc('\n', f);
+
+  for (int i = 0; i < s; ++i)
+    fprintf(f, "%.4e ", mlp[i]);
+
+  fputc('\n', f);
+
+  for (int i = 0; i < s; ++i)
+    fprintf(f, "%.4e ", mup[i]);
+}
+
+void mtx_sky_fct_ldu(struct mtx_sky* mp) {
+  int n = mp->n;
+
+  int* mpp = mp->p;
+
+  double* mdp = mp->dv;
+  double* mlp = mp->lv;
+  double* mup = mp->uv;
+
+  for (int i = 0; i < n; ++i) {
+    int ic = mpp[i + 1] - mpp[i];
+    double dsum = mdp[i];
+
+    for (int k = 1; k <= ic; ++k)
+      dsum -= mlp[mpp[i] + ic - k] * mup[mpp[i] + ic - k] * mdp[i - k];
+
+    mdp[i] = dsum;
+
+    for (int j = i + 1; j < n; ++j) {
+      int jc = mpp[j + 1] - mpp[j] - j + i;
+
+      if (jc > -1) {
+        double lsum = mlp[mpp[j] + jc];
+        double usum = mup[mpp[j] + jc];
+
+        for (int k = 1; k <= min(jc, ic); ++k) {
+          lsum -= mlp[mpp[j] + jc - k] * mup[mpp[i] + ic - k] * mdp[i - k];
+          usum -= mup[mpp[j] + jc - k] * mlp[mpp[i] + ic - k] * mdp[i - k];
+        }
+
+        mlp[mpp[j] + jc] = lsum / mdp[i];
+        mup[mpp[j] + jc] = usum / mdp[i];
+      }
+    }
+  }
+}
+
+void mtx_sky_ddm(struct mtx_sky* mp, int k) {
+  int n = mp->n;
+
+  double* mlp = mp->lv;
+  double* mup = mp->uv;
+  double* mdp = mp->dv;
+  int* mpp = mp->p;
+
+  double* sum = malloc(sizeof(double) * n);
+
+  memset(sum, 0, sizeof(double) * n);
 
   mpp[0] = 0;
 
@@ -62,14 +152,15 @@ void mtx_pfl_ddm(struct mtx_pfl* mp, int k) {
   free(sum);
 }
 
-void mtx_pfl_hlb(struct mtx_pfl* mp) {
+void mtx_sky_hlb(struct mtx_sky* mp) {
   int n = mp->n;
   int ir = 0;
 
-  real* mlp = mp->l;
-  real* mup = mp->u;
-  real* mdp = mp->d;
   int* mpp = mp->p;
+
+  double* mlp = mp->lv;
+  double* mup = mp->uv;
+  double* mdp = mp->dv;
 
   mpp[0] = ir;
   mdp[0] = 1;
@@ -81,7 +172,7 @@ void mtx_pfl_hlb(struct mtx_pfl* mp) {
     mdp[i] = 1.0 / (i2 + 1.0);
 
     for (int j = 0; j < i; ++j) {
-      synt v = 1.0 / (i + j + 1.0);
+      double v = 1.0 / (i + j + 1.0);
 
       mlp[ir + j] = v;
       mup[ir + j] = v;
@@ -91,39 +182,18 @@ void mtx_pfl_hlb(struct mtx_pfl* mp) {
   mpp[n] = n * (n - 1) / 2;
 }
 
-void mtx_pfl_fget(FILE* f, struct mtx_pfl* mp) {
-  int n = mp->n;
-  int s = mp->s;
-
-  real* mlp = mp->l;
-  real* mup = mp->u;
-  real* mdp = mp->d;
-  int* mpp = mp->p;
-
-  for (int i = 0; i <= n; ++i)
-    fscanf(f, "%d", &mpp[i]);
-
-  for (int i = 0; i < n; ++i)
-    fscanf(f, FMT, &mdp[i]);
-
-  for (int i = 0; i < s; ++i)
-    fscanf(f, FMT, &mlp[i]);
-
-  for (int i = 0; i < s; ++i)
-    fscanf(f, FMT, &mup[i]);
-}
-
-void mtx_pfl_vmlt(struct mtx_pfl* ap, struct vec* bp, struct vec* rp) {
+void mtx_sky_vmlt(struct mtx_sky* ap, struct vec* bp, struct vec* rp) {
   int n = ap->n;
 
   int* app = ap->p;
-  real* adp = ap->d;
-  real* alp = ap->l;
-  real* aup = ap->u;
-  real* bvp = bp->v;
-  real* rvp = rp->v;
 
-  memset(rvp, 0, n * sizeof(real));
+  double* adp = ap->dv;
+  double* alp = ap->lv;
+  double* aup = ap->uv;
+  double* bvp = bp->vp;
+  double* rvp = rp->vp;
+
+  memset(rvp, 0, n * sizeof(double));
 
   for (int i = 0; i < n; ++i) {
     rvp[i] += adp[i] * bvp[i];
@@ -138,74 +208,10 @@ void mtx_pfl_vmlt(struct mtx_pfl* ap, struct vec* bp, struct vec* rp) {
   }
 }
 
-void mtx_pfl_fput(FILE* f, struct mtx_pfl* mp) {
-  int n = mp->n;
-  int s = mp->s;
-
-  real* mlp = mp->l;
-  real* mup = mp->u;
-  real* mdp = mp->d;
-  int* mpp = mp->p;
-
-  for (int i = 0; i <= n; ++i)
-    fprintf(f, "%u ", mpp[i]);
-
-  fputc('\n', f);
-
-  for (int i = 0; i < n; ++i)
-    fprintf(f, "%.4e ", mdp[i]);
-
-  fputc('\n', f);
-
-  for (int i = 0; i < s; ++i)
-    fprintf(f, "%.4e ", mlp[i]);
-
-  fputc('\n', f);
-
-  for (int i = 0; i < s; ++i)
-    fprintf(f, "%.4e ", mup[i]);
-}
-
-void mtx_pfl_ldu(struct mtx_pfl* mp) {
-  int n = mp->n;
-
-  int* mpp = mp->p;
-  real* mdp = mp->d;
-  real* mlp = mp->l;
-  real* mup = mp->u;
-
-  for (int i = 0; i < n; ++i) {
-    int ic = mpp[i + 1] - mpp[i];
-    synt dsum = mdp[i];
-
-    for (int k = 1; k <= ic; ++k)
-      dsum -= mlp[mpp[i] + ic - k] * mup[mpp[i] + ic - k] * mdp[i - k];
-
-    mdp[i] = dsum;
-
-    for (int j = i + 1; j < n; ++j) {
-      int jc = mpp[j + 1] - mpp[j] - j + i;
-
-      if (jc > -1) {
-        synt lsum = mlp[mpp[j] + jc];
-        synt usum = mup[mpp[j] + jc];
-
-        for (int k = 1; k <= min(jc, ic); ++k) {
-          lsum -= mlp[mpp[j] + jc - k] * mup[mpp[i] + ic - k] * mdp[i - k];
-          usum -= mup[mpp[j] + jc - k] * mlp[mpp[i] + ic - k] * mdp[i - k];
-        }
-
-        mlp[mpp[j] + jc] = lsum / mdp[i];
-        mup[mpp[j] + jc] = usum / mdp[i];
-      }
-    }
-  }
-}
-
-void mtx_pfl_free(struct mtx_pfl* mp) {
-  free(mp->d);
-  free(mp->l);
-  free(mp->u);
+void mtx_sky_free(struct mtx_sky* mp) {
+  free(mp->dv);
+  free(mp->lv);
+  free(mp->uv);
   free(mp->p);
   free(mp);
 }

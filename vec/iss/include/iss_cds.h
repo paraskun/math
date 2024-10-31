@@ -1,28 +1,20 @@
 #ifndef ISS_CDS_H
 #define ISS_CDS_H
 
+#include <iss_cmn.h>
 #include <mtx_cds.h>
 #include <vec.h>
 
-struct pps {
+struct iss_jac_pps {
+  struct iss_pps pps;
+
   double omg;
-  double eps;
-
-  int ms;
-  int bs;
-
-  int dbg;
 };
 
-struct rep {
-  int sc;
-  double res;
-};
+int iss_cds_jac_solve(struct mtx_cds*, struct vec*, struct vec*,
+                      struct iss_jac_pps, void (*f)(int, double));
 
-int iss_cds_jac_solve(struct mtx_cds*, struct vec*, struct vec*, struct pps,
-                      struct rep*);
-int iss_cds_rlx_solve(struct mtx_cds*, struct vec*, struct vec*, struct pps,
-                      struct rep*);
-int iss_cds_brx_solve(struct mtx_cds*, struct vec*, struct vec*, struct pps);
+int iss_cds_rlx_solve(struct mtx_cds*, struct vec*, struct vec*,
+                      struct iss_jac_pps, void (*f)(int, double));
 
 #endif  // ISS_CDS_H

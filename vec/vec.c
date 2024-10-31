@@ -14,19 +14,6 @@ struct vec* vec_new(int n) {
   return vec;
 }
 
-int vec_rnd(struct vec* vp, int u) {
-  int n = vp->n;
-  double* vvp = vp->vp;
-
-#ifdef OMP_THREADS_NUM
-#pragma omp parallel for num_threads(OMP_THREADS_NUM)
-#endif  // OMP
-  for (int i = 0; i < n; ++i)
-    vvp[i] = rand() % (u + 1);
-
-  return 0;
-}
-
 int vec_seq(struct vec* vp, int s) {
   int n = vp->n;
   double* vvp = vp->vp;

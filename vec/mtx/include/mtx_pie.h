@@ -20,7 +20,7 @@ int mtx_pie_fput(FILE* f, struct mtx_pie* mp);
 
 int mtx_pie_seq(struct mtx_pie* mp, int s);
 
-int mtx_pie_vmlt(struct mtx_pie* mp, struct vec* xp, struct vec* bp);
+int mtx_pie_vmlt(struct mtx_pie* mp, struct vec* xp, struct vec* fp);
 
 int mtx_pie_free(struct mtx_pie* mp);
 
