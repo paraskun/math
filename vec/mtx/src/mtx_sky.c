@@ -74,7 +74,7 @@ void mtx_sky_fput(FILE* f, struct mtx_sky* mp) {
     fprintf(f, "%.4e ", mup[i]);
 }
 
-void mtx_sky_fct_ldu(struct mtx_sky* mp) {
+void mtx_sky_ldu(struct mtx_sky* mp) {
   int n = mp->n;
 
   int* mpp = mp->p;

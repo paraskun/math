@@ -5,7 +5,7 @@
 #include <mtx_csr.h>
 #include <vec.h>
 
-int iss_csr_los_solve(struct mtx_csr*, struct vec*, struct vec*, struct iss_pps,
-                      void (*f)(int, double));
+int iss_csr_ilu_los_solve(struct mtx_csr*, struct vec*, struct vec*,
+                          struct iss_pps, void (*f)(int, double));
 
 #endif  // ISS_CSR_H

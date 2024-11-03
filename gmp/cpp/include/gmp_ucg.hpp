@@ -1,27 +1,29 @@
-#ifndef GMP_ALS
-#define GMP_ALS
+#ifndef GMP_UCG
+#define GMP_UCG
 
-#include <fstream>
 #include <functional>
+#include <istream>
 #include <list>
 #include <vector>
 
-struct gmp_vtx {
-  int v;
-  int p;
-};
-
 struct gmp_ucg {
  private:
-  std::vector<std::vector<int>> al;
+  std::vector<std::list<int>> al;
 
  public:
-  int fget(std::ifstream& f);
-  int fput(std::ofstream& f);
-  int vput(std::ofstream& f, int v);
+  int add(int a, int b);
+  int add(gmp_ucg& g);
 
-  int bfs(int sp, std::function<bool(gmp_vtx)> f);
+  int fget_edg(std::istream& f);
+  int fget_vtx(std::istream& f);
+
+  int fput(std::ostream& f);
+  int vput(std::ostream& f, int v);
+
+  int bfs(int sp, std::function<bool(int, int)> f);
   int spp(int sp, int ep, std::list<int>& path);
+
+  void clear();
 };
 
-#endif  // GMP_ALS
+#endif  // GMP_UCG

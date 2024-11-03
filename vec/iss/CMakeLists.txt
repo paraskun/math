@@ -1,6 +1,5 @@
-set(SRC src/iss_cds.c)
-
-set(HDR include/iss_cds.h)
+set(SRC src/iss_cds.c src/iss_csr.c)
+set(HDR include/iss_cmn.h include/iss_cds.h include/iss_csr.h)
 
 add_library(iss ${SRC} ${HDR})
 

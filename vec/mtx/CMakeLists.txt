@@ -1,5 +1,4 @@
 set(SRC src/mtx_cds.c)
-
 set(HDR include/mtx_cds.h)
 
 add_library(mtx ${SRC} ${HDR})

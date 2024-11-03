@@ -9,7 +9,7 @@
 using namespace std;
 
 int main(int argc, char** argv) {
-  struct gmp_ucg g;
+  gmp_ucg g;
 
   std::ifstream in;
   std::ofstream out;
@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
     goto end;
   }
 
-  if (g.fget(in))
+  if (g.fget_edg(in))
     goto end;
 
   out.open("gmpcc-out.txt");
@@ -48,8 +48,8 @@ int main(int argc, char** argv) {
     goto end;
   }
 
-  g.bfs(sp - 1, [&g, &out](gmp_vtx vtx) {
-    g.vput(out, vtx.v);
+  g.bfs(sp - 1, [&g, &out](int v, int) {
+    g.vput(out, v);
     return true;
   });
 

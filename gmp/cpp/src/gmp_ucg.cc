@@ -1,22 +1,46 @@
-#include <gmp_ucg.hpp>
-
-#include <algorithm>
 #include <cerrno>
 #include <cstring>
-#include <fstream>
 #include <functional>
 #include <queue>
 #include <vector>
 
+#include <gmp_ucg.hpp>
+
 using namespace std;
 
-int gmp_ucg::fget(ifstream& f) {
-  int a, b, ec;
+int gmp_ucg::add(int a, int b) {
+  if (a == b)
+    return 0;
 
-  f >> a >> ec;
+  list<int>::iterator i = al[a].begin();
+
+  while (i != al[a].end() && *i < b)
+    advance(i, 1);
+
+  al[a].insert(i, b);
+
+  return 0;
+}
+
+int gmp_ucg::add(gmp_ucg& g) {
+  if (al.size() < g.al.size())
+    al.resize(g.al.size());
+
+  for (size_t i = 0; i < al.size(); ++i) {
+    al[i].merge(g.al[i]);
+    al[i].unique();
+  }
+
+  return 0;
+}
+
+int gmp_ucg::fget_edg(istream& f) {
+  int a, b, c;
+
+  f >> a >> c;
   al.resize(a);
 
-  for (int i = 0; i < ec; ++i) {
+  for (int i = 0; i < c; ++i) {
     if (f.eof() || f.bad()) {
       errno = EIO;
       return -1;
@@ -24,31 +48,57 @@ int gmp_ucg::fget(ifstream& f) {
 
     f >> a >> b;
 
-    al[a - 1].push_back(b - 1);
-    al[b - 1].push_back(a - 1);
+    add(a - 1, b - 1);
+    add(b - 1, a - 1);
   }
 
   return 0;
 }
 
-int gmp_ucg::fput(ofstream& f) {
+int gmp_ucg::fget_vtx(istream& f) {
+  list<int> prev;
+  int a, c;
+
+  f >> c;
+
+  for (int i = 0; i < c; ++i) {
+    if (f.eof() || f.bad()) {
+      errno = EIO;
+      return -1;
+    }
+
+    f >> a;
+
+    if ((size_t)a > al.size())
+      al.resize(a);
+
+    for (const int& v : prev) {
+      add(a - 1, v - 1);
+      add(v - 1, a - 1);
+    }
+
+    prev.push_back(a);
+  }
+
+  return 0;
+}
+
+int gmp_ucg::fput(ostream& f) {
   for (size_t i = 0; i < al.size(); ++i)
     vput(f, i);
 
   return 0;
 }
 
-int gmp_ucg::vput(ofstream& f, int v) {
+int gmp_ucg::vput(ostream& f, int v) {
   if (f.bad()) {
     errno = EIO;
     return -1;
   }
 
-  sort(al[v].begin(), al[v].end(), less<int>());
-
   f << v + 1 << ": ";
 
-  for (int s : al[v])
+  for (const int& s : al[v])
     if (!f.bad())
       f << s + 1 << " ";
     else {
@@ -61,23 +111,23 @@ int gmp_ucg::vput(ofstream& f, int v) {
   return 0;
 }
 
-int gmp_ucg::bfs(int sp, function<bool(gmp_vtx)> f) {
-  vector<bool> chk(al.size(), false);
-  queue<gmp_vtx> que;
+int gmp_ucg::bfs(int sp, function<bool(int, int)> f) {
+  vector<bool> check(al.size(), false);
+  queue<pair<int, int>> que;
 
-  que.push(gmp_vtx{sp, sp});
-  chk[sp] = true;
+  que.push(pair{sp, sp});
+  check[sp] = true;
 
   while (!que.empty()) {
-    gmp_vtx vtx = que.front();
+    pair vtx = que.front();
 
-    if (!f(vtx))
+    if (!f(vtx.first, vtx.second))
       break;
 
-    for (int c : al[vtx.v])
-      if (!chk[c]) {
-        que.push(gmp_vtx{c, vtx.v});
-        chk[c] = true;
+    for (const int& c : al[vtx.first])
+      if (!check[c]) {
+        que.push(pair{c, vtx.first});
+        check[c] = true;
       }
 
     que.pop();
@@ -89,10 +139,10 @@ int gmp_ucg::bfs(int sp, function<bool(gmp_vtx)> f) {
 int gmp_ucg::spp(int sp, int ep, list<int>& path) {
   vector<int> ft(al.size(), -1);
 
-  bfs(sp, [&ep, &ft](gmp_vtx vtx) {
-    ft[vtx.v] = vtx.p;
+  bfs(sp, [&ep, &ft](int v, int p) {
+    ft[v] = p;
 
-    if (vtx.v == ep)
+    if (v == ep)
       return false;
 
     return true;
@@ -110,4 +160,8 @@ int gmp_ucg::spp(int sp, int ep, list<int>& path) {
   } while (ft[v] != v);
 
   return 0;
+}
+
+void gmp_ucg::clear() {
+  al.clear();
 }
