@@ -1,5 +1,10 @@
-set(SRC src/dss_sky.c)
-set(HDR include/dss_sky.h)
+set(SRC 
+  src/dss_sky.c
+)
+
+set(HDR 
+  include/dss_sky.h
+)
 
 add_library(dss ${SRC} ${HDR})
 

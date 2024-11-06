@@ -1,5 +1,10 @@
-set(SRC src/dfs.c)
-set(HDR include/dfs.h)
+set(SRC 
+  src/dfs.c
+)
+
+set(HDR 
+  include/dfs.h
+)
 
 add_library(dfs ${SRC} ${HDR})
 
