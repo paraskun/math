@@ -4,6 +4,7 @@
 #include <omp.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 struct vec* vec_new(int n) {
   struct vec* vec = malloc(sizeof(struct vec));
@@ -127,6 +128,11 @@ int vec_nrm(struct vec* vp, double* rp) {
     s += vvp[i] * vvp[i];
 
   *rp = sqrt(s);
+  return 0;
+}
+
+int vec_cpy(struct vec* ap, struct vec* bp) {
+  memcpy(bp->vp, ap->vp, sizeof(double) * ap->n);
   return 0;
 }
 

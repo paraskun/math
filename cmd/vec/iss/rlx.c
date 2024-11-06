@@ -22,7 +22,7 @@ int main(int argc, char* argv[argc]) {
   FILE* fmi = fopen(argv[1], "r");
 
   fscanf(fpi, "%d %d", &n, &c);
-  fscanf(fpi, "%lf %lf %d", &pps.omg, &pps.pps.eps, &pps.pps.ms);
+  fscanf(fpi, "%lf %lf %d", &pps.omg, &pps.pps.eps, &pps.pps.mk);
 
   struct mtx_cds* mp = mtx_cds_new(n, c);
   struct vec* xp = vec_new(n);

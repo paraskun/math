@@ -50,9 +50,9 @@ int iss_cds_jac_solve(struct mtx_cds* mp, struct vec* xp, struct vec* fp,
   double eps = pps.pps.eps;
   double omg = pps.omg;
 
-  int ms = pps.pps.ms;
+  int mk = pps.pps.mk;
 
-  for (int s = 0; s < ms && res >= eps; ++s) {
+  for (int k = 0; k < mk && res >= eps; ++k) {
     step(mp, xp, fp, tp, omg);
     swap(xp, tp);
 
@@ -62,7 +62,7 @@ int iss_cds_jac_solve(struct mtx_cds* mp, struct vec* xp, struct vec* fp,
 
     res = ntp / nfp;
 
-    f(s, res);
+    f(k, res);
   }
 
   vec_free(tp);
@@ -82,9 +82,9 @@ int iss_cds_rlx_solve(struct mtx_cds* mp, struct vec* xp, struct vec* fp,
   double eps = pps.pps.eps;
   double omg = pps.omg;
 
-  int ms = pps.pps.ms;
+  int mk = pps.pps.mk;
 
-  for (int s = 0; s < ms && res >= eps; ++s) {
+  for (int k = 0; k < mk && res >= eps; ++k) {
     step(mp, xp, fp, xp, omg);
 
     mtx_cds_vmlt(mp, xp, tp);
@@ -93,7 +93,7 @@ int iss_cds_rlx_solve(struct mtx_cds* mp, struct vec* xp, struct vec* fp,
 
     res = ntp / nfp;
 
-    f(s, res);
+    f(k, res);
   }
 
   vec_free(tp);

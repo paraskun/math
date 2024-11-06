@@ -5,7 +5,7 @@
 
 struct iss_pps {
   double eps;
-  int ms;
+  int mk;
 };
 
 int iss_pps_fget(FILE* f, struct iss_pps* pps);

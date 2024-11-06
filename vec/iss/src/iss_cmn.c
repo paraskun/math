@@ -2,7 +2,7 @@
 
 int iss_pps_fget(FILE* f, struct iss_pps* pps) {
   fscanf(f, "%lf", &pps->eps);
-  fscanf(f, "%d", &pps->ms);
+  fscanf(f, "%d", &pps->mk);
 
   return 0;
 }
