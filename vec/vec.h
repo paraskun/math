@@ -21,6 +21,7 @@ int vec_cmb(struct vec* ap, struct vec* bp, struct vec* rp, double k);
 int vec_mlt(struct vec* ap, struct vec* bp, double* rp);
 int vec_nrm(struct vec* vp, double* rp);
 int vec_cpy(struct vec* ap, struct vec* bp);
+int vec_cls(struct vec* vp);
 
 void vec_free(struct vec* vp);
 

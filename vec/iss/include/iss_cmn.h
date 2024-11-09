@@ -8,6 +8,14 @@ struct iss_pps {
   int mk;
 };
 
-int iss_pps_fget(FILE* f, struct iss_pps* pps);
+struct iss_fio {
+  FILE* pps;
+  FILE* x;
+  FILE* f;
+};
+
+int iss_pps_fget(struct iss_fio* f, struct iss_pps* pps);
+
+void iss_fio_close(struct iss_fio* f);
 
 #endif  // ISS_CMN_H

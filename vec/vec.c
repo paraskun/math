@@ -136,6 +136,11 @@ int vec_cpy(struct vec* ap, struct vec* bp) {
   return 0;
 }
 
+int vec_cls(struct vec* vp) {
+  memset(vp->vp, 0, sizeof(double) * vp->n);
+  return 0;
+}
+
 void vec_free(struct vec* vp) {
   free(vp->vp);
   free(vp);
