@@ -39,15 +39,15 @@ struct mtx_csj* mtx_csj_new(struct mtx_csj_pps pps) {
   return mp;
 }
 
-int mtx_csj_pps_fget(struct mtx_csj_fio* f, struct mtx_csj_pps* pps) {
-  fscanf(f->pps, "%d", &pps->n);
-  fscanf(f->pps, "%d", &pps->le);
-  fscanf(f->pps, "%d", &pps->ue);
+int mtx_csj_pps_fget(struct mtx_csj_pkt* pkt, struct mtx_csj_pps* pps) {
+  fscanf(pkt->pps, "%d", &pps->n);
+  fscanf(pkt->pps, "%d", &pps->le);
+  fscanf(pkt->pps, "%d", &pps->ue);
 
   return 0;
 }
 
-int mtx_csj_fput(struct mtx_csj_fio* f, struct mtx_csj* mp) {
+int mtx_csj_fput(struct mtx_csj_pkt* pkt, struct mtx_csj* mp) {
   int n = mp->pps.n;
   int le = mp->pps.le;
   int ue = mp->pps.ue;
@@ -63,30 +63,30 @@ int mtx_csj_fput(struct mtx_csj_fio* f, struct mtx_csj* mp) {
   int* iu = mp->iu;
 
   for (int i = 0; i < n; ++i)
-    fprintf(f->dr, "%10.3e ", dr[i]);
+    fprintf(pkt->dr, "%10.3e ", dr[i]);
 
   for (int i = 0; i < le; ++i)
-    fprintf(f->lr, "%10.3e ", lr[i]);
+    fprintf(pkt->lr, "%10.3e ", lr[i]);
 
   for (int i = 0; i < le; ++i)
-    fprintf(f->jl, "%d ", jl[i]);
+    fprintf(pkt->jl, "%d ", jl[i]);
 
   for (int i = 0; i <= n; ++i)
-    fprintf(f->il, "%d ", il[i]);
+    fprintf(pkt->il, "%d ", il[i]);
 
   for (int i = 0; i < ue; ++i)
-    fprintf(f->ur, "%10.3e ", ur[i]);
+    fprintf(pkt->ur, "%10.3e ", ur[i]);
 
   for (int i = 0; i < ue; ++i)
-    fprintf(f->iu, "%d ", iu[i]);
+    fprintf(pkt->iu, "%d ", iu[i]);
 
   for (int i = 0; i <= n; ++i)
-    fprintf(f->ju, "%d ", ju[i]);
+    fprintf(pkt->ju, "%d ", ju[i]);
 
   return 0;
 }
 
-int mtx_csj_fget(struct mtx_csj_fio* f, struct mtx_csj* mp) {
+int mtx_csj_fget(struct mtx_csj_pkt* pkt, struct mtx_csj* mp) {
   int n = mp->pps.n;
   int le = mp->pps.le;
   int ue = mp->pps.ue;
@@ -101,40 +101,40 @@ int mtx_csj_fget(struct mtx_csj_fio* f, struct mtx_csj* mp) {
   int* jl = mp->jl;
   int* iu = mp->iu;
 
-  fseek(f->dr, 0, SEEK_SET);
+  fseek(pkt->dr, 0, SEEK_SET);
 
   for (int i = 0; i < n; ++i)
-    fscanf(f->dr, "%lf", &dr[i]);
+    fscanf(pkt->dr, "%lf", &dr[i]);
 
-  fseek(f->lr, 0, SEEK_SET);
-
-  for (int i = 0; i < le; ++i)
-    fscanf(f->lr, "%lf", &lr[i]);
-
-  fseek(f->jl, 0, SEEK_SET);
+  fseek(pkt->lr, 0, SEEK_SET);
 
   for (int i = 0; i < le; ++i)
-    fscanf(f->jl, "%d", &jl[i]);
+    fscanf(pkt->lr, "%lf", &lr[i]);
 
-  fseek(f->il, 0, SEEK_SET);
+  fseek(pkt->jl, 0, SEEK_SET);
 
-  for (int i = 0; i <= n; ++i)
-    fscanf(f->il, "%d", &il[i]);
+  for (int i = 0; i < le; ++i)
+    fscanf(pkt->jl, "%d", &jl[i]);
 
-  fseek(f->ur, 0, SEEK_SET);
-
-  for (int i = 0; i < ue; ++i)
-    fscanf(f->ur, "%lf", &ur[i]);
-
-  fseek(f->iu, 0, SEEK_SET);
-
-  for (int i = 0; i < ue; ++i)
-    fscanf(f->iu, "%d", &iu[i]);
-
-  fseek(f->ju, 0, SEEK_SET);
+  fseek(pkt->il, 0, SEEK_SET);
 
   for (int i = 0; i <= n; ++i)
-    fscanf(f->ju, "%d", &ju[i]);
+    fscanf(pkt->il, "%d", &il[i]);
+
+  fseek(pkt->ur, 0, SEEK_SET);
+
+  for (int i = 0; i < ue; ++i)
+    fscanf(pkt->ur, "%lf", &ur[i]);
+
+  fseek(pkt->iu, 0, SEEK_SET);
+
+  for (int i = 0; i < ue; ++i)
+    fscanf(pkt->iu, "%d", &iu[i]);
+
+  fseek(pkt->ju, 0, SEEK_SET);
+
+  for (int i = 0; i <= n; ++i)
+    fscanf(pkt->ju, "%d", &ju[i]);
 
   return 0;
 }
@@ -488,15 +488,15 @@ void mtx_csj_free(struct mtx_csj* mp) {
   free(mp);
 }
 
-void mtx_csj_fio_close(struct mtx_csj_fio* f) {
-  fclose(f->pps);
+void mtx_csj_pkt_close(struct mtx_csj_pkt* pkt) {
+  fclose(pkt->pps);
 
-  fclose(f->lr);
-  fclose(f->ur);
-  fclose(f->dr);
+  fclose(pkt->lr);
+  fclose(pkt->ur);
+  fclose(pkt->dr);
 
-  fclose(f->il);
-  fclose(f->jl);
-  fclose(f->iu);
-  fclose(f->ju);
+  fclose(pkt->il);
+  fclose(pkt->jl);
+  fclose(pkt->iu);
+  fclose(pkt->ju);
 }

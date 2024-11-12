@@ -24,7 +24,7 @@ struct mtx_csj {
   int* ju;
 };
 
-struct mtx_csj_fio {
+struct mtx_csj_pkt {
   FILE* pps;
 
   FILE* lr;
@@ -39,10 +39,10 @@ struct mtx_csj_fio {
 
 struct mtx_csj* mtx_csj_new(struct mtx_csj_pps pps);
 
-int mtx_csj_pps_fget(struct mtx_csj_fio* f, struct mtx_csj_pps* pps);
+int mtx_csj_pps_fget(struct mtx_csj_pkt* pkt, struct mtx_csj_pps* pps);
 
-int mtx_csj_fput(struct mtx_csj_fio* f, struct mtx_csj* mp);
-int mtx_csj_fget(struct mtx_csj_fio* f, struct mtx_csj* mp);
+int mtx_csj_fput(struct mtx_csj_pkt* pkt, struct mtx_csj* mp);
+int mtx_csj_fget(struct mtx_csj_pkt* pkt, struct mtx_csj* mp);
 
 int mtx_csj_fput_all(FILE* f, struct mtx_csj* mp);
 int mtx_csj_fget_all(FILE* f, struct mtx_csj* mp);
@@ -53,6 +53,6 @@ int mtx_csj_dgl(struct mtx_csj* mp, struct mtx_csj* rp);
 int mtx_csj_vmlt(struct mtx_csj* mp, struct vec* xp, struct vec* fp);
 
 void mtx_csj_free(struct mtx_csj* mp);
-void mtx_csj_fio_close(struct mtx_csj_fio* f);
+void mtx_csj_pkt_close(struct mtx_csj_pkt* pkt);
 
 #endif  // MTX_CSR_H
