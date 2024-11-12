@@ -15,6 +15,12 @@ set(HDR
 )
 
 add_library(mtx ${SRC} ${HDR})
-
 target_link_libraries(mtx PUBLIC vec -lm)
 target_include_directories(mtx PUBLIC include/)
+
+add_executable(mtx_csj_test test/mtx_csj_test.cc)
+target_link_libraries(mtx_csj_test mtx GTest::gtest_main)
+
+include(GoogleTest)
+
+gtest_discover_tests(mtx_csj_test)

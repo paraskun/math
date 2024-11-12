@@ -57,7 +57,7 @@ int iss_cds_jac_solve(struct mtx_cds* mp, struct vec* xp, struct vec* fp,
     swap(xp, tp);
 
     mtx_cds_vmlt(mp, xp, tp);
-    vec_sub(fp, tp, tp);
+    vec_cmb(fp, tp, tp, -1);
     vec_nrm(tp, &ntp);
 
     res = ntp / nfp;
@@ -88,7 +88,7 @@ int iss_cds_rlx_solve(struct mtx_cds* mp, struct vec* xp, struct vec* fp,
     step(mp, xp, fp, xp, omg);
 
     mtx_cds_vmlt(mp, xp, tp);
-    vec_sub(fp, tp, tp);
+    vec_cmb(fp, tp, tp, -1);
     vec_nrm(tp, &ntp);
 
     res = ntp / nfp;

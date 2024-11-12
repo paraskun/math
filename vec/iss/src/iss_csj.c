@@ -1,5 +1,6 @@
 #include <iss_csj.h>
 
+#include <math.h>
 #include <string.h>
 
 int iss_csj_los_solve(struct mtx_csj* mp, struct vec* xp, struct vec* fp,
@@ -19,30 +20,52 @@ int iss_csj_los_solve(struct mtx_csj* mp, struct vec* xp, struct vec* fp,
 
   struct vec* t1 = vec_new(n);
 
-  mtx_csj_vmlt(mp, xp, r);
-  vec_sub(fp, r, r);
-  vec_cpy(r, z);
-  mtx_csj_vmlt(mp, z, p);
-  vec_mlt(r, r, &rr);
-
   int mk = pps->mk;
   double eps = pps->eps;
 
-  for (int k = 0; k < mk && rr >= eps; ++k) {
+  // r{0} = f - A * x{0}
+  mtx_csj_vmlt(mp, xp, r);
+  vec_cmb(fp, r, r, -1);
+
+  // z{0} = r{0}
+  vec_cpy(r, z);
+
+  // p{0} = A * z{0}
+  mtx_csj_vmlt(mp, z, p);
+
+  // rr{0} = r{0} * r{0}
+  vec_mlt(r, r, &rr);
+
+  for (int k = 0; k < mk && fabs(rr) >= eps; ++k) {
+    // pr{k-1} = p{k-1} * r{k-1}
     vec_mlt(p, r, &pr);
+
+    // pp{k-1} = p{k-1} * p{k-1}
     vec_mlt(p, p, &pp);
 
+    // a{k} == pr{k-1} / pp{k-1}
     a = pr / pp;
+
+    // rr{k} = rr{k-1} - a{k} * a{k} * pp{k-1}
     rr = rr - a * a * pp;
 
+    // x{k} = x{k-1} + a{k} * z{k-1}
     vec_cmb(xp, z, xp, a);
+
+    // r{k} = r{k-1} - a{k} * p{k-1}
     vec_cmb(r, p, r, -a);
+
+    // pr = p{k-1} * A * r{k}
     mtx_csj_vmlt(mp, r, t1);
     vec_mlt(p, t1, &pr);
 
+    // b{k} = -pr / pp{k-1}
     b = -pr / pp;
 
+    // z{k} = r{k} + b{k} * z{k-1}
     vec_cmb(r, z, z, b);
+
+    // p{k} = A * r{k} + b{k} + p{k-1}
     vec_cmb(t1, p, p, b);
 
     f(k, rr);
@@ -76,9 +99,9 @@ int iss_csj_ilu_lsolve(struct mtx_csj* mp, struct vec* xp, struct vec* fp) {
     double s = 0;
 
     for (int lr = lr0; lr < lr1; ++lr) {
-      int lj = mjl[lr];
+      int j = mjl[lr];
 
-      s += mlr[lr] * xv[lj];
+      s += mlr[lr] * xv[j];
     }
 
     xv[i] = (fv[i] - s) / mdr[i];
@@ -99,7 +122,7 @@ int iss_csj_ilu_usolve(struct mtx_csj* mp, struct vec* xp, struct vec* fp) {
   double* xv = xp->vp;
   double* fv = fp->vp;
 
-  memcpy(fv, xv, sizeof(double) * n);
+  memcpy(xv, fv, sizeof(double) * n);
 
   for (int j = n - 1; j > -1; --j) {
     xv[j] /= mdr[j];
@@ -140,35 +163,68 @@ int iss_csj_ilu_los_solve(struct mtx_csj* mp, struct vec* xp, struct vec* fp,
   struct vec* t2 = vec_new(n);
 
   mtx_csj_ilu(mp, ilu);
+
+  putchar('\n');
+  mtx_csj_fput_all(stdout, ilu);
+  putchar('\n');
+
+  // mtx_csj_fput_all(stdout, ilu);
+
+  // r{0} = L^-1 * (f - A * x{0})
   mtx_csj_vmlt(mp, xp, r);
-  vec_sub(fp, r, r);
+  vec_cmb(fp, r, r, -1);
   iss_csj_ilu_lsolve(ilu, r, r);
+
+  // z{0} = U^-1 * r{0}
   iss_csj_ilu_usolve(ilu, z, r);
+
+  // p{0} = L^-1 * A * z{0}
   mtx_csj_vmlt(mp, z, p);
   iss_csj_ilu_lsolve(ilu, p, p);
+
+  // rr{0} = (r{0}, r{0})
   vec_mlt(r, r, &rr);
 
   int mk = pps->mk;
   double eps = pps->eps;
 
-  for (int k = 0; k < mk && rr >= eps; ++k) {
+  for (int k = 0; k < mk && fabs(rr) >= eps; ++k) {
+    // pr{k-1} = (p{k-1}, r{k-1})
     vec_mlt(p, r, &pr);
+
+    // pp{k-1} = (p{k-1}, p{k-1})
     vec_mlt(p, p, &pp);
 
+    // a{k} = pr{k-1} / pp{k-1}
     a = pr / pp;
+
+    // rr{k} = rr{k-1} * a{k}^2 * pp{k-1}
     rr = rr - a * a * pp;
 
+    // x{k} = x{k-1} + a{k} * z{k-1}
     vec_cmb(xp, z, xp, a);
+
+    // r{k} = r{k-1} - a{k} * p{k-1}
     vec_cmb(r, p, r, -a);
+
+    // t1 = L^-1 * A * U^-1 * r{k}
     iss_csj_ilu_usolve(ilu, t1, r);
     mtx_csj_vmlt(mp, t1, t1);
     iss_csj_ilu_lsolve(ilu, t1, t1);
+
+    // pr = (p{k-1}, t1)
     vec_mlt(p, t1, &pr);
 
+    // b{k} = -pr / pp{k-1}
     b = -pr / pp;
 
+    // t2 = U^-1 * r{k}
     iss_csj_ilu_usolve(ilu, r, t2);
+
+    // z{k} = t2 + b{k} * z{k-1}
     vec_cmb(t2, z, z, b);
+
+    // p{k} = t1 + b{k} * p{k-1}
     vec_cmb(t1, p, p, b);
 
     f(k, rr);
@@ -227,7 +283,7 @@ int iss_csj_dgl_los_solve(struct mtx_csj* mp, struct vec* xp, struct vec* fp,
 
   mtx_csj_dgl(mp, dgl);
   mtx_csj_vmlt(mp, xp, r);
-  vec_sub(fp, r, r);
+  vec_cmb(fp, r, r, -1);
   iss_csj_dgl_solve(dgl, r, r);
   iss_csj_dgl_solve(dgl, z, r);
   mtx_csj_vmlt(mp, z, p);

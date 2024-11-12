@@ -1,10 +1,14 @@
 #include <vec.h>
 
 #include <math.h>
-#include <omp.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#ifdef OMP_THREADS_NUM
+#include <omp.h>
+#endif
 
 struct vec* vec_new(int n) {
   struct vec* vec = malloc(sizeof(struct vec));
@@ -17,13 +21,16 @@ struct vec* vec_new(int n) {
 
 int vec_seq(struct vec* vp, int s) {
   int n = vp->n;
+  int v = s;
   double* vvp = vp->vp;
 
 #ifdef OMP_THREADS_NUM
 #pragma omp parallel for num_threads(OMP_THREADS_NUM)
 #endif  // OMP
-  for (int i = 0, v = s; i < n; ++i, ++v)
+  for (int i = 0; i < n; ++i) {
     vvp[i] = v;
+    v += 1;
+  }
 
   return 0;
 }
@@ -46,38 +53,6 @@ int vec_fput(FILE* f, struct vec* vp) {
   for (int i = 0; i < n; ++i)
     if (fprintf(f, "%.3e ", vvp[i]) < 0)
       return -1;
-
-  return 0;
-}
-
-int vec_add(struct vec* ap, struct vec* bp, struct vec* rp) {
-  int n = ap->n;
-
-  double* avp = ap->vp;
-  double* bvp = bp->vp;
-  double* rvp = rp->vp;
-
-#ifdef OMP_THREADS_NUM
-#pragma omp parallel for num_threads(OMP_THREADS_NUM)
-#endif  // OMP
-  for (int i = 0; i < n; ++i)
-    rvp[i] = avp[i] + bvp[i];
-
-  return 0;
-}
-
-int vec_sub(struct vec* ap, struct vec* bp, struct vec* rp) {
-  int n = ap->n;
-
-  double* avp = ap->vp;
-  double* bvp = bp->vp;
-  double* rvp = rp->vp;
-
-#ifdef OMP_THREADS_NUM
-#pragma omp parallel for num_threads(OMP_THREADS_NUM)
-#endif  // OMP
-  for (int i = 0; i < n; ++i)
-    rvp[i] = avp[i] - bvp[i];
 
   return 0;
 }

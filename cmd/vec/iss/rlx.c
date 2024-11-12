@@ -50,7 +50,7 @@ int main(int argc, char* argv[argc]) {
     double nd;
 
     vec_nrm(xp, &nxp);
-    vec_sub(xt, xp, xp);
+    vec_cmb(xt, xp, xp, -1);
     vec_nrm(xp, &nd);
     vec_nrm(xt, &ntp);
 
