@@ -20,4 +20,6 @@ add_executable(iss_csj_test test/iss_csj_test.cc)
 target_link_libraries(iss_csj_test mtx iss GTest::gtest_main)
 
 include(GoogleTest)
-gtest_discover_tests(iss_csj_test)
+gtest_discover_tests(iss_csj_test
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/vec/iss/test/
+)

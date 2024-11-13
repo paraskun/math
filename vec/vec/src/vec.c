@@ -35,7 +35,7 @@ int vec_seq(struct vec* vp, int s) {
   return 0;
 }
 
-int vec_fget(FILE* f, struct vec* vp) {
+int vec_get(FILE* f, struct vec* vp) {
   int n = vp->n;
   double* vvp = vp->vp;
 
@@ -46,13 +46,15 @@ int vec_fget(FILE* f, struct vec* vp) {
   return 0;
 }
 
-int vec_fput(FILE* f, struct vec* vp) {
+int vec_put(FILE* f, struct vec* vp) {
   int n = vp->n;
   double* vvp = vp->vp;
 
   for (int i = 0; i < n; ++i)
     if (fprintf(f, "%.3e ", vvp[i]) < 0)
       return -1;
+
+  putc('\n', f);
 
   return 0;
 }

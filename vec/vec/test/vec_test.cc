@@ -21,9 +21,9 @@ TEST(vec, cmb_pos) {
 
   vec_cmb(ap, bp, ap, k);
 
-  EXPECT_FLOAT_EQ(1.4, ap->vp[0]);
-  EXPECT_FLOAT_EQ(1.5, ap->vp[1]);
-  EXPECT_FLOAT_EQ(-2.4, ap->vp[2]);
+  EXPECT_DOUBLE_EQ(1.4, ap->vp[0]);
+  EXPECT_DOUBLE_EQ(1.5, ap->vp[1]);
+  EXPECT_DOUBLE_EQ(-2.4, ap->vp[2]);
 
   vec_free(ap);
   vec_free(bp);
@@ -45,9 +45,9 @@ TEST(vec, cmb_neg) {
 
   vec_cmb(ap, bp, ap, k);
 
-  EXPECT_FLOAT_EQ(0.6, ap->vp[0]);
-  EXPECT_FLOAT_EQ(2.5, ap->vp[1]);
-  EXPECT_FLOAT_EQ(-3.6, ap->vp[2]);
+  EXPECT_DOUBLE_EQ(0.6, ap->vp[0]);
+  EXPECT_DOUBLE_EQ(2.5, ap->vp[1]);
+  EXPECT_DOUBLE_EQ(-3.6, ap->vp[2]);
 
   vec_free(ap);
   vec_free(bp);
@@ -69,7 +69,7 @@ TEST(vec, mlt) {
 
   vec_mlt(ap, bp, &r);
 
-  EXPECT_FLOAT_EQ(-24.0, r);
+  EXPECT_DOUBLE_EQ(-24.0, r);
 
   vec_free(ap);
   vec_free(bp);
@@ -86,7 +86,7 @@ TEST(vec, nrm) {
 
   vec_nrm(ap, &r);
 
-  EXPECT_FLOAT_EQ(sqrt(14.0), r);
+  EXPECT_DOUBLE_EQ(sqrt(14.0), r);
 
   vec_free(ap);
 }
@@ -101,9 +101,9 @@ TEST(vec, cpy) {
 
   vec_cpy(ap, bp);
 
-  EXPECT_FLOAT_EQ(1.0, bp->vp[0]);
-  EXPECT_FLOAT_EQ(2.0, bp->vp[1]);
-  EXPECT_FLOAT_EQ(-3.0, bp->vp[2]);
+  EXPECT_DOUBLE_EQ(1.0, bp->vp[0]);
+  EXPECT_DOUBLE_EQ(2.0, bp->vp[1]);
+  EXPECT_DOUBLE_EQ(-3.0, bp->vp[2]);
 
   vec_free(ap);
   vec_free(bp);
@@ -118,9 +118,9 @@ TEST(vec, cls) {
 
   vec_cls(ap);
 
-  EXPECT_FLOAT_EQ(0.0, ap->vp[0]);
-  EXPECT_FLOAT_EQ(0.0, ap->vp[1]);
-  EXPECT_FLOAT_EQ(0.0, ap->vp[2]);
+  EXPECT_DOUBLE_EQ(0.0, ap->vp[0]);
+  EXPECT_DOUBLE_EQ(0.0, ap->vp[1]);
+  EXPECT_DOUBLE_EQ(0.0, ap->vp[2]);
 
   vec_free(ap);
 }

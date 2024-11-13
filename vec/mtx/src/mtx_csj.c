@@ -39,7 +39,7 @@ struct mtx_csj* mtx_csj_new(struct mtx_csj_pps pps) {
   return mp;
 }
 
-int mtx_csj_pps_fget(struct mtx_csj_pkt* pkt, struct mtx_csj_pps* pps) {
+int mtx_csj_pps_get(struct mtx_csj_pkt* pkt, struct mtx_csj_pps* pps) {
   fscanf(pkt->pps, "%d", &pps->n);
   fscanf(pkt->pps, "%d", &pps->le);
   fscanf(pkt->pps, "%d", &pps->ue);
@@ -47,7 +47,7 @@ int mtx_csj_pps_fget(struct mtx_csj_pkt* pkt, struct mtx_csj_pps* pps) {
   return 0;
 }
 
-int mtx_csj_fput(struct mtx_csj_pkt* pkt, struct mtx_csj* mp) {
+int mtx_csj_put(struct mtx_csj_pkt* pkt, struct mtx_csj* mp) {
   int n = mp->pps.n;
   int le = mp->pps.le;
   int ue = mp->pps.ue;
@@ -86,7 +86,7 @@ int mtx_csj_fput(struct mtx_csj_pkt* pkt, struct mtx_csj* mp) {
   return 0;
 }
 
-int mtx_csj_fget(struct mtx_csj_pkt* pkt, struct mtx_csj* mp) {
+int mtx_csj_get(struct mtx_csj_pkt* pkt, struct mtx_csj* mp) {
   int n = mp->pps.n;
   int le = mp->pps.le;
   int ue = mp->pps.ue;
@@ -139,7 +139,7 @@ int mtx_csj_fget(struct mtx_csj_pkt* pkt, struct mtx_csj* mp) {
   return 0;
 }
 
-int mtx_csj_fput_all(FILE* f, struct mtx_csj* mp) {
+int mtx_csj_put_all(FILE* f, struct mtx_csj* mp) {
   int n = mp->pps.n;
 
   int* mil = mp->il;
@@ -192,7 +192,7 @@ int mtx_csj_fput_all(FILE* f, struct mtx_csj* mp) {
   return 0;
 }
 
-int mtx_csj_fget_all(FILE* f, struct mtx_csj* mp) {
+int mtx_csj_get_all(FILE* f, struct mtx_csj* mp) {
   int n = mp->pps.n;
   int ue = mp->pps.ue;
   int le = mp->pps.le;
@@ -421,6 +421,117 @@ int mtx_csj_dgl(struct mtx_csj* mp, struct mtx_csj* rp) {
   return 0;
 }
 
+int mtx_csj_all(struct mtx_csj* mp) {
+  int n = mp->pps.n;
+  int le = mp->pps.le;
+  int ue = mp->pps.ue;
+
+  int* mil = mp->il;
+  int* mjl = mp->jl;
+  int* miu = mp->iu;
+  int* mju = mp->ju;
+
+  mil[0] = 0;
+  mju[0] = 0;
+
+  for (int i = 1, lr = 0; i < n; ++i) {
+    mil[i] = lr;
+    mju[i] = lr;
+
+    for (int j = 0; j < i; ++j, ++lr) {
+      mjl[lr] = j;
+      miu[lr] = j;
+    }
+  }
+
+  mil[n] = le;
+  mju[n] = ue;
+
+  return 0;
+}
+
+int mtx_csj_ddm(struct mtx_csj* mp, int k) {
+  int n = mp->pps.n;
+
+  int* mil = mp->il;
+  int* mju = mp->ju;
+  int* miu = mp->iu;
+
+  double* mdr = mp->dr;
+  double* mlr = mp->lr;
+  double* mur = mp->ur;
+
+  memset(mdr, 0, sizeof(double) * n);
+
+  for (int i = 1; i < n; ++i) {
+    int lr0 = mil[i];
+    int lr1 = mil[i + 1];
+
+    for (int lr = lr0; lr < lr1; ++lr) {
+      mlr[lr] = -(rand() % 5);
+      mdr[i] -= mlr[lr];
+      mlr[lr] *= k;
+    }
+  }
+
+  for (int j = 1; j < n; ++j) {
+    int ur0 = mju[j];
+    int ur1 = mju[j + 1];
+
+    for (int ur = ur0; ur < ur1; ++ur) {
+      int i = miu[ur];
+
+      mur[ur] = -(rand() % 5);
+      mdr[i] -= mur[ur];
+      mur[ur] *= k;
+    }
+  }
+
+  mdr[0] += 1;
+
+  return 0;
+}
+
+int mtx_csj_hlb(struct mtx_csj* mp) {
+  int n = mp->pps.n;
+
+  int* mil = mp->il;
+  int* mjl = mp->jl;
+  int* mju = mp->ju;
+  int* miu = mp->iu;
+
+  double* mdr = mp->dr;
+  double* mlr = mp->lr;
+  double* mur = mp->ur;
+
+  for (int i = 0; i < n; ++i)
+    mdr[i] = 1.0 / (i + i - 1);
+
+  for (int i = 1; i < n; ++i) {
+    int lr0 = mil[i];
+    int lr1 = mil[i + 1];
+
+    for (int lr = lr0; lr < lr1; ++lr) {
+      int j = mjl[lr];
+
+      mlr[lr] = 1.0 / (i + j - 1);
+    }
+  }
+
+  for (int j = 1; j < n; ++j) {
+    int ur0 = mju[j];
+    int ur1 = mju[j + 1];
+
+    for (int ur = ur0; ur < ur1; ++ur) {
+      int i = miu[ur];
+
+      mur[ur] = 1.0 / (i + j - 1);
+    }
+  }
+
+  return 0;
+}
+
 int mtx_csj_vmlt(struct mtx_csj* mp, struct vec* xp, struct vec* fp) {
   int n = mp->pps.n;
 
@@ -489,7 +600,8 @@ void mtx_csj_free(struct mtx_csj* mp) {
 }
 
 void mtx_csj_pkt_close(struct mtx_csj_pkt* pkt) {
-  fclose(pkt->pps);
+  if (pkt->pps)
+    fclose(pkt->pps);
 
   fclose(pkt->lr);
   fclose(pkt->ur);
