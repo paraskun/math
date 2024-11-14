@@ -18,7 +18,6 @@ class Env : public testing::Environment {
 
   static struct mtx_csj_pkt ddm_pos_pkt;
   static struct mtx_csj_pkt ddm_neg_pkt;
-
   static struct mtx_csj_pkt big_sym_pkt;
   static struct mtx_csj_pkt big_asm_pkt;
 
@@ -117,43 +116,23 @@ class IssCsjTest : public testing::Test {
     return sec * 1000 + nan / 1000000;
   }
 
-  void test_smp_los(FILE* rep,
-                    int (*f)(struct mtx_csj* mp, struct vec* xp, struct vec* fp,
-                             struct iss_pps* pps, struct iss_res* res,
-                             void (*)(struct iss_res*)));
+  void ctx_smp(FILE* rep, fun_iss_csj_slv slv);
 
-  void test_hlb_los(FILE* rep,
-                    int (*f)(struct mtx_csj* mp, struct vec* xp, struct vec* fp,
-                             struct iss_pps* pps, struct iss_res* res,
-                             void (*)(struct iss_res*)));
+  void ctx_hlb(FILE* rep, fun_iss_csj_slv slv);
 
-  void test_ddm_pos_los(FILE* rep, int (*f)(struct mtx_csj* mp, struct vec* xp,
-                                            struct vec* fp, struct iss_pps* pps,
-                                            struct iss_res* res,
-                                            void (*)(struct iss_res*)));
-  void test_ddm_neg_los(FILE* rep, int (*f)(struct mtx_csj* mp, struct vec* xp,
-                                            struct vec* fp, struct iss_pps* pps,
-                                            struct iss_res* res,
-                                            void (*)(struct iss_res*)));
+  void ctx_ddm_pos(FILE* rep, fun_iss_csj_slv slv);
 
-  void test_big_sym_los(FILE* rep, int (*f)(struct mtx_csj* mp, struct vec* xp,
-                                            struct vec* fp, struct iss_pps* pps,
-                                            struct iss_res* res,
-                                            void (*)(struct iss_res*)));
-  void test_big_asm_los(FILE* rep, int (*f)(struct mtx_csj* mp, struct vec* xp,
-                                            struct vec* fp, struct iss_pps* pps,
-                                            struct iss_res* res,
-                                            void (*)(struct iss_res*)));
+  void ctx_ddm_neg(FILE* rep, fun_iss_csj_slv slv);
+
+  void ctx_big_sym(FILE* rep, fun_iss_csj_slv slv);
+
+  void ctx_big_asm(FILE* rep, fun_iss_csj_slv slv);
 };
 
 const double IssCsjTest::EPS = 1e-10;
 const double IssCsjTest::EPS_X = 1e-4;
 
-void IssCsjTest::test_smp_los(FILE* rep,
-                              int (*f)(struct mtx_csj* mp, struct vec* xp,
-                                       struct vec* fp, struct iss_pps* pps,
-                                       struct iss_res* res,
-                                       void (*)(struct iss_res*))) {
+void IssCsjTest::ctx_smp(FILE* rep, fun_iss_csj_slv slv) {
   struct timespec beg;
   struct timespec end;
 
@@ -162,14 +141,14 @@ void IssCsjTest::test_smp_los(FILE* rep,
   struct iss_res res = {0, 0};
 
   //  1  2  3
-  // -4 -5 -6
+  // -4  5 -6
   //  7  8  9
   struct mtx_csj* mp = mtx_csj_new(mpp);
   struct vec* xp = vec_new(mpp.n);
   struct vec* fp = vec_new(mpp.n);
 
   mp->dr[0] = 1;
-  mp->dr[1] = -5;
+  mp->dr[1] = 5;
   mp->dr[2] = 9;
 
   mp->lr[0] = -4;
@@ -209,7 +188,7 @@ void IssCsjTest::test_smp_los(FILE* rep,
   vec_cls(xp);
 
   clock_gettime(CLOCK_MONOTONIC, &beg);
-  f(mp, xp, fp, &spp, &res, 0);
+  slv(mp, xp, fp, &spp, &res, 0);
   clock_gettime(CLOCK_MONOTONIC, &end);
 
   vec_nrm(xp, &pst);
@@ -226,11 +205,7 @@ void IssCsjTest::test_smp_los(FILE* rep,
   vec_free(fp);
 }
 
-void IssCsjTest::test_hlb_los(FILE* rep,
-                              int (*f)(struct mtx_csj* mp, struct vec* xp,
-                                       struct vec* fp, struct iss_pps* pps,
-                                       struct iss_res* res,
-                                       void (*)(struct iss_res*))) {
+void IssCsjTest::ctx_hlb(FILE* rep, fun_iss_csj_slv slv) {
   struct timespec beg;
   struct timespec end;
 
@@ -258,7 +233,7 @@ void IssCsjTest::test_hlb_los(FILE* rep,
     vec_cls(xp);
 
     clock_gettime(CLOCK_MONOTONIC, &beg);
-    f(mp, xp, fp, &spp, &res, 0);
+    slv(mp, xp, fp, &spp, &res, 0);
     clock_gettime(CLOCK_MONOTONIC, &end);
 
     vec_nrm(xp, &pst);
@@ -276,11 +251,7 @@ void IssCsjTest::test_hlb_los(FILE* rep,
   }
 }
 
-void IssCsjTest::test_ddm_pos_los(FILE* rep,
-                                  int (*f)(struct mtx_csj* mp, struct vec* xp,
-                                           struct vec* fp, struct iss_pps* pps,
-                                           struct iss_res* res,
-                                           void (*)(struct iss_res*))) {
+void IssCsjTest::ctx_ddm_pos(FILE* rep, fun_iss_csj_slv slv) {
   struct timespec beg;
   struct timespec end;
 
@@ -304,7 +275,7 @@ void IssCsjTest::test_ddm_pos_los(FILE* rep,
   vec_cls(xp);
 
   clock_gettime(CLOCK_MONOTONIC, &beg);
-  f(mp, xp, fp, &spp, &res, 0);
+  slv(mp, xp, fp, &spp, &res, 0);
   clock_gettime(CLOCK_MONOTONIC, &end);
 
   vec_nrm(xp, &pst);
@@ -321,11 +292,7 @@ void IssCsjTest::test_ddm_pos_los(FILE* rep,
   vec_free(fp);
 }
 
-void IssCsjTest::test_ddm_neg_los(FILE* rep,
-                                  int (*f)(struct mtx_csj* mp, struct vec* xp,
-                                           struct vec* fp, struct iss_pps* pps,
-                                           struct iss_res* res,
-                                           void (*)(struct iss_res*))) {
+void IssCsjTest::ctx_ddm_neg(FILE* rep, fun_iss_csj_slv slv) {
   struct timespec beg;
   struct timespec end;
 
@@ -349,7 +316,7 @@ void IssCsjTest::test_ddm_neg_los(FILE* rep,
   vec_cls(xp);
 
   clock_gettime(CLOCK_MONOTONIC, &beg);
-  f(mp, xp, fp, &spp, &res, 0);
+  slv(mp, xp, fp, &spp, &res, 0);
   clock_gettime(CLOCK_MONOTONIC, &end);
 
   vec_nrm(xp, &pst);
@@ -366,11 +333,7 @@ void IssCsjTest::test_ddm_neg_los(FILE* rep,
   vec_free(fp);
 }
 
-void IssCsjTest::test_big_sym_los(FILE* rep,
-                                  int (*f)(struct mtx_csj* mp, struct vec* xp,
-                                           struct vec* fp, struct iss_pps* pps,
-                                           struct iss_res* res,
-                                           void (*)(struct iss_res*))) {
+void IssCsjTest::ctx_big_sym(FILE* rep, fun_iss_csj_slv slv) {
   struct timespec beg;
   struct timespec end;
 
@@ -387,7 +350,7 @@ void IssCsjTest::test_big_sym_los(FILE* rep,
   vec_cls(xp);
 
   clock_gettime(CLOCK_MONOTONIC, &beg);
-  f(mp, xp, fp, &spp, &res, 0);
+  slv(mp, xp, fp, &spp, &res, 0);
   clock_gettime(CLOCK_MONOTONIC, &end);
 
   EXPECT_GT(spp.eps, fabs(res.res));
@@ -403,11 +366,7 @@ void IssCsjTest::test_big_sym_los(FILE* rep,
   vec_free(fp);
 }
 
-void IssCsjTest::test_big_asm_los(FILE* rep,
-                                  int (*f)(struct mtx_csj* mp, struct vec* xp,
-                                           struct vec* fp, struct iss_pps* pps,
-                                           struct iss_res* res,
-                                           void (*)(struct iss_res*))) {
+void IssCsjTest::ctx_big_asm(FILE* rep, fun_iss_csj_slv slv) {
   struct timespec beg;
   struct timespec end;
 
@@ -424,7 +383,7 @@ void IssCsjTest::test_big_asm_los(FILE* rep,
   vec_cls(xp);
 
   clock_gettime(CLOCK_MONOTONIC, &beg);
-  f(mp, xp, fp, &spp, &res, 0);
+  slv(mp, xp, fp, &spp, &res, 0);
   clock_gettime(CLOCK_MONOTONIC, &end);
 
   EXPECT_GT(spp.eps, fabs(res.res));
@@ -443,7 +402,7 @@ void IssCsjTest::test_big_asm_los(FILE* rep,
 TEST_F(IssCsjTest, los_dft_smp) {
   FILE* rep = fopen("report/los_dft_smp.rep", "w+");
 
-  test_smp_los(rep, &iss_csj_los_slv);
+  ctx_smp(rep, &iss_csj_los_slv);
 
   fclose(rep);
 }
@@ -451,7 +410,7 @@ TEST_F(IssCsjTest, los_dft_smp) {
 TEST_F(IssCsjTest, los_dft_ddm_pos) {
   FILE* rep = fopen("report/los_dft_ddm_pos.rep", "w+");
 
-  test_ddm_pos_los(rep, &iss_csj_los_slv);
+  ctx_ddm_pos(rep, &iss_csj_los_slv);
 
   fclose(rep);
 }
@@ -459,7 +418,7 @@ TEST_F(IssCsjTest, los_dft_ddm_pos) {
 TEST_F(IssCsjTest, los_dft_ddm_neg) {
   FILE* rep = fopen("report/los_dft_ddm_neg.rep", "w+");
 
-  test_ddm_neg_los(rep, &iss_csj_los_slv);
+  ctx_ddm_neg(rep, &iss_csj_los_slv);
 
   fclose(rep);
 }
@@ -467,7 +426,7 @@ TEST_F(IssCsjTest, los_dft_ddm_neg) {
 TEST_F(IssCsjTest, los_dft_hlb) {
   FILE* rep = fopen("report/los_dft_hlb.rep", "w+");
 
-  test_hlb_los(rep, &iss_csj_los_slv);
+  ctx_hlb(rep, &iss_csj_los_slv);
 
   fclose(rep);
 }
@@ -475,7 +434,7 @@ TEST_F(IssCsjTest, los_dft_hlb) {
 TEST_F(IssCsjTest, los_dft_big_sym) {
   FILE* rep = fopen("report/los_dft_big_sym.rep", "w+");
 
-  test_big_sym_los(rep, &iss_csj_los_slv);
+  ctx_big_sym(rep, &iss_csj_los_slv);
 
   fclose(rep);
 }
@@ -483,7 +442,7 @@ TEST_F(IssCsjTest, los_dft_big_sym) {
 TEST_F(IssCsjTest, los_dft_big_asm) {
   FILE* rep = fopen("report/los_dft_big_asm.rep", "w+");
 
-  test_big_asm_los(rep, &iss_csj_los_slv);
+  ctx_big_asm(rep, &iss_csj_los_slv);
 
   fclose(rep);
 }
@@ -491,7 +450,7 @@ TEST_F(IssCsjTest, los_dft_big_asm) {
 TEST_F(IssCsjTest, los_ilu_smp) {
   FILE* rep = fopen("report/los_ilu_smp.rep", "w+");
 
-  test_smp_los(rep, &iss_csj_ilu_los_slv);
+  ctx_smp(rep, &iss_csj_ilu_los_slv);
 
   fclose(rep);
 }
@@ -499,7 +458,7 @@ TEST_F(IssCsjTest, los_ilu_smp) {
 TEST_F(IssCsjTest, los_ilu_ddm_pos) {
   FILE* rep = fopen("report/los_ilu_ddm_pos.rep", "w+");
 
-  test_ddm_pos_los(rep, &iss_csj_ilu_los_slv);
+  ctx_ddm_pos(rep, &iss_csj_ilu_los_slv);
 
   fclose(rep);
 }
@@ -507,7 +466,7 @@ TEST_F(IssCsjTest, los_ilu_ddm_pos) {
 TEST_F(IssCsjTest, los_ilu_ddm_neg) {
   FILE* rep = fopen("report/los_ilu_ddm_neg.rep", "w+");
 
-  test_ddm_neg_los(rep, &iss_csj_ilu_los_slv);
+  ctx_ddm_neg(rep, &iss_csj_ilu_los_slv);
 
   fclose(rep);
 }
@@ -515,7 +474,7 @@ TEST_F(IssCsjTest, los_ilu_ddm_neg) {
 TEST_F(IssCsjTest, los_ilu_hlb) {
   FILE* rep = fopen("report/los_ilu_hlb.rep", "w+");
 
-  test_hlb_los(rep, &iss_csj_ilu_los_slv);
+  ctx_hlb(rep, &iss_csj_ilu_los_slv);
 
   fclose(rep);
 }
@@ -523,7 +482,7 @@ TEST_F(IssCsjTest, los_ilu_hlb) {
 TEST_F(IssCsjTest, los_ilu_big_sym) {
   FILE* rep = fopen("report/los_ilu_big_sym.rep", "w+");
 
-  test_big_sym_los(rep, &iss_csj_ilu_los_slv);
+  ctx_big_sym(rep, &iss_csj_ilu_los_slv);
 
   fclose(rep);
 }
@@ -531,7 +490,7 @@ TEST_F(IssCsjTest, los_ilu_big_sym) {
 TEST_F(IssCsjTest, los_ilu_big_asm) {
   FILE* rep = fopen("report/los_ilu_big_asm.rep", "w+");
 
-  test_big_asm_los(rep, &iss_csj_ilu_los_slv);
+  ctx_big_asm(rep, &iss_csj_ilu_los_slv);
 
   fclose(rep);
 }
@@ -539,7 +498,7 @@ TEST_F(IssCsjTest, los_ilu_big_asm) {
 TEST_F(IssCsjTest, los_dgl_smp) {
   FILE* rep = fopen("report/los_dgl_smp.rep", "w+");
 
-  test_smp_los(rep, &iss_csj_dgl_los_slv);
+  ctx_smp(rep, &iss_csj_dgl_los_slv);
 
   fclose(rep);
 }
@@ -547,7 +506,7 @@ TEST_F(IssCsjTest, los_dgl_smp) {
 TEST_F(IssCsjTest, los_dgl_ddm_pos) {
   FILE* rep = fopen("report/los_dgl_ddm_pos.rep", "w+");
 
-  test_ddm_pos_los(rep, &iss_csj_dgl_los_slv);
+  ctx_ddm_pos(rep, &iss_csj_dgl_los_slv);
 
   fclose(rep);
 }
@@ -555,7 +514,7 @@ TEST_F(IssCsjTest, los_dgl_ddm_pos) {
 TEST_F(IssCsjTest, los_dgl_ddm_neg) {
   FILE* rep = fopen("report/los_dgl_ddm_neg.rep", "w+");
 
-  test_ddm_neg_los(rep, &iss_csj_dgl_los_slv);
+  ctx_ddm_neg(rep, &iss_csj_dgl_los_slv);
 
   fclose(rep);
 }
@@ -563,7 +522,7 @@ TEST_F(IssCsjTest, los_dgl_ddm_neg) {
 TEST_F(IssCsjTest, los_dgl_hlb) {
   FILE* rep = fopen("report/los_dgl_hlb.rep", "w+");
 
-  test_hlb_los(rep, &iss_csj_dgl_los_slv);
+  ctx_hlb(rep, &iss_csj_dgl_los_slv);
 
   fclose(rep);
 }
@@ -571,7 +530,7 @@ TEST_F(IssCsjTest, los_dgl_hlb) {
 TEST_F(IssCsjTest, los_dgl_big_sym) {
   FILE* rep = fopen("report/los_dgl_big_sym.rep", "w+");
 
-  test_big_sym_los(rep, &iss_csj_dgl_los_slv);
+  ctx_big_sym(rep, &iss_csj_dgl_los_slv);
 
   fclose(rep);
 }
@@ -579,7 +538,7 @@ TEST_F(IssCsjTest, los_dgl_big_sym) {
 TEST_F(IssCsjTest, los_dgl_big_asm) {
   FILE* rep = fopen("report/los_dgl_big_asm.rep", "w+");
 
-  test_big_asm_los(rep, &iss_csj_dgl_los_slv);
+  ctx_big_asm(rep, &iss_csj_dgl_los_slv);
 
   fclose(rep);
 }

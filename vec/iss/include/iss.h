@@ -19,7 +19,9 @@ struct iss_pkt {
   FILE* f;
 };
 
-int iss_pps_fget(struct iss_pkt* pkt, struct iss_pps* pps);
+typedef void (*fun_iss_cbk)(struct iss_res*);
+
+int iss_pps_get(struct iss_pkt* pkt, struct iss_pps* pps);
 int iss_pkt_close(struct iss_pkt* pkt);
 
 #endif  // ISS_H
