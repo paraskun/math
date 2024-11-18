@@ -5,6 +5,17 @@ extern "C" {
 #include <vec.h>
 }
 
+TEST(vec, seq) {
+  struct vec* vp = vec_new(10000);
+
+  vec_seq(vp, 1);
+
+  for (int i = 0; i < vp->n; ++i)
+    EXPECT_DOUBLE_EQ(i + 1, vp->vp[i]);
+
+  vec_cls(vp);
+}
+
 TEST(vec, cmb_pos) {
   struct vec* ap = vec_new(3);
   struct vec* bp = vec_new(3);
@@ -25,8 +36,8 @@ TEST(vec, cmb_pos) {
   EXPECT_DOUBLE_EQ(1.5, ap->vp[1]);
   EXPECT_DOUBLE_EQ(-2.4, ap->vp[2]);
 
-  vec_free(ap);
-  vec_free(bp);
+  vec_cls(ap);
+  vec_cls(bp);
 }
 
 TEST(vec, cmb_neg) {
@@ -49,8 +60,8 @@ TEST(vec, cmb_neg) {
   EXPECT_DOUBLE_EQ(2.5, ap->vp[1]);
   EXPECT_DOUBLE_EQ(-3.6, ap->vp[2]);
 
-  vec_free(ap);
-  vec_free(bp);
+  vec_cls(ap);
+  vec_cls(bp);
 }
 
 TEST(vec, mlt) {
@@ -71,8 +82,8 @@ TEST(vec, mlt) {
 
   EXPECT_DOUBLE_EQ(-24.0, r);
 
-  vec_free(ap);
-  vec_free(bp);
+  vec_cls(ap);
+  vec_cls(bp);
 }
 
 TEST(vec, nrm) {
@@ -88,7 +99,7 @@ TEST(vec, nrm) {
 
   EXPECT_DOUBLE_EQ(sqrt(14.0), r);
 
-  vec_free(ap);
+  vec_cls(ap);
 }
 
 TEST(vec, cpy) {
@@ -105,24 +116,24 @@ TEST(vec, cpy) {
   EXPECT_DOUBLE_EQ(2.0, bp->vp[1]);
   EXPECT_DOUBLE_EQ(-3.0, bp->vp[2]);
 
-  vec_free(ap);
-  vec_free(bp);
+  vec_cls(ap);
+  vec_cls(bp);
 }
 
-TEST(vec, cls) {
+TEST(vec, zer) {
   struct vec* ap = vec_new(3);
 
   ap->vp[0] = 1;
   ap->vp[1] = 2;
   ap->vp[2] = -3;
 
-  vec_cls(ap);
+  vec_zer(ap);
 
   EXPECT_DOUBLE_EQ(0.0, ap->vp[0]);
   EXPECT_DOUBLE_EQ(0.0, ap->vp[1]);
   EXPECT_DOUBLE_EQ(0.0, ap->vp[2]);
 
-  vec_free(ap);
+  vec_cls(ap);
 }
 
 int main(int argc, char** argv) {

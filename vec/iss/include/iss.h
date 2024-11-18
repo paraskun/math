@@ -21,7 +21,6 @@ struct iss_pkt {
 
 typedef void (*fun_iss_cbk)(struct iss_res*);
 
-int iss_pps_get(struct iss_pkt* pkt, struct iss_pps* pps);
-int iss_pkt_close(struct iss_pkt* pkt);
+int iss_pkt_cls(struct iss_pkt* pkt);
 
 #endif  // ISS_H

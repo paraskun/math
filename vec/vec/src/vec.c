@@ -21,15 +21,13 @@ struct vec* vec_new(int n) {
 
 int vec_seq(struct vec* vp, int s) {
   int n = vp->n;
-  int v = s;
   double* vvp = vp->vp;
 
 #ifdef OMP_THREADS_NUM
 #pragma omp parallel for num_threads(OMP_THREADS_NUM)
 #endif  // OMP
   for (int i = 0; i < n; ++i) {
-    vvp[i] = v;
-    v += 1;
+    vvp[i] = i + s;
   }
 
   return 0;
@@ -51,10 +49,8 @@ int vec_put(FILE* f, struct vec* vp) {
   double* vvp = vp->vp;
 
   for (int i = 0; i < n; ++i)
-    if (fprintf(f, "%.3e ", vvp[i]) < 0)
+    if (fprintf(f, "%.7e\n", vvp[i]) < 0)
       return -1;
-
-  putc('\n', f);
 
   return 0;
 }
@@ -113,12 +109,14 @@ int vec_cpy(struct vec* ap, struct vec* bp) {
   return 0;
 }
 
-int vec_cls(struct vec* vp) {
+int vec_zer(struct vec* vp) {
   memset(vp->vp, 0, sizeof(double) * vp->n);
   return 0;
 }
 
-void vec_free(struct vec* vp) {
+int vec_cls(struct vec* vp) {
   free(vp->vp);
   free(vp);
+
+  return 0;
 }

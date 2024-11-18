@@ -1,0 +1,35 @@
+N: 4
+Iterations: 1
+Residual: 0.0000000e+00
+Time: 15.099569 ms
+
+N: 5
+Iterations: 1
+Residual: 1.4210855e-14
+Time: 0.013054 ms
+
+N: 6
+Iterations: 1
+Residual: 0.0000000e+00
+Time: 0.013966 ms
+
+N: 7
+Iterations: 1
+Residual: 2.8421709e-14
+Time: 0.014788 ms
+
+N: 8
+Iterations: 1
+Residual: -2.8421709e-14
+Time: 0.016241 ms
+
+N: 9
+Iterations: 1
+Residual: -1.1368684e-13
+Time: 0.017022 ms
+
+N: 10
+Iterations: 1
+Residual: 0.0000000e+00
+Time: 0.021460 ms
+

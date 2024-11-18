@@ -2,7 +2,10 @@
 
 #include <string.h>
 
-static void dss_sky_l(struct mtx_sky* mp, struct vec* xp, struct vec* fp) {
+static void dss_sky_l(
+    struct mtx_sky* mp, 
+    struct vec* xp, 
+    struct vec* fp) {
   int n = mp->n;
   int* pp = mp->p;
 
@@ -24,7 +27,10 @@ static void dss_sky_l(struct mtx_sky* mp, struct vec* xp, struct vec* fp) {
   }
 }
 
-static void dss_sky_d(struct mtx_sky* mp, struct vec* xp, struct vec* fp) {
+static void dss_sky_d(
+    struct mtx_sky* mp, 
+    struct vec* xp, 
+    struct vec* fp) {
   int n = mp->n;
 
   double* dvp = mp->dv;
@@ -37,7 +43,10 @@ static void dss_sky_d(struct mtx_sky* mp, struct vec* xp, struct vec* fp) {
   }
 }
 
-static void dss_sky_u(struct mtx_sky* mp, struct vec* xp, struct vec* fp) {
+static void dss_sky_u(
+    struct mtx_sky* mp, 
+    struct vec* xp, 
+    struct vec* fp) {
   int n = mp->n;
   int* pp = mp->p;
 
@@ -57,7 +66,10 @@ static void dss_sky_u(struct mtx_sky* mp, struct vec* xp, struct vec* fp) {
   }
 }
 
-void dss_sky_ldu_solve(struct mtx_sky* mp, struct vec* xp, struct vec* fp) {
+void dss_sky_ldu_solve(
+    struct mtx_sky* mp, 
+    struct vec* xp, 
+    struct vec* fp) {
   dss_sky_l(mp, xp, fp);
   dss_sky_d(mp, fp, xp);
   dss_sky_u(mp, xp, fp);

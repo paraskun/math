@@ -78,7 +78,7 @@ int iss_cds_jac_slv(
       cbk(res);
   }
 
-  vec_free(tp);
+  vec_cls(tp);
   return 0;
 }
 
@@ -117,6 +117,6 @@ int iss_cds_rlx_slv(
       cbk(res);
   }
 
-  vec_free(tp);
+  vec_cls(tp);
   return 0;
 }

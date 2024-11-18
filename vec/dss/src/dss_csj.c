@@ -2,11 +2,14 @@
 
 #include <string.h>
 
-int iss_csj_ilu_lslv(struct mtx_csj* mp, struct vec* xp, struct vec* fp) {
+int iss_csj_ilu_lslv(
+    struct mtx_csj* mp, 
+    struct vec* xp, 
+    struct vec* fp) {
   int n = mp->pps.n;
 
-  int* mil = mp->il;
-  int* mjl = mp->jl;
+  int* mia = mp->ia;
+  int* mja = mp->ja;
 
   double* mdr = mp->dr;
   double* mlr = mp->lr;
@@ -15,13 +18,13 @@ int iss_csj_ilu_lslv(struct mtx_csj* mp, struct vec* xp, struct vec* fp) {
   double* fv = fp->vp;
 
   for (int i = 0; i < n; ++i) {
-    int lr0 = mil[i];
-    int lr1 = mil[i + 1];
+    int lr0 = mia[i];
+    int lr1 = mia[i + 1];
 
     double s = 0;
 
     for (int lr = lr0; lr < lr1; ++lr) {
-      int j = mjl[lr];
+      int j = mja[lr];
 
       s += mlr[lr] * xv[j];
     }
@@ -32,11 +35,14 @@ int iss_csj_ilu_lslv(struct mtx_csj* mp, struct vec* xp, struct vec* fp) {
   return 0;
 }
 
-int iss_csj_ilu_uslv(struct mtx_csj* mp, struct vec* xp, struct vec* fp) {
+int iss_csj_ilu_uslv(
+    struct mtx_csj* mp, 
+    struct vec* xp, 
+    struct vec* fp) {
   int n = mp->pps.n;
 
-  int* mju = mp->ju;
-  int* miu = mp->iu;
+  int* mia = mp->ia;
+  int* mja = mp->ja;
 
   double* mdr = mp->dr;
   double* mur = mp->ur;
@@ -49,13 +55,13 @@ int iss_csj_ilu_uslv(struct mtx_csj* mp, struct vec* xp, struct vec* fp) {
   for (int j = n - 1; j > -1; --j) {
     xv[j] /= mdr[j];
 
-    int ur0 = mju[j];
-    int ur1 = mju[j + 1];
+    int ur0 = mia[j];
+    int ur1 = mia[j + 1];
 
     double x = xv[j];
 
     for (int ur = ur0; ur < ur1; ++ur) {
-      int ui = miu[ur];
+      int ui = mja[ur];
 
       xv[ui] -= mur[ur] * x;
     }
@@ -64,15 +70,18 @@ int iss_csj_ilu_uslv(struct mtx_csj* mp, struct vec* xp, struct vec* fp) {
   return 0;
 }
 
-int iss_csj_dgl_slv(struct mtx_csj* mp, struct vec* xp, struct vec* fp) {
+int iss_csj_dgl_slv(
+    struct mtx_csj* mp, 
+    struct vec* xp, 
+    struct vec* fp) {
   int n = mp->pps.n;
 
-  double* mdr = mp->dr;
-  double* xvp = xp->vp;
-  double* fvp = fp->vp;
+  double* dr = mp->dr;
+  double* xv = xp->vp;
+  double* fv = fp->vp;
 
   for (int i = 0; i < n; ++i)
-    xvp[i] = fvp[i] / mdr[i];
+    xv[i] = fv[i] / dr[i];
 
   return 0;
 }
