@@ -119,23 +119,64 @@ TEST(dcg_sll, add) {
   dcg_sll_cls(l);
 }
 
-TEST(dcg_als, fwp_cless) {
-  FILE* rep = fopen("report/fwp_smpl.rep", "w+");
+TEST(dcg_als, fwp_conn) {
+  FILE* rep = fopen("report/fwp_conn.rep", "w+");
+  FILE* fin = fopen("dcg/conn.dcg", "r");
 
-  struct dcg_als* g = dcg_als_new(4);
+  int n;
 
-  dcg_als_add(g, 0, 1, 1);
-  dcg_als_add(g, 0, 2, 6);
-  dcg_als_add(g, 1, 2, 4);
-  dcg_als_add(g, 1, 3, 1);
-  dcg_als_add(g, 3, 2, 1);
+  fscanf(fin, "%d", &n);
 
+  struct dcg_als* g = dcg_als_new(n);
+
+  dcg_als_get(fin, g, 1);
   dcg_als_fwp(g, 1);
   dcg_als_map(rep, g);
 
   dcg_als_cls(g);
 
   fclose(rep);
+  fclose(fin);
+}
+
+TEST(dcg_als, fwp_comp) {
+  FILE* rep = fopen("report/fwp_comp.rep", "w+");
+  FILE* fin = fopen("dcg/comp.dcg", "r");
+
+  int n;
+
+  fscanf(fin, "%d", &n);
+
+  struct dcg_als* g = dcg_als_new(n);
+
+  dcg_als_get(fin, g, 1);
+  dcg_als_fwp(g, 1);
+  dcg_als_map(rep, g);
+
+  dcg_als_cls(g);
+
+  fclose(rep);
+  fclose(fin);
+}
+
+TEST(dcg_als, fwp_full) {
+  FILE* rep = fopen("report/fwp_full.rep", "w+");
+  FILE* fin = fopen("dcg/full.dcg", "r");
+
+  int n;
+
+  fscanf(fin, "%d", &n);
+
+  struct dcg_als* g = dcg_als_new(n);
+
+  dcg_als_get(fin, g, 1);
+  dcg_als_fwp(g, 1);
+  dcg_als_map(rep, g);
+
+  dcg_als_cls(g);
+
+  fclose(rep);
+  fclose(fin);
 }
 
 int main(int argc, char** argv) {

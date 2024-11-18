@@ -120,7 +120,7 @@ struct dcg_als* dcg_als_new(int s) {
   return g;
 }
 
-int dcg_als_get(FILE* f, struct dcg_als* g) {
+int dcg_als_get(FILE* f, struct dcg_als* g, int w) {
   if (!f || !g) {
     errno = EINVAL;
     return -1;
@@ -137,13 +137,18 @@ int dcg_als_get(FILE* f, struct dcg_als* g) {
   }
 
   for (int i = 0; i < v; ++i) {
-    int a, b;
-    int w = rand();
+    int a, b, c;
 
     if (fscanf(f, "%d %d", &a, &b) != 2)
       return -1;
 
-    if (dcg_als_add(g, a - 1, b - 1, w))
+    if (w) {
+      if (fscanf(f, "%d", &c) != 1)
+        return -1;
+    } else
+      c = rand();
+
+    if (dcg_als_add(g, a - 1, b - 1, c))
       return -1;
   }
 
@@ -284,11 +289,11 @@ int dcg_als_fwp(struct dcg_als* g, int map) {
 
           if (map)
             g->map[u][v] = g->map[u][i];
-
-          pe = ue;
-          ue = ue->next;
-          ie = ie->next;
         }
+
+        pe = ue;
+        ue = ue->next;
+        ie = ie->next;
       }
     }
   }
