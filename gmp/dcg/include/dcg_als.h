@@ -41,6 +41,7 @@ int dcg_als_map(FILE* f, struct dcg_als* g);
 
 int dcg_als_add(struct dcg_als* g, int f, int t, int wgt);
 int dcg_als_fwp(struct dcg_als* g, int map);
+int dcg_als_nrm(struct dcg_als* g, double *nrm);
 
 int dcg_als_cls(struct dcg_als* g);
 
