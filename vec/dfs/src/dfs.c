@@ -12,7 +12,7 @@ static inline void swap(int* p, int a, int b) {
   p[b] = tmp;
 }
 
-void dfs_red_solve(struct mtx_all* mp, struct vec* xp, struct vec* fp) {
+void dfs_red_solve(struct mtx* mp, struct vec* xp, struct vec* fp) {
   int n = mp->n;
   int* pp = malloc(sizeof(int) * n);
 

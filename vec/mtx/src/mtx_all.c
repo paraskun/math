@@ -5,8 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct mtx_all* mtx_all_new(int n) {
-  struct mtx_all* mp = malloc(sizeof(struct mtx_all));
+struct mtx* mtx_new(int n) {
+  struct mtx* mp = malloc(sizeof(struct mtx));
 
   mp->vp = malloc(sizeof(double) * n * n);
   mp->n = n;
@@ -14,7 +14,7 @@ struct mtx_all* mtx_all_new(int n) {
   return mp;
 }
 
-int mtx_all_fget(FILE* f, struct mtx_all* mp) {
+int mtx_fget(FILE* f, struct mtx* mp) {
   int n = mp->n;
   double* vp = mp->vp;
 
@@ -24,7 +24,7 @@ int mtx_all_fget(FILE* f, struct mtx_all* mp) {
   return 0;
 }
 
-int mtx_all_fput(FILE* f, struct mtx_all* mp) {
+int mtx_fput(FILE* f, struct mtx* mp) {
   int n = mp->n;
   double* vp = mp->vp;
 
@@ -38,7 +38,7 @@ int mtx_all_fput(FILE* f, struct mtx_all* mp) {
   return 0;
 }
 
-int mtx_all_ddm(struct mtx_all* mp) {
+int mtx_ddm(struct mtx* mp) {
   int n = mp->n;
   double* vp = mp->vp;
 
@@ -61,7 +61,7 @@ int mtx_all_ddm(struct mtx_all* mp) {
   return 0;
 }
 
-int mtx_all_hlb(struct mtx_all* mp) {
+int mtx_hlb(struct mtx* mp) {
   int n = mp->n;
   double* vp = mp->vp;
 
@@ -72,7 +72,7 @@ int mtx_all_hlb(struct mtx_all* mp) {
   return 0;
 }
 
-int mtx_all_nrm(struct mtx_all* mp, double* rp) {
+int mtx_nrm(struct mtx* mp, double* rp) {
   int n = mp->n;
   double* vp = mp->vp;
   double r = 0.0;
@@ -88,7 +88,7 @@ int mtx_all_nrm(struct mtx_all* mp, double* rp) {
   return 0;
 }
 
-int mtx_all_vmlt(struct mtx_all* ap, struct vec* bp, struct vec* cp) {
+int mtx_vmlt(struct mtx* ap, struct vec* bp, struct vec* cp) {
   int n = ap->n;
 
   double* avp = ap->vp;
@@ -112,7 +112,7 @@ int mtx_all_vmlt(struct mtx_all* ap, struct vec* bp, struct vec* cp) {
   return 0;
 }
 
-int mtx_all_mmlt(struct mtx_all* ap, struct mtx_all* bp, struct mtx_all* cp) {
+int mtx_mmlt(struct mtx* ap, struct mtx* bp, struct mtx* cp) {
   int n = ap->n;
 
   double* avp = ap->vp;
@@ -136,7 +136,9 @@ int mtx_all_mmlt(struct mtx_all* ap, struct mtx_all* bp, struct mtx_all* cp) {
   return 0;
 }
 
-void mtx_all_free(struct mtx_all* mp) {
+int mtx_cls(struct mtx* mp) {
   free(mp->vp);
   free(mp);
+
+  return 0;
 }
