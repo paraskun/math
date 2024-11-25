@@ -2,6 +2,14 @@
 
 extern "C" {
 #include <dcg_als.h>
+#include <time.h>
+}
+
+static double diff_ms(struct timespec* beg, struct timespec* end) {
+  double sec = end->tv_sec - beg->tv_sec;
+  double nan = abs(end->tv_nsec - beg->tv_nsec);
+
+  return sec * 1000 + nan / 1000000;
 }
 
 TEST(dcg_sll, ins_end_exp) {
@@ -120,7 +128,7 @@ TEST(dcg_sll, add) {
 }
 
 TEST(dcg_als, fwp_conn) {
-  FILE* rep = fopen("report/fwp_conn.rep", "w+");
+  FILE* rep = fopen("rep/fwp_conn.rep", "w+");
   FILE* fin = fopen("dcg/conn.dcg", "r");
 
   int n;
@@ -130,9 +138,17 @@ TEST(dcg_als, fwp_conn) {
   struct dcg_als* g = dcg_als_new(n);
 
   dcg_als_get(fin, g, 1);
-  dcg_als_fwp(g, 1);
-  dcg_als_map(rep, g);
 
+  struct timespec beg;
+  struct timespec end;
+
+  clock_gettime(CLOCK_MONOTONIC, &beg);
+  dcg_als_fwp(g, 1);
+  clock_gettime(CLOCK_MONOTONIC, &end);
+
+  fprintf(rep, "Time: %.7e ms.\n\n", diff_ms(&beg, &end));
+
+  dcg_als_map(rep, g);
   dcg_als_cls(g);
 
   fclose(rep);
@@ -140,7 +156,7 @@ TEST(dcg_als, fwp_conn) {
 }
 
 TEST(dcg_als, fwp_comp) {
-  FILE* rep = fopen("report/fwp_comp.rep", "w+");
+  FILE* rep = fopen("rep/fwp_comp.rep", "w+");
   FILE* fin = fopen("dcg/comp.dcg", "r");
 
   int n;
@@ -150,9 +166,17 @@ TEST(dcg_als, fwp_comp) {
   struct dcg_als* g = dcg_als_new(n);
 
   dcg_als_get(fin, g, 1);
-  dcg_als_fwp(g, 1);
-  dcg_als_map(rep, g);
 
+  struct timespec beg;
+  struct timespec end;
+
+  clock_gettime(CLOCK_MONOTONIC, &beg);
+  dcg_als_fwp(g, 1);
+  clock_gettime(CLOCK_MONOTONIC, &end);
+
+  fprintf(rep, "Time: %.7e ms.\n\n", diff_ms(&beg, &end));
+
+  dcg_als_map(rep, g);
   dcg_als_cls(g);
 
   fclose(rep);
@@ -160,7 +184,7 @@ TEST(dcg_als, fwp_comp) {
 }
 
 TEST(dcg_als, fwp_full) {
-  FILE* rep = fopen("report/fwp_full.rep", "w+");
+  FILE* rep = fopen("rep/fwp_full.rep", "w+");
   FILE* fin = fopen("dcg/full.dcg", "r");
 
   int n;
@@ -170,8 +194,80 @@ TEST(dcg_als, fwp_full) {
   struct dcg_als* g = dcg_als_new(n);
 
   dcg_als_get(fin, g, 1);
+
+  struct timespec beg;
+  struct timespec end;
+
+  clock_gettime(CLOCK_MONOTONIC, &beg);
   dcg_als_fwp(g, 1);
+  clock_gettime(CLOCK_MONOTONIC, &end);
+
+  fprintf(rep, "Time: %.7e ms.\n\n", diff_ms(&beg, &end));
+
   dcg_als_map(rep, g);
+  dcg_als_cls(g);
+
+  fclose(rep);
+  fclose(fin);
+}
+
+TEST(dcg_als, fwp_fbig) {
+  FILE* rep = fopen("rep/fwp_fbig.rep", "w+");
+  FILE* fin = fopen("dcg/fbig.dcg", "r");
+
+  int n;
+
+  fscanf(fin, "%d", &n);
+
+  struct dcg_als* g = dcg_als_new(n);
+
+  dcg_als_get(fin, g, 1);
+
+  struct timespec beg;
+  struct timespec end;
+
+  clock_gettime(CLOCK_MONOTONIC, &beg);
+  dcg_als_fwp(g, 0);
+  clock_gettime(CLOCK_MONOTONIC, &end);
+
+  double nrm;
+
+  dcg_als_nrm(g, &nrm);
+
+  fprintf(rep, "Time: %.7e ms.\n", diff_ms(&beg, &end));
+  fprintf(rep, "Norm: %lf\n", nrm);
+
+  dcg_als_cls(g);
+
+  fclose(rep);
+  fclose(fin);
+}
+
+TEST(dcg_als, fwp_sbig) {
+  FILE* rep = fopen("rep/fwp_sbig.rep", "w+");
+  FILE* fin = fopen("dcg/sbig.dcg", "r");
+
+  int n;
+
+  fscanf(fin, "%d", &n);
+
+  struct dcg_als* g = dcg_als_new(n);
+
+  dcg_als_get(fin, g, 1);
+
+  struct timespec beg;
+  struct timespec end;
+
+  clock_gettime(CLOCK_MONOTONIC, &beg);
+  dcg_als_fwp(g, 0);
+  clock_gettime(CLOCK_MONOTONIC, &end);
+
+  double nrm;
+
+  dcg_als_nrm(g, &nrm);
+
+  fprintf(rep, "Time: %.7e ms.\n", diff_ms(&beg, &end));
+  fprintf(rep, "Norm: %lf\n", nrm);
 
   dcg_als_cls(g);
 

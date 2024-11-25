@@ -2,6 +2,7 @@
 
 #include <errno.h>
 #include <limits.h>
+#include <math.h>
 #include <stdlib.h>
 
 struct dcg_sll* dcg_sll_new() {
@@ -224,9 +225,9 @@ int dcg_als_fwp(struct dcg_als* g, int map) {
       }
     }
 
-#ifdef OMP_THREADS_NUM
-#pragma omp parallel for num_threads(OMP_THREADS_NUM)
-#endif  // OMP
+// #ifdef OMP_THREADS_NUM
+// #pragma omp parallel for num_threads(OMP_THREADS_NUM)
+// #endif  // OMP
     for (int u = 0; u < s; ++u) {
       struct dcg_edg* ue = g->als[u]->beg;
 
@@ -240,9 +241,9 @@ int dcg_als_fwp(struct dcg_als* g, int map) {
   for (int i = 0; i < s; ++i) {
     struct dcg_sll* il = g->als[i];
 
-#ifdef OMP_THREADS_NUM
-#pragma omp parallel for num_threads(OMP_THREADS_NUM)
-#endif  // OMP
+// #ifdef OMP_THREADS_NUM
+// #pragma omp parallel for num_threads(OMP_THREADS_NUM)
+// #endif  // OMP
     for (int u = 0; u < s; ++u) {
       if (i == u)
         continue;
@@ -297,6 +298,28 @@ int dcg_als_fwp(struct dcg_als* g, int map) {
       }
     }
   }
+
+  return 0;
+}
+
+int dcg_als_nrm(struct dcg_als* g, double* nrm) {
+  if (!g) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  double r = 0;
+
+  for (int i = 0; i < g->s; ++i) {
+    struct dcg_edg* e = g->als[i]->beg;
+
+    while (e) {
+      r += e->wgt * e->wgt;
+      e = e->next;
+    }
+  }
+
+  *nrm = sqrt(r);
 
   return 0;
 }
