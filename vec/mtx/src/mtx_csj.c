@@ -129,7 +129,7 @@ int mtx_csj_ilu(struct mtx_csj* mp, struct mtx_csj* rp) {
       int j = rja[lr];
 
       int ur0 = ria[j];
-      int ur1 = ria[j];
+      int ur1 = ria[j + 1];
 
       double sl = 0;
       double su = 0;

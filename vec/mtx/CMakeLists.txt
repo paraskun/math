@@ -22,5 +22,6 @@ add_executable(mtx_csj_test test/mtx_csj_test.cc)
 target_link_libraries(mtx_csj_test mtx GTest::gtest_main)
 
 include(GoogleTest)
-
-gtest_discover_tests(mtx_csj_test)
+gtest_discover_tests(mtx_csj_test
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/vec/mtx/test/
+)

@@ -52,6 +52,37 @@ TEST(mtx_csj, vmlt) {
   vec_cls(fp);
 }
 
+TEST(mtx_csj, ilu) {
+  struct mtx_csj_pkt pkt = {
+      .pps = 0,
+      .dr = fopen("mtx/dr.csj.mtx", "r"),
+      .lr = fopen("mtx/lr.csj.mtx", "r"),
+      .ur = fopen("mtx/ur.csj.mtx", "r"),
+      .ia = fopen("mtx/ia.csj.mtx", "r"),
+      .ja = fopen("mtx/ja.csj.mtx", "r"),
+  };
+
+  struct mtx_csj* m = mtx_csj_new({5, 5});
+
+  mtx_csj_get(&pkt, m);
+  mtx_csj_ilu(m, m);
+  mtx_csj_pkt_cls(&pkt);
+
+  pkt = {
+      .pps = 0,
+      .dr = fopen("mtx/dr.csj.ilu.mtx", "w+"),
+      .lr = fopen("mtx/lr.csj.ilu.mtx", "w+"),
+      .ur = fopen("mtx/ur.csj.ilu.mtx", "w+"),
+      .ia = fopen("mtx/ia.csj.ilu.mtx", "w+"),
+      .ja = fopen("mtx/ja.csj.ilu.mtx", "w+"),
+  };
+
+  mtx_csj_put(&pkt, m);
+  mtx_csj_pkt_cls(&pkt);
+
+  mtx_csj_cls(m);
+}
+
 int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

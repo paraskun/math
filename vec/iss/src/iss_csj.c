@@ -30,11 +30,14 @@ int iss_csj_los_slv(
 
   mtx_csj_vmlt(mp, xp, r);
   vec_cmb(fp, r, r, -1);
+
   vec_cpy(r, z);
+
   mtx_csj_vmlt(mp, z, p);
+
   vec_mlt(r, r, &rr);
 
-  for (int k = 0; k < mk && fabs(rr) >= eps; ++k) {
+  for (int k = 0; k < mk && rr >= eps; ++k) {
     vec_mlt(p, r, &pr);
     vec_mlt(p, p, &pp);
 
@@ -50,7 +53,7 @@ int iss_csj_los_slv(
 
     vec_cmb(r, z, z, b);
     vec_cmb(t1, p, p, b);
-
+    
     res->res = rr;
     res->k = k + 1;
 
@@ -91,6 +94,9 @@ int iss_csj_ilu_los_slv(
   struct vec* t1 = vec_new(n);
   struct vec* t2 = vec_new(n);
 
+  int mk = pps->mk;
+  double eps = pps->eps;
+
   mtx_csj_ilu(mp, ilu);
   mtx_csj_vmlt(mp, xp, r);
   vec_cmb(fp, r, r, -1);
@@ -98,12 +104,10 @@ int iss_csj_ilu_los_slv(
   iss_csj_ilu_uslv(ilu, z, r);
   mtx_csj_vmlt(mp, z, p);
   iss_csj_ilu_lslv(ilu, p, p);
+
   vec_mlt(r, r, &rr);
 
-  int mk = pps->mk;
-  double eps = pps->eps;
-
-  for (int k = 0; k < mk && fabs(rr) >= eps; ++k) {
+  for (int k = 0; k < mk && rr >= eps; ++k) {
     vec_mlt(p, r, &pr);
     vec_mlt(p, p, &pp);
 
@@ -119,7 +123,7 @@ int iss_csj_ilu_los_slv(
 
     b = -pr / pp;
 
-    iss_csj_ilu_uslv(ilu, r, t2);
+    iss_csj_ilu_uslv(ilu, t2, r);
     vec_cmb(t2, z, z, b);
     vec_cmb(t1, p, p, b);
 
