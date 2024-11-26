@@ -120,73 +120,47 @@ int mtx_csj_ilu(struct mtx_csj* mp, struct mtx_csj* rp) {
   double* rur = rp->ur;
 
   for (int d = 0; d < n; ++d) {
-    int ar0 = mia[d];
-    int ar1 = mia[d + 1];
+    int lr0 = ria[d];
+    int lr1 = ria[d + 1];
 
-    double ds = 0;
+    double sd = 0;
 
-    for (int lr = ar0; lr < ar1; ++lr) {
-      int lj = mja[lr];
+    for (int lr = lr0; lr < lr1; ++lr) {
+      int j = rja[lr];
 
-      int ur0 = mia[lj];
-      int ur1 = mia[lj + 1];
+      int ur0 = ria[j];
+      int ur1 = ria[j];
 
-      double s = 0;
+      double sl = 0;
+      double su = 0;
 
-      for (int llr = ar0, uur = ur0; llr < lr && uur < ur1;) {
-        int llj = mja[llr];
-        int uui = mja[uur];
+      for (int lrr = lr0, urr = ur0; urr < ur1 && lrr < lr;) {
+        int lj = rja[lrr];
+        int ui = rja[urr];
 
-        if (llj == uui) {
-          s += rlr[llr] * rur[uur];
+        if (lj == ui) {
+          sl += rlr[lrr] * rur[urr];
+          su += rlr[urr] * rur[lrr];
 
-          llr += 1;
-          uur += 1;
-
-          continue;
-        }
-
-        if (llj < uui)
-          llr += 1;
-        else
-          uur += 1;
-      }
-
-      rlr[lr] = (mlr[lr] - s) / rdr[lj];
-    }
-
-    for (int ur = ar0; ur < ar1; ++ur) {
-      int ui = mja[ur];
-
-      int lr0 = mia[ui];
-      int lr1 = mia[ui + 1];
-
-      double s = 0;
-
-      for (int llr = lr0, uur = ar0; llr < lr1 && uur < ur;) {
-        int llj = mja[llr];
-        int uui = mja[uur];
-
-        if (llj == uui) {
-          s += rlr[llr] * rur[uur];
-
-          llr += 1;
-          uur += 1;
+          lrr += 1;
+          urr += 1;
 
           continue;
         }
 
-        if (llj < uui)
-          llr += 1;
+        if (lj < ui)
+          lrr += 1;
         else
-          uur += 1;
+          urr += 1;
       }
 
-      rur[ur] = (mur[ur] - s) / rdr[ui];
-      ds += rlr[ur] * rur[ur];
+      rlr[lr] = (mlr[lr] - sl) / rdr[j];
+      rur[lr] = (mur[lr] - su) / rdr[j];
+
+      sd += rlr[lr] * rur[lr];
     }
 
-    rdr[d] = sqrt(mdr[d] - ds);
+    rdr[d] = sqrt(mdr[d] - sd);
   }
 
   return 0;
