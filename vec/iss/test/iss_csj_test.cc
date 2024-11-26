@@ -15,11 +15,14 @@ class Env : public testing::Environment {
   static struct mtx_csj_pps hlb_pps;
   static struct mtx_csj_pps ddm_pps;
 
+  static struct mtx_csj_pps ddm_dft_pps;
+
   static struct mtx_csj_pps big_fst_pps;
   static struct mtx_csj_pps big_snd_pps;
 
   static struct iss_csj_pkt iss_hlb_pkt;
 
+  static struct iss_csj_pkt iss_ddm_dft_pkt;
   static struct iss_csj_pkt iss_ddm_pos_pkt;
   static struct iss_csj_pkt iss_ddm_neg_pkt;
 
@@ -79,9 +82,27 @@ class Env : public testing::Environment {
     vec_cls(fp);
   }
 
+  void GetRight() {
+    struct mtx_csj* mp = mtx_csj_new(ddm_dft_pps);
+    struct vec* xp = vec_new(mp->pps.n);
+    struct vec* fp = vec_new(mp->pps.n);
+
+    vec_seq(xp, 1);
+
+    mtx_csj_get(&iss_ddm_dft_pkt.mtx, mp);
+    mtx_csj_vmlt(mp, xp, fp);
+
+    vec_put(iss_ddm_dft_pkt.pkt.f, fp);
+
+    mtx_csj_cls(mp);
+    vec_cls(xp);
+    vec_cls(fp);
+  }
+
   virtual void SetUp() {
     // NewHilbert();
     // NewDominant();
+    // GetRight();
   }
 
   virtual void TearDown() {
@@ -95,18 +116,19 @@ class Env : public testing::Environment {
 
 struct mtx_csj_pps Env::hlb_pps = {3, ALL(3)};
 struct mtx_csj_pps Env::ddm_pps = {10, ALL(10)};
+struct mtx_csj_pps Env::ddm_dft_pps = {10, 17};
 struct mtx_csj_pps Env::big_fst_pps = {4545, 46640};
 struct mtx_csj_pps Env::big_snd_pps = {945, 9440};
 
 struct iss_csj_pkt Env::iss_hlb_pkt {
-  .pkt = {
-    .pps = 0,
-    .x = 0,
-    .f = fopen("mtx/hlb/f.vec", "r"),
+  .pkt =
+      {
+          .pps = 0,
+          .x = 0,
+          .f = fopen("mtx/hlb/f.vec", "r"),
   },
   .mtx {
-    .pps = 0, 
-    .dr = fopen("mtx/hlb/dr.csj.mtx", "r"),
+    .pps = 0, .dr = fopen("mtx/hlb/dr.csj.mtx", "r"),
     .lr = fopen("mtx/hlb/lr.csj.mtx", "r"),
     .ur = fopen("mtx/hlb/ur.csj.mtx", "r"),
     .ia = fopen("mtx/hlb/ia.csj.mtx", "r"),
@@ -114,15 +136,30 @@ struct iss_csj_pkt Env::iss_hlb_pkt {
   }
 };
 
+struct iss_csj_pkt Env::iss_ddm_dft_pkt {
+  .pkt{
+      .pps = 0,
+      .x = 0,
+      .f = fopen("mtx/ddm/f.vec", "r"),
+  },
+      .mtx {
+    .pps = 0, .dr = fopen("mtx/ddm/dr.csj.mtx", "r"),
+    .lr = fopen("mtx/ddm/lr.csj.mtx", "r"),
+    .ur = fopen("mtx/ddm/ur.csj.mtx", "r"),
+    .ia = fopen("mtx/ddm/ia.csj.mtx", "r"),
+    .ja = fopen("mtx/ddm/ja.csj.mtx", "r"),
+  }
+};
+
 struct iss_csj_pkt Env::iss_ddm_pos_pkt {
-  .pkt = {
-    .pps = 0,
-    .x = 0,
-    .f = fopen("mtx/ddm-pos/f.vec", "r"),
+  .pkt =
+      {
+          .pps = 0,
+          .x = 0,
+          .f = fopen("mtx/ddm-pos/f.vec", "r"),
   },
   .mtx {
-    .pps = 0, 
-    .dr = fopen("mtx/ddm-pos/dr.csj.mtx", "r"),
+    .pps = 0, .dr = fopen("mtx/ddm-pos/dr.csj.mtx", "r"),
     .lr = fopen("mtx/ddm-pos/lr.csj.mtx", "r"),
     .ur = fopen("mtx/ddm-pos/ur.csj.mtx", "r"),
     .ia = fopen("mtx/ddm-pos/ia.csj.mtx", "r"),
@@ -131,14 +168,14 @@ struct iss_csj_pkt Env::iss_ddm_pos_pkt {
 };
 
 struct iss_csj_pkt Env::iss_ddm_neg_pkt {
-  .pkt = {
-    .pps = 0,
-    .x = 0,
-    .f = fopen("mtx/ddm-neg/f.vec", "r"),
+  .pkt =
+      {
+          .pps = 0,
+          .x = 0,
+          .f = fopen("mtx/ddm-neg/f.vec", "r"),
   },
   .mtx {
-    .pps = 0, 
-    .dr = fopen("mtx/ddm-neg/dr.csj.mtx", "r"),
+    .pps = 0, .dr = fopen("mtx/ddm-neg/dr.csj.mtx", "r"),
     .lr = fopen("mtx/ddm-neg/lr.csj.mtx", "r"),
     .ur = fopen("mtx/ddm-neg/ur.csj.mtx", "r"),
     .ia = fopen("mtx/ddm-neg/ia.csj.mtx", "r"),
@@ -147,14 +184,14 @@ struct iss_csj_pkt Env::iss_ddm_neg_pkt {
 };
 
 struct iss_csj_pkt Env::iss_big_fst_pkt {
-  .pkt = {
-    .pps = 0,
-    .x = 0,
-    .f = fopen("mtx/big-fst/f.vec", "r"),
+  .pkt =
+      {
+          .pps = 0,
+          .x = 0,
+          .f = fopen("mtx/big-fst/f.vec", "r"),
   },
   .mtx {
-    .pps = 0, 
-    .dr = fopen("mtx/big-fst/dr.csj.mtx", "r"),
+    .pps = 0, .dr = fopen("mtx/big-fst/dr.csj.mtx", "r"),
     .lr = fopen("mtx/big-fst/lr.csj.mtx", "r"),
     .ur = fopen("mtx/big-fst/ur.csj.mtx", "r"),
     .ia = fopen("mtx/big-fst/ia.csj.mtx", "r"),
@@ -163,14 +200,14 @@ struct iss_csj_pkt Env::iss_big_fst_pkt {
 };
 
 struct iss_csj_pkt Env::iss_big_snd_pkt {
-  .pkt = {
-    .pps = 0,
-    .x = 0,
-    .f = fopen("mtx/big-snd/f.vec", "r"),
+  .pkt =
+      {
+          .pps = 0,
+          .x = 0,
+          .f = fopen("mtx/big-snd/f.vec", "r"),
   },
   .mtx {
-    .pps = 0, 
-    .dr = fopen("mtx/big-snd/dr.csj.mtx", "r"),
+    .pps = 0, .dr = fopen("mtx/big-snd/dr.csj.mtx", "r"),
     .lr = fopen("mtx/big-snd/lr.csj.mtx", "r"),
     .ur = fopen("mtx/big-snd/ur.csj.mtx", "r"),
     .ia = fopen("mtx/big-snd/ia.csj.mtx", "r"),
@@ -191,6 +228,7 @@ class iss_csj_test : public testing::Test {
 
   void test_ctx_hlb_dft(FILE* rep, fun_iss_csj_slv slv);
   void test_ctx_hlb_all(FILE* rep, fun_iss_csj_slv slv);
+  void test_ctx_ddm_dft(FILE* rep, fun_iss_csj_slv slv);
   void test_ctx_ddm_pos(FILE* rep, fun_iss_csj_slv svl);
   void test_ctx_ddm_neg(FILE* rep, fun_iss_csj_slv slv);
   void test_ctx_big_fst(FILE* rep, fun_iss_csj_slv slv);
@@ -221,15 +259,14 @@ void iss_csj_test::test_ctx_hlb_dft(FILE* rep, fun_iss_csj_slv slv) {
   EXPECT_GT(pps.eps, fabs(res.res));
   EXPECT_GT(pps.mk, res.k);
 
-  fprintf(rep, "Iterations: %d\nResidual: %.7e\nTime: %lf ms\n\n", 
-      res.k, res.res, diff_ms(&beg, &end));
+  fprintf(rep, "Iterations: %d\nResidual: %.7e\nTime: %lf ms\n\n", res.k,
+          res.res, diff_ms(&beg, &end));
 
   vec_put(rep, xp);
 
   mtx_csj_cls(mp);
   vec_cls(xp);
   vec_cls(fp);
-
 }
 
 void iss_csj_test::test_ctx_hlb_all(FILE* rep, fun_iss_csj_slv slv) {
@@ -258,13 +295,45 @@ void iss_csj_test::test_ctx_hlb_all(FILE* rep, fun_iss_csj_slv slv) {
     EXPECT_GT(pps.eps, fabs(res.res));
     EXPECT_GT(pps.mk, res.k);
 
-    fprintf(rep, "N: %d\nIterations: %d\nResidual: %.7e\nTime: %lf ms\n\n", 
-        n, res.k, res.res, diff_ms(&beg, &end));
+    fprintf(rep, "N: %d\nIterations: %d\nResidual: %.7e\nTime: %lf ms\n\n", n,
+            res.k, res.res, diff_ms(&beg, &end));
 
     mtx_csj_cls(mp);
     vec_cls(xp);
     vec_cls(fp);
   }
+}
+
+void iss_csj_test::test_ctx_ddm_dft(FILE* rep, fun_iss_csj_slv slv) {
+  struct timespec beg;
+  struct timespec end;
+
+  struct iss_res res = {0, 0};
+
+  struct mtx_csj* mp = mtx_csj_new(Env::ddm_dft_pps);
+  struct vec* xp = vec_new(mp->pps.n);
+  struct vec* fp = vec_new(mp->pps.n);
+
+  mtx_csj_get(&Env::iss_ddm_dft_pkt.mtx, mp);
+  vec_get(Env::iss_ddm_dft_pkt.pkt.f, fp);
+
+  vec_zer(xp);
+
+  clock_gettime(CLOCK_MONOTONIC, &beg);
+  slv(mp, xp, fp, &pps, &res, 0);
+  clock_gettime(CLOCK_MONOTONIC, &end);
+
+  EXPECT_GT(pps.eps, fabs(res.res));
+  EXPECT_GT(pps.mk, res.k);
+
+  fprintf(rep, "Iterations: %d\nResidual: %.7e\nTime: %lf ms\n\n", res.k,
+          res.res, diff_ms(&beg, &end));
+
+  vec_put(rep, xp);
+
+  mtx_csj_cls(mp);
+  vec_cls(xp);
+  vec_cls(fp);
 }
 
 void iss_csj_test::test_ctx_ddm_pos(FILE* rep, fun_iss_csj_slv slv) {
@@ -289,8 +358,8 @@ void iss_csj_test::test_ctx_ddm_pos(FILE* rep, fun_iss_csj_slv slv) {
   EXPECT_GT(pps.eps, fabs(res.res));
   EXPECT_GT(pps.mk, res.k);
 
-  fprintf(rep, "Iterations: %d\nResidual: %.7e\nTime: %lf ms\n\n", 
-      res.k, res.res, diff_ms(&beg, &end));
+  fprintf(rep, "Iterations: %d\nResidual: %.7e\nTime: %lf ms\n\n", res.k,
+          res.res, diff_ms(&beg, &end));
 
   vec_put(rep, xp);
 
@@ -321,8 +390,8 @@ void iss_csj_test::test_ctx_ddm_neg(FILE* rep, fun_iss_csj_slv slv) {
   EXPECT_GT(pps.eps, fabs(res.res));
   EXPECT_GT(pps.mk, res.k);
 
-  fprintf(rep, "Iterations: %d\nResidual: %.7e\nTime: %lf ms\n\n", 
-      res.k, res.res, diff_ms(&beg, &end));
+  fprintf(rep, "Iterations: %d\nResidual: %.7e\nTime: %lf ms\n\n", res.k,
+          res.res, diff_ms(&beg, &end));
 
   vec_put(rep, xp);
 
@@ -330,7 +399,6 @@ void iss_csj_test::test_ctx_ddm_neg(FILE* rep, fun_iss_csj_slv slv) {
   vec_cls(xp);
   vec_cls(fp);
 }
-
 
 void iss_csj_test::test_ctx_big_fst(FILE* rep, fun_iss_csj_slv slv) {
   struct timespec beg;
@@ -354,8 +422,8 @@ void iss_csj_test::test_ctx_big_fst(FILE* rep, fun_iss_csj_slv slv) {
   EXPECT_GT(pps.eps, fabs(res.res));
   EXPECT_GT(pps.mk, res.k);
 
-  fprintf(rep, "Iterations: %d\nResidual: %.7e\nTime: %lf ms\n\n", 
-      res.k, res.res, diff_ms(&beg, &end));
+  fprintf(rep, "Iterations: %d\nResidual: %.7e\nTime: %lf ms\n\n", res.k,
+          res.res, diff_ms(&beg, &end));
 
   vec_put(rep, xp);
 
@@ -386,8 +454,8 @@ void iss_csj_test::test_ctx_big_snd(FILE* rep, fun_iss_csj_slv slv) {
   EXPECT_GT(pps.eps, fabs(res.res));
   EXPECT_GT(pps.mk, res.k);
 
-  fprintf(rep, "Iterations: %d\nResidual: %.7e\nTime: %lf ms\n\n", 
-      res.k, res.res, diff_ms(&beg, &end));
+  fprintf(rep, "Iterations: %d\nResidual: %.7e\nTime: %lf ms\n\n", res.k,
+          res.res, diff_ms(&beg, &end));
 
   vec_put(rep, xp);
 
@@ -408,6 +476,14 @@ TEST_F(iss_csj_test, los_dft_hlb_all) {
   FILE* rep = fopen("report/los_dft_hlb_all.rep", "w+");
 
   test_ctx_hlb_all(rep, &iss_csj_los_slv);
+
+  fclose(rep);
+}
+
+TEST_F(iss_csj_test, los_dft_ddm_dft) {
+  FILE* rep = fopen("report/los_dft_ddm_dft.rep", "w+");
+
+  test_ctx_ddm_dft(rep, &iss_csj_los_slv);
 
   fclose(rep);
 }
@@ -460,6 +536,14 @@ TEST_F(iss_csj_test, los_ilu_hlb_all) {
   fclose(rep);
 }
 
+TEST_F(iss_csj_test, los_ilu_ddm_dft) {
+  FILE* rep = fopen("report/los_ilu_ddm_dft.rep", "w+");
+
+  test_ctx_ddm_dft(rep, &iss_csj_ilu_los_slv);
+
+  fclose(rep);
+}
+
 TEST_F(iss_csj_test, los_ilu_ddm_pos) {
   FILE* rep = fopen("report/los_ilu_ddm_pos.rep", "w+");
 
@@ -504,6 +588,14 @@ TEST_F(iss_csj_test, los_dgl_hlb_all) {
   FILE* rep = fopen("report/los_dgl_hlb_all.rep", "w+");
 
   test_ctx_hlb_all(rep, &iss_csj_dgl_los_slv);
+
+  fclose(rep);
+}
+
+TEST_F(iss_csj_test, los_dgl_ddm_dft) {
+  FILE* rep = fopen("report/los_dgl_ddm_dft.rep", "w+");
+
+  test_ctx_ddm_dft(rep, &iss_csj_dgl_los_slv);
 
   fclose(rep);
 }

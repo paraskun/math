@@ -33,4 +33,4 @@ enable_testing()
 
 add_subdirectory(vec)
 add_subdirectory(gmp)
-add_subdirectory(pde)
+# add_subdirectory(pde)
