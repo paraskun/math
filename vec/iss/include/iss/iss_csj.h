@@ -2,7 +2,7 @@
 #define ISS_CSJ_H
 
 #include <iss/iss.h>
-#include <mtx_csj.h>
+#include <mtx/csj.h>
 #include <vec.h>
 
 struct iss_csj_pkt {

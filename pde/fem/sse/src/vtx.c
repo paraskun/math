@@ -6,18 +6,14 @@ struct vtx* vtx_new() {
   return malloc(sizeof(struct vtx));
 }
 
-nrm fce_nrm(struct vtx* a, struct vtx* b, struct vtx* c) {
-  if (a->x == c->x && b->x == c->x)
-    return X;
-
-  if (a->y == c->y && b->y == c->y)
-    return Y;
-
-  return Z;
-}
-
 int vtx_get(FILE* obj, struct vtx* v) {
-  return fscanf(obj, "%lf %lf %lf", &v->x, &v->y, &v->z) / 3;
+  if (fgetc(obj) != 'v')
+    return 0;
+
+  fscanf(obj, "%lf %lf %lf", &v->x, &v->y, &v->z);
+  fscanf(obj, "| %lf", &v->pps.q);
+
+  return 1;
 }
 
 int vtx_cls(struct vtx* v) {

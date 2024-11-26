@@ -4,45 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-int vll_add(struct vll* l, int vtx) {
-  struct vln* n = malloc(sizeof(struct vln));
-
-  n->vtx = vtx;
-  n->next = NULL;
-
-  if (l->beg == NULL) {
-    l->beg = n;
-    return 0;
-  }
-
-  struct vln* e = l->beg;
-
-  if (vtx < e->vtx) {
-    n->next = e;
-    l->beg = n;
-
-    return 0;
-  }
-
-  while (e->next && e->next->vtx < vtx)
-    e = e->next;
-
-  n->next = e->next;
-  e->next = n;
-
-  return 0;
-}
-
 int vll_cls(struct vll* l) {
-  struct vln* n = l->beg;
 
-  while (n) {
-    struct vln* t = n->next;
-    free(n);
-    n = t;
-  }
-
-  return 0;
 }
 
 struct fem* fem_new() {

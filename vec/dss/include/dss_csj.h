@@ -1,7 +1,7 @@
 #ifndef DSS_CSJ_H
 #define DSS_CSJ_H
 
-#include <mtx_csj.h>
+#include <mtx/csj.h>
 
 int iss_csj_ilu_lslv(
     struct mtx_csj* mp, 

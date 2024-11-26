@@ -3,34 +3,21 @@
 
 #include <fem/hex.h>
 
-#include <mtx_all.h>
-#include <mtx_csj.h>
+#include <mtx/mtx.h>
+#include <mtx/csj.h>
 
 struct fem {
   int vs;
   int hs;
+  int fs;
 
   struct vtx** vtx;
   struct hex** hex;
+  struct fce** fce;
 
   struct mtx_csj* a;
   struct vec* b;
-
-  struct fll fll;
 };
-
-struct vln {
-  int vtx;
-
-  struct vln* next;
-};
-
-struct vll {
-  struct vln* beg;
-};
-
-int vll_add(struct vll* l, int vtx);
-int vll_cls(struct vll* l);
 
 struct fem* fem_new();
 

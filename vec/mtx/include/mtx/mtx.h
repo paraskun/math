@@ -1,5 +1,5 @@
-#ifndef DMTX_H
-#define DMTX_H
+#ifndef MTX_H
+#define MTX_H
 
 #include <stddef.h>
 #include <stdio.h>
@@ -7,16 +7,14 @@
 
 struct mtx {
   int n;
-  double* vp;
+
+  double** v;
 };
 
 struct mtx* mtx_new(int n);
 
 int mtx_fget(FILE* f, struct mtx* mp);
 int mtx_fput(FILE* f, struct mtx* mp);
-
-int mtx_ddm(struct mtx* mp);
-int mtx_hlb(struct mtx* mp);
 
 int mtx_nrm(struct mtx* ap, double* rp);
 

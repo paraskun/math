@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 extern "C" {
-#include <mtx_csj.h>
+#include <mtx/csj.h>
 }
 
 TEST(mtx_csj, vmlt) {

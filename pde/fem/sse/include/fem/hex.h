@@ -3,24 +3,27 @@
 
 #include <fem/fce.h>
 #include <fem/vtx.h>
+#include <mtx/mtx.h>
 
 struct hex {
   int vtx[8];
 
-  double lam;
-  double gam;
+  struct {
+    double lam;
+    double gam;
+  } pps;
 
-  struct mtx* g;
-  struct mtx* m;
-  struct vec* b;
-
-  struct fll fll;
+  struct {
+    struct mtx* g;
+    struct mtx* m;
+    struct vec* b;
+  } dep;
 };
 
 struct hex* hex_new();
 
 int hex_get(FILE* obj, struct hex* h);
-int hex_evo(struct hex* h, struct vtx** v, struct fll* l);
+int hex_evo(struct hex* h, struct vtx** v);
 int hex_cls(struct hex* h);
 
 #endif  // FEM_HEX_H

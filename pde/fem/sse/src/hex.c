@@ -1,6 +1,6 @@
 #include <fem/const.h>
 #include <fem/hex.h>
-#include <mtx_all.h>
+#include <mtx/mtx.h>
 
 #include <stdlib.h>
 
@@ -10,42 +10,42 @@ struct hex* hex_new() {
   if (!h)
     return h;
 
-  h->g = mtx_new(8);
-  h->m = mtx_new(8);
-  h->b = vec_new(8);
-
-  h->fll.beg = NULL;
-  h->fll.end = NULL;
+  h->dep.m = mtx_new(8);
+  h->dep.g = mtx_new(8);
+  h->dep.b = vec_new(8);
 
   return h;
 }
 
 int hex_get(FILE* obj, struct hex* h) {
+  if (fgetc(obj) != 'h')
+    return 0;
+
   for (int j = 0, v; j < 8; ++j) {
     fscanf(obj, "%d", &v);
     h->vtx[j] = v - 1;
   }
 
-  fscanf(obj, "| %lf | %lf", &h->lam, &h->gam);
+  fscanf(obj, "| %lf | %lf", &h->pps.lam, &h->pps.gam);
 
   return 1;
 }
 
-int hex_evo(struct hex* h, struct vtx** v, struct fll* l) {
-  double lam = h->lam;
-  double gam = h->gam;
+int hex_evo(struct hex* h, struct vtx** v) {
+  double lam = h->pps.lam;
+  double gam = h->pps.gam;
 
   double hx = v[h->vtx[1]]->x - v[h->vtx[0]]->x;
   double hy = v[h->vtx[2]]->y - v[h->vtx[0]]->y;
   double hz = v[h->vtx[4]]->z - v[h->vtx[0]]->z;
 
-  double Gx[2][2];
-  double Gy[2][2];
-  double Gz[2][2];
+  double gx[2][2];
+  double gy[2][2];
+  double gz[2][2];
 
-  double Mx[2][2];
-  double My[2][2];
-  double Mz[2][2];
+  double mx[2][2];
+  double my[2][2];
+  double mz[2][2];
 
   struct mtx* d = mtx_new(8);
   struct vec* q = vec_new(8);
@@ -55,66 +55,51 @@ int hex_evo(struct hex* h, struct vtx** v, struct fll* l) {
 
   for (int i = 0; i < 2; ++i)
     for (int j = 0; j < 2; ++j) {
-      Gx[i][j] = G[i][j] / hx;
-      Gy[i][j] = G[i][j] / hy;
-      Gz[i][j] = G[i][j] / hz;
+      gx[i][j] = G[i][j] / hx;
+      gy[i][j] = G[i][j] / hy;
+      gz[i][j] = G[i][j] / hz;
 
-      Mx[i][j] = M[i][j] * hx;
-      My[i][j] = M[i][j] * hy;
-      Mz[i][j] = M[i][j] * hz;
+      mx[i][j] = M[i][j] * hx;
+      my[i][j] = M[i][j] * hy;
+      mz[i][j] = M[i][j] * hz;
     }
 
-  double* gvp = h->g->vp;
-  double* mvp = h->m->vp;
-  double* dvp = d->vp;
-  double* qvp = q->vp;
+  double** gv = h->dep.g->v;
+  double** mv = h->dep.m->v;
+
+  double** dv = d->v;
+  double* qv = q->vp;
 
   for (int i = 0, ib = 0; i < 8; ++i, ib += 8) {
-    qvp[i] = v[h->vtx[i]]->q;
+    qv[i] = v[h->vtx[i]]->pps.q;
 
     int mui = MU[i];
     int nui = NU[i];
     int tti = TT[i];
 
     for (int j = 0; j < 8; ++j) {
-      int e = ib + j;
-
       int muj = MU[j];
       int nuj = NU[j];
       int ttj = TT[j];
 
-      double mx = Mx[mui][muj];
-      double my = My[nui][nuj];
-      double mz = Mz[tti][ttj];
+      double mxl = mx[mui][muj];
+      double myl = my[nui][nuj];
+      double mzl = mz[tti][ttj];
 
-      double gx = Gx[mui][muj];
-      double gy = Gy[mui][muj];
-      double gz = Gz[mui][muj];
+      double gxl = gx[mui][muj];
+      double gyl = gy[mui][muj];
+      double gzl = gz[mui][muj];
 
-      mvp[e] = gam * mx * my * mz;
-      dvp[e] = X[mui][muj] * my * mz;
-      gvp[e] = lam * (gx * my * mz + mx * gy * mz + mx * my * gz);
+      mv[i][j] = gam * mxl * myl * mzl;
+      gv[i][j] = lam * (gxl * myl * mzl + mxl * gyl * mzl + mxl * myl * gzl);
+      dv[i][j] = X[mui][muj] * myl * mzl;
     }
   }
 
-  mtx_vmlt(d, q, h->b);
+  mtx_vmlt(d, q, h->dep.b);
+
   mtx_cls(d);
   vec_cls(q);
-
-  struct fce* f = h->fll.beg;
-
-  while (f) {
-    switch (f->cnd.type) {
-      case DIR:
-        fll_add(l, f);
-        break;
-      case NEU:
-      case ROB:
-        fce_evo(f, v, hx, hy, hz, Mx, My, Mz);
-    }
-
-    f = f->next;
-  }
 
   return 0;
 }
@@ -123,10 +108,9 @@ int hex_cls(struct hex* h) {
   if (!h)
     return 0;
 
-  mtx_cls(h->g);
-  mtx_cls(h->m);
-  vec_cls(h->b);
-  fll_cls(&h->fll);
+  mtx_cls(h->dep.g);
+  mtx_cls(h->dep.m);
+  vec_cls(h->dep.b);
 
   free(h);
 

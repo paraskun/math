@@ -1,54 +1,44 @@
-#include <fem/fce.h>
 #include <fem/const.h>
-#include <mtx_all.h>
+#include <fem/fce.h>
+#include <mtx/mtx.h>
 
 #include <stdlib.h>
 
 struct fce* fce_new() {
-  struct fce* f = malloc(sizeof(struct fce));
-
-  if (!f)
-    return f;
-
-  f->m = NULL;
-  f->b = NULL;
-
-  return f;
+  return malloc(sizeof(struct fce));
 }
 
 int fce_get(FILE* obj, struct fce* f) {
+  if (fgetc(obj) != 'f')
+    return 0;
+
   for (int j = 0, v; j < 4; ++j) {
     fscanf(obj, "%d", &v);
     f->vtx[j] = v - 1;
   }
 
-  fscanf(obj, "| %d", &f->cnd.type);
-
-  switch (f->cnd.type) {
-    case DIR:
-      break;
-    case NEU:
-      fscanf(obj, "| %lf", &f->cnd.pps.neu.tta);
-      f->b = vec_new(4);
-      break;
-    case ROB:
-      fscanf(obj, "| %lf %lf", &f->cnd.pps.rob.bet, &f->cnd.pps.rob.cff);
-      f->b = vec_new(4);
-      f->m = mtx_new(4);
-      break;
-  }
+  int type;
+  fscanf(obj, "| %d", &type);
+  f->cnd.type = type - 1;
 
   return 1;
 }
 
-int fce_evo(struct fce* f,
-    struct vtx** v,
-    double hx, 
-    double hy, 
-    double hz, 
-    double mx[2][2], 
-    double my[2][2], 
-    double mz[2][2]) {
+int fce_nrm(struct fce* f, struct vtx** v) {
+  struct vtx* a = v[f->vtx[0]];
+  struct vtx* b = v[f->vtx[1]];
+  struct vtx* c = v[f->vtx[2]];
+
+  if (a->x == c->x && b->x == c->x)
+    return 0;
+
+  if (a->y == c->y && b->y == c->y)
+    return 1;
+
+  return 2;
+}
+
+int fce_evo(struct fce* f, struct vtx** v) {
   double mult = f->cnd.pps.neu.tta;
 
   switch (f->cnd.type) {
@@ -65,10 +55,8 @@ int fce_evo(struct fce* f,
           int nuj = NU[j];
           int ttj = TT[j];
 
-          f->m->vp[e] = f->cnd.pps.rob.bet * 
-            mx[mui][muj] *
-            my[nui][nuj] *
-            mz[tti][ttj];
+          f->dep.rob.m->v[e] =
+              f->cnd.pps.rob.bet * mx[mui][muj] * my[nui][nuj] * mz[tti][ttj];
         }
       }
 
@@ -100,36 +88,19 @@ int fce_cls(struct fce* f) {
   if (!f)
     return 0;
 
-  if (f->m)
-    free(f->m);
-
-  if (f->b)
-    free(f->b);
+  switch (f->cnd.type) {
+    case ROB:
+      free(f->dep.rob.b);
+      free(f->dep.rob.m);
+      break;
+    case NEU:
+      free(f->dep.neu.b);
+      break;
+    case DIR:
+      break;
+  }
 
   free(f);
-
-  return 0;
-}
-
-int fll_add(struct fll* l, struct fce* f) {
-  if (l->beg == NULL)
-    l->beg = f;
-  else
-    l->end->next = f;
-
-  l->end = f;
-
-  return 0;
-}
-
-int fll_cls(struct fll* l) {
-  struct fce* f = l->beg;
-
-  while (f) {
-    struct fce* n = f->next;
-    fce_cls(f);
-    f = n;
-  }
 
   return 0;
 }
