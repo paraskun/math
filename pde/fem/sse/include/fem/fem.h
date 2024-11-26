@@ -19,6 +19,19 @@ struct fem {
   struct fll fll;
 };
 
+struct vln {
+  int vtx;
+
+  struct vln* next;
+};
+
+struct vll {
+  struct vln* beg;
+};
+
+int vll_add(struct vll* l, int vtx);
+int vll_cls(struct vll* l);
+
 struct fem* fem_new();
 
 int fem_get(FILE* obj, struct fem* fem);

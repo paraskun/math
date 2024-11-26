@@ -16,6 +16,8 @@ struct vec* vec_new(int n) {
   vec->vp = malloc(sizeof(double) * n);
   vec->n = n;
 
+  memset(vec->vp, 0, sizeof(double) * n);
+
   return vec;
 }
 

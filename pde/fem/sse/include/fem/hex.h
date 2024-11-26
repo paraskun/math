@@ -10,8 +10,6 @@ struct hex {
   double lam;
   double gam;
 
-  struct vec* q;
-
   struct mtx* g;
   struct mtx* m;
   struct vec* b;

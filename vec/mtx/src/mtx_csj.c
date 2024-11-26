@@ -15,6 +15,8 @@ struct mtx_csj* mtx_csj_new(struct mtx_csj_pps pps) {
 
   mp->dr = malloc(sizeof(double) * n);
 
+  memset(mp->dr, 0, sizeof(double) * n);
+
   mp->lr = NULL;
   mp->ur = NULL;
   mp->ia = NULL;
@@ -25,6 +27,11 @@ struct mtx_csj* mtx_csj_new(struct mtx_csj_pps pps) {
     mp->ur = malloc(sizeof(double) * ne);
     mp->ia = malloc(sizeof(int) * (n + 1));
     mp->ja = malloc(sizeof(int) * ne);
+
+    memset(mp->lr, 0, sizeof(double) * ne);
+    memset(mp->ur, 0, sizeof(double) * ne);
+    memset(mp->ia, 0, sizeof(int) * (n + 1));
+    memset(mp->ja, 0, sizeof(int) * ne);
   }
 
   return mp;

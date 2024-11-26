@@ -4,12 +4,6 @@ set(SRC
   src/iss_csj.c
 )
 
-set(HDR 
-  include/iss.h 
-  include/iss_cds.h 
-  include/iss_csj.h
-)
-
 add_library(iss ${SRC} ${HDR})
 target_link_libraries(iss PUBLIC vec)
 target_link_libraries(iss PUBLIC mtx)

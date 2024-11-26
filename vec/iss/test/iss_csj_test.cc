@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 extern "C" {
-#include <iss_csj.h>
+#include <iss/iss_csj.h>
 
 #include <math.h>
 #include <stdio.h>

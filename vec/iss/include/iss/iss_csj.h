@@ -1,7 +1,7 @@
 #ifndef ISS_CSJ_H
 #define ISS_CSJ_H
 
-#include <iss.h>
+#include <iss/iss.h>
 #include <mtx_csj.h>
 #include <vec.h>
 

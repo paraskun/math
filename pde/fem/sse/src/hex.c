@@ -1,5 +1,5 @@
-#include <fem/hex.h>
 #include <fem/const.h>
+#include <fem/hex.h>
 #include <mtx_all.h>
 
 #include <stdlib.h>
@@ -13,7 +13,6 @@ struct hex* hex_new() {
   h->g = mtx_new(8);
   h->m = mtx_new(8);
   h->b = vec_new(8);
-  h->q = vec_new(8);
 
   h->fll.beg = NULL;
   h->fll.end = NULL;
@@ -48,12 +47,11 @@ int hex_evo(struct hex* h, struct vtx** v, struct fll* l) {
   double My[2][2];
   double Mz[2][2];
 
-  struct mtx* D = mtx_new(8);
+  struct mtx* d = mtx_new(8);
+  struct vec* q = vec_new(8);
 
-  double X[2][2] = {
-    {v[h->vtx[0]]->x / hx + 0.5, - v[h->vtx[0]]->x / hx - 0.5},
-    {-1, 1}
-  };
+  double X[2][2] = {{v[h->vtx[0]]->x / hx + 0.5, -v[h->vtx[0]]->x / hx - 0.5},
+                    {-1, 1}};
 
   for (int i = 0; i < 2; ++i)
     for (int j = 0; j < 2; ++j) {
@@ -68,9 +66,12 @@ int hex_evo(struct hex* h, struct vtx** v, struct fll* l) {
 
   double* gvp = h->g->vp;
   double* mvp = h->m->vp;
-  double* dvp = D->vp;
+  double* dvp = d->vp;
+  double* qvp = q->vp;
 
   for (int i = 0, ib = 0; i < 8; ++i, ib += 8) {
+    qvp[i] = v[h->vtx[i]]->q;
+
     int mui = MU[i];
     int nui = NU[i];
     int tti = TT[i];
@@ -96,7 +97,9 @@ int hex_evo(struct hex* h, struct vtx** v, struct fll* l) {
     }
   }
 
-  mtx_vmlt(D, h->q, h->b);
+  mtx_vmlt(d, q, h->b);
+  mtx_cls(d);
+  vec_cls(q);
 
   struct fce* f = h->fll.beg;
 
@@ -123,7 +126,6 @@ int hex_cls(struct hex* h) {
   mtx_cls(h->g);
   mtx_cls(h->m);
   vec_cls(h->b);
-  vec_cls(h->q);
   fll_cls(&h->fll);
 
   free(h);

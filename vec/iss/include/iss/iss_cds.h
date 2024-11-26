@@ -1,7 +1,7 @@
 #ifndef ISS_CDS_H
 #define ISS_CDS_H
 
-#include <iss.h>
+#include <iss/iss.h>
 #include <mtx_cds.h>
 #include <vec.h>
 

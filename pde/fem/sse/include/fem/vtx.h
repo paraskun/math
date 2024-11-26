@@ -11,6 +11,8 @@ struct vtx {
   double x;
   double y;
   double z;
+
+  double q;
 };
 
 struct vtx* vtx_new();
