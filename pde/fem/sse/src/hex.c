@@ -104,6 +104,61 @@ int hex_evo(struct hex* h, struct vtx** v) {
   return 0;
 }
 
+int hex_mov(struct hex* h, struct mtx_csj* a, struct vec* b) {
+  struct mtx* lg = h->dep.g;
+  struct mtx* lm = h->dep.m;
+  struct vec* lb = h->dep.b;
+
+  for (int i = 0; i < 8; ++i) {
+    int gi = h->vtx[i];
+
+    b->vp[gi] += lb->vp[i];
+
+    for (int j = 0; j < 8; ++j) {
+      int gj = h->vtx[j];
+
+      if (gj == gi) {
+        a->dr[gi] += lg->v[i][j] + lm->v[i][j];
+        continue;
+      }
+
+      if (gi > gj) {
+        int lr0 = a->ia[gi];
+        int lr1 = a->ia[gi + 1];
+
+        for (int lr = lr0; lr < lr1; ++lr) {
+          int lj = a->ja[lr];
+
+          if (lj == gj) {
+            a->lr[lr] += lg->v[i][j] + lm->v[i][j];
+            break;
+          }
+
+          if (lj > gj)
+            break;
+        }
+      } else {
+        int ur0 = a->ia[gj];
+        int ur1 = a->ia[gj + 1];
+
+        for (int ur = ur0; ur < ur1; ++ur) {
+          int ui = a->ja[ur];
+
+          if (ui == gi) {
+            a->ur[ur] += lg->v[i][j] + lm->v[i][j];
+            break;
+          }
+
+          if (ui > gi)
+            break;
+        }
+      }
+    }
+  }
+
+  return 0;
+}
+
 int hex_cls(struct hex* h) {
   if (!h)
     return 0;

@@ -3,22 +3,23 @@
 
 #include <fem/vtx.h>
 #include <mtx/mtx.h>
+#include <mtx/csj.h>
 
 struct cnd {
   enum type { DIR, NEU, ROB } type;
 
   union pps {
     struct {
-      double (*fun)(struct vtx* v);
+      double (*tmp)(struct vtx* v);
     } dir;
 
     struct {
-      double tta;
+      double (*tta)(struct vtx* v);
     } neu;
 
     struct {
+      double (*tmp)(struct vtx* v);
       double bet;
-      double cff;
     } rob;
   } pps;
 };
@@ -45,6 +46,7 @@ struct fce* fce_new();
 int fce_get(FILE* obj, struct fce* f);
 int fce_nrm(struct fce* f, struct vtx** v);
 int fce_evo(struct fce* f, struct vtx** v);
+int fce_mov(struct fce* f, struct mtx_csj* a, struct vec* b);
 int fce_cls(struct fce* f);
 
 #endif  // FEM_FCE_H

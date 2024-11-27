@@ -39,46 +39,81 @@ int fce_nrm(struct fce* f, struct vtx** v) {
 }
 
 int fce_evo(struct fce* f, struct vtx** v) {
-  double mult = f->cnd.pps.neu.tta;
+  switch (f->cnd.type) {
+    case DIR:
+      return 0;
+    case NEU:
+    case ROB:
+      return v[0]->x;
+  }
+
+  return 0;
+}
+
+int fce_mov(struct fce* f, struct mtx_csj* a, struct vec* b) {
+  struct mtx* lm;
+  struct vec* lb;
 
   switch (f->cnd.type) {
     case DIR:
-      return -1;
+      return 0;
     case ROB:
-      for (int i = 0, e = 0; i < 4; ++i) {
-        int mui = MU[i];
-        int nui = NU[i];
-        int tti = TT[i];
+      lm = f->dep.rob.m;
+      lb = f->dep.rob.b;
 
-        for (int j = 0; j < 4; ++j, ++e) {
-          int muj = MU[j];
-          int nuj = NU[j];
-          int ttj = TT[j];
+      for (int i = 0; i < 4; ++i) {
+        int gi = f->vtx[i];
 
-          f->dep.rob.m->v[e] =
-              f->cnd.pps.rob.bet * mx[mui][muj] * my[nui][nuj] * mz[tti][ttj];
+        b->vp[gi] += lb->vp[i];
+
+        for (int j = 0; j < 4; ++j) {
+          int gj = f->vtx[j];
+
+          if (gi == gj) {
+            a->dr[gi] += lm->v[i][j];
+            continue;
+          }
+
+          if (gi > gj) {
+            int lr0 = a->ia[gi];
+            int lr1 = a->ia[gi + 1];
+
+            for (int lr = lr0; lr < lr1; ++lr) {
+              int lj = a->ja[lr];
+
+              if (lj == gj) {
+                a->lr[lr] += lm->v[i][j];
+                break;
+              }
+
+              if (lj > gj)
+                break;
+            }
+          } else {
+            int ur0 = a->ia[gj];
+            int ur1 = a->ia[gj + 1];
+
+            for (int ur = ur0; ur < ur1; ++ur) {
+              int ui = a->ja[ur];
+
+              if (ui == gi) {
+                a->ur[ur] += lm->v[i][j];
+                break;
+              }
+
+              if (ui > gi)
+                break;
+            }
+          }
         }
       }
 
-      mult = f->cnd.pps.rob.bet * f->cnd.pps.rob.cff;
+      break;
     case NEU:
-      double h;
+      lb = f->dep.neu.b;
 
-      switch (fce_nrm(v[f->vtx[0]], v[f->vtx[1]], v[f->vtx[2]])) {
-        case X:
-          h = hy * hz / 4;
-          break;
-        case Y:
-          h = hx * hz / 4;
-          break;
-        case Z:
-          h = hx * hy / 4;
-          break;
-      }
-
-      f->b->vp[0] = mult * h;
-      f->b->vp[1] = mult * h;
-      f->b->vp[2] = mult * h;
+      for (int i = 0; i < 4; ++i)
+        b->vp[f->vtx[i]] += lb->vp[i];
   }
 
   return 0;
