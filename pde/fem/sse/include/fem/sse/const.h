@@ -3,20 +3,13 @@
 
 #include <limits.h>
 
-const double G[2][2] = {
-  {1.0, -1.0}, 
-  {-1.0, 1.0}
-};
+extern const double G[2][2];
+extern const double M[2][2];
 
-const double M[2][2] = {
-  {2.0 / 6.0, 1.0 / 6.0},
-  {1.0 / 6.0, 2.0 / 6.0}
-};
+extern const int MU[8];
+extern const int NU[8];
+extern const int TT[8];
 
-const int MU[8] = {0, 1, 0, 1, 0, 1, 0, 1};
-const int NU[8] = {0, 0, 1, 1, 0, 0, 1, 1};
-const int TT[8] = {0, 0, 0, 0, 1, 1, 1, 1};
-
-const unsigned long C = ULONG_MAX;
+extern const unsigned long C;
 
 #endif  // FEM_CONST_H

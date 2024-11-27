@@ -17,7 +17,9 @@ struct fem {
   struct hex** hex;
   struct fce** fce;
 
-  double (**fun)(struct vtx*);
+  struct {
+    double (**fun)(struct vtx*);
+  } pps;
 
   struct mtx_csj* a;
   struct vec* b;

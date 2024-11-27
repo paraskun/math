@@ -5,6 +5,16 @@
 #include <stdlib.h>
 #include <string.h>
 
+const double G[2][2] = {{1.0, -1.0}, {-1.0, 1.0}};
+
+const double M[2][2] = {{2.0 / 6.0, 1.0 / 6.0}, {1.0 / 6.0, 2.0 / 6.0}};
+
+const int MU[8] = {0, 1, 0, 1, 0, 1, 0, 1};
+const int NU[8] = {0, 0, 1, 1, 0, 0, 1, 1};
+const int TT[8] = {0, 0, 0, 0, 1, 1, 1, 1};
+
+const unsigned long C = ULONG_MAX;
+
 int cmp(int a, int b) {
   return a > b ? -1 : a == b ? 0 : 1;
 }
@@ -23,7 +33,7 @@ struct fem* fem_new(double (**fun)(struct vtx*)) {
   fem->hex = NULL;
   fem->fce = NULL;
 
-  fem->fun = fun;
+  fem->pps.fun = fun;
 
   return fem;
 }
@@ -38,9 +48,12 @@ int fem_get(FILE* obj, struct fem* fem) {
 
   for (int i = 0; i < fem->vs; ++i) {
     fem->vtx[i] = vtx_new();
-    vtx_get(obj, fem->vtx[i]);
+
+    fgets(buf, sizeof(buf), obj);
+    vtx_get(buf, fem->vtx[i]);
   }
 
+  fgets(buf, sizeof(buf), obj);
   fgets(buf, sizeof(buf), obj);
   sscanf(buf, "#hexahedron [%d]", &fem->hs);
 
@@ -48,15 +61,22 @@ int fem_get(FILE* obj, struct fem* fem) {
 
   for (int i = 0; i < fem->hs; ++i) {
     fem->hex[i] = hex_new();
-    hex_get(obj, fem->hex[i]);
+
+    fgets(buf, sizeof(buf), obj);
+    hex_get(buf, fem->hex[i]);
   }
 
   fgets(buf, sizeof(buf), obj);
+  fgets(buf, sizeof(buf), obj);
   sscanf(buf, "#face [%d]", &fem->fs);
 
+  fem->fce = malloc(sizeof(struct fce*) * fem->fs);
+
   for (int i = 0; i < fem->fs; ++i) {
-    struct fce* f = fce_new();
-    fce_get(obj, f);
+    fem->fce[i] = fce_new();
+
+    fgets(buf, sizeof(buf), obj);
+    fce_get(buf, fem->fce[i], fem->pps.fun);
   }
 
   return 0;
@@ -75,10 +95,10 @@ int fem_evo(struct fem* fem) {
   for (int i = 0; i < fem->hs; ++i) {
     struct hex* h = fem->hex[i];
 
-    hex_evo(h, fem->vtx);
+    hex_evo(h, fem->vtx, fem->pps.fun[0]);
 
     for (int j = 0; j < 8; ++j) {
-      int a = h->vtx[i];
+      int a = h->vtx[j];
 
       for (int k = 0; k < 8; ++k) {
         int b = h->vtx[k];
@@ -174,8 +194,11 @@ int fem_slv(struct fem* fem, struct vec* q) {
 }
 
 int fem_cls(struct fem* fem) {
-  mtx_csj_cls(fem->a);
-  vec_cls(fem->b);
+  if (fem->a)
+    mtx_csj_cls(fem->a);
+
+  if (fem->b)
+    vec_cls(fem->b);
 
   for (int i = 0; i < fem->vs; ++i)
     vtx_cls(fem->vtx[i]);
@@ -185,6 +208,12 @@ int fem_cls(struct fem* fem) {
 
   for (int i = 0; i < fem->fs; ++i)
     fce_cls(fem->fce[i]);
+
+  free(fem->vtx);
+  free(fem->hex);
+  free(fem->fce);
+
+  free(fem);
 
   return 0;
 }

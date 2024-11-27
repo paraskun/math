@@ -5,46 +5,145 @@
 #include <stdlib.h>
 
 struct fce* fce_new() {
-  return malloc(sizeof(struct fce));
+  struct fce* f = malloc(sizeof(struct fce));
+
+  f->cnd.pps.dir.tmp = NULL;
+  f->cnd.pps.neu.tta = NULL;
+  f->cnd.pps.rob.tmp = NULL;
+
+  f->dep.neu.b = NULL;
+  f->dep.rob.m = NULL;
+
+  return f;
 }
 
-int fce_get(FILE* obj, struct fce* f) {
-  if (fgetc(obj) != 'f')
+int fce_get(const char* buf, struct fce* f, double (**fun)(struct vtx*)) {
+  int pos;
+
+  if (buf[0] != 'f')
     return 0;
 
+  buf += 1;
+
   for (int j = 0, v; j < 4; ++j) {
-    fscanf(obj, "%d", &v);
+    sscanf(buf, "%d%n", &v, &pos);
+    buf += pos;
+
     f->vtx[j] = v - 1;
   }
 
   int type;
-  fscanf(obj, "| %d", &type);
+  sscanf(buf, " | %d%n", &type, &pos);
+  buf += pos;
+
   f->cnd.type = type - 1;
+
+  switch (f->cnd.type) {
+    case DIR:
+      int tmp;
+
+      sscanf(buf, " | %d%n", &tmp, &pos);
+      buf += pos;
+
+      f->cnd.pps.dir.tmp = fun[tmp];
+
+      break;
+    case NEU:
+      int tta;
+
+      sscanf(buf, " | %d%n", &tta, &pos);
+      buf += pos;
+
+      f->cnd.pps.neu.tta = fun[tta];
+      f->dep.neu.b = vec_new(4);
+
+      break;
+    case ROB:
+      double bet;
+
+      sscanf(buf, " | %d | %lf%n", &tmp, &bet, &pos);
+      buf += pos;
+
+      f->cnd.pps.rob.tmp = fun[tmp];
+      f->cnd.pps.rob.bet = bet;
+      f->dep.rob.b = vec_new(4);
+      f->dep.rob.m = mtx_new(4);
+
+      break;
+  }
 
   return 1;
 }
 
-int fce_nrm(struct fce* f, struct vtx** v) {
-  struct vtx* a = v[f->vtx[0]];
-  struct vtx* b = v[f->vtx[1]];
-  struct vtx* c = v[f->vtx[2]];
-
-  if (a->x == c->x && b->x == c->x)
+int fce_evo(struct fce* f, struct vtx** v) {
+  if (f->cnd.type == DIR)
     return 0;
 
-  if (a->y == c->y && b->y == c->y)
-    return 1;
+  double mxi[2][2];
+  double mzt[2][2];
 
-  return 2;
-}
+  double hxi = v[f->vtx[1]]->y - v[f->vtx[0]]->y;
+  double hzt = v[f->vtx[2]]->y - v[f->vtx[0]]->y;
 
-int fce_evo(struct fce* f, struct vtx** v) {
-  switch (f->cnd.type) {
-    case DIR:
-      return 0;
-    case NEU:
-    case ROB:
-      return v[0]->x;
+  for (int i = 0; i < 2; ++i)
+    for (int j = 0; j < 2; ++j) {
+      mxi[i][j] = hxi * M[i][j];
+      mzt[i][j] = hzt * M[i][j];
+    }
+
+  if (f->cnd.type == ROB) {
+    double* lb = f->dep.rob.b->vp;
+    double** lm = f->dep.rob.m->v;
+
+    double (*fun)(struct vtx*) = f->cnd.pps.rob.tmp;
+    double bet = f->cnd.pps.rob.bet;
+    double cff[4];
+
+    for (int i = 0; i < 4; ++i)
+      cff[i] = fun(v[f->vtx[i]]);
+
+    for (int i = 0; i < 4; ++i) {
+      lb[i] = 0;
+
+      int mui = MU[i];
+      int nui = NU[i];
+
+      for (int j = 0; j < 4; ++j) {
+        int muj = MU[j];
+        int nuj = NU[j];
+
+        lm[i][j] = bet * mxi[mui][muj] * mzt[nui][nuj];
+        lb[i] += cff[j] * mxi[mui][muj] * mzt[nui][nuj];
+      }
+
+      lb[i] = lb[i] * bet;
+    }
+
+    return 0;
+  }
+
+  if (f->cnd.type == NEU) {
+    double* lb = f->dep.neu.b->vp;
+
+    double (*fun)(struct vtx*) = f->cnd.pps.neu.tta;
+    double cff[4];
+
+    for (int i = 0; i < 4; ++i)
+      cff[i] = fun(v[f->vtx[i]]);
+
+    for (int i = 0; i < 4; ++i) {
+      lb[i] = 0;
+
+      int mui = MU[i];
+      int nui = NU[i];
+
+      for (int j = 0; j < 4; ++j) {
+        int muj = MU[j];
+        int nuj = NU[j];
+
+        lb[i] += cff[j] * mxi[mui][muj] * mzt[nui][nuj];
+      }
+    }
   }
 
   return 0;
@@ -125,11 +224,17 @@ int fce_cls(struct fce* f) {
 
   switch (f->cnd.type) {
     case ROB:
-      free(f->dep.rob.b);
-      free(f->dep.rob.m);
+      if (f->dep.rob.m)
+        free(f->dep.rob.m);
+
+      if (f->dep.rob.b)
+        free(f->dep.rob.b);
+
       break;
     case NEU:
-      free(f->dep.neu.b);
+      if (f->dep.neu.b)
+        free(f->dep.neu.b);
+
       break;
     case DIR:
       break;

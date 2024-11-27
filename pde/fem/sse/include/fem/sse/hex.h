@@ -23,8 +23,8 @@ struct hex {
 
 struct hex* hex_new();
 
-int hex_get(FILE* obj, struct hex* h);
-int hex_evo(struct hex* h, struct vtx** v);
+int hex_get(const char* buf, struct hex* h);
+int hex_evo(struct hex* h, struct vtx** v, double (*g)(struct vtx*));
 int hex_mov(struct hex* h, struct mtx_csj* a, struct vec* b);
 int hex_cls(struct hex* h);
 

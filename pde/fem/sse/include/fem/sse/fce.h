@@ -35,16 +35,15 @@ struct fce {
     } neu;
 
     struct {
-      struct mtx* m;
       struct vec* b;
+      struct mtx* m;
     } rob;
   } dep;
 };
 
 struct fce* fce_new();
 
-int fce_get(FILE* obj, struct fce* f);
-int fce_nrm(struct fce* f, struct vtx** v);
+int fce_get(const char* buf, struct fce* f, double (**fun)(struct vtx*));
 int fce_evo(struct fce* f, struct vtx** v);
 int fce_mov(struct fce* f, struct mtx_csj* a, struct vec* b);
 int fce_cls(struct fce* f);

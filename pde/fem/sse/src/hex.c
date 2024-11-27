@@ -17,21 +17,28 @@ struct hex* hex_new() {
   return h;
 }
 
-int hex_get(FILE* obj, struct hex* h) {
-  if (fgetc(obj) != 'h')
+int hex_get(const char* buf, struct hex* h) {
+  int pos;
+
+  if (buf[0] != 'h')
     return 0;
 
+  buf += 1;
+
   for (int j = 0, v; j < 8; ++j) {
-    fscanf(obj, "%d", &v);
+    sscanf(buf, "%d%n", &v, &pos);
+    buf += pos;
+
     h->vtx[j] = v - 1;
   }
 
-  fscanf(obj, "| %lf | %lf", &h->pps.lam, &h->pps.gam);
+  sscanf(buf, " | %lf | %lf%n", &h->pps.lam, &h->pps.gam, &pos);
+  buf += pos;
 
   return 1;
 }
 
-int hex_evo(struct hex* h, struct vtx** v) {
+int hex_evo(struct hex* h, struct vtx** v, double (*g)(struct vtx*)) {
   double lam = h->pps.lam;
   double gam = h->pps.gam;
 
@@ -71,7 +78,7 @@ int hex_evo(struct hex* h, struct vtx** v) {
   double* qv = q->vp;
 
   for (int i = 0, ib = 0; i < 8; ++i, ib += 8) {
-    qv[i] = v[h->vtx[i]]->pps.q;
+    qv[i] = g(v[h->vtx[i]]);
 
     int mui = MU[i];
     int nui = NU[i];
@@ -163,9 +170,14 @@ int hex_cls(struct hex* h) {
   if (!h)
     return 0;
 
-  mtx_cls(h->dep.g);
-  mtx_cls(h->dep.m);
-  vec_cls(h->dep.b);
+  if (h->dep.g)
+    mtx_cls(h->dep.g);
+
+  if (h->dep.m)
+    mtx_cls(h->dep.m);
+
+  if (h->dep.b)
+    vec_cls(h->dep.b);
 
   free(h);
 
