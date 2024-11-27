@@ -1,14 +1,9 @@
-#include <vec.h>
-
-#include <math.h>
+#include <vec/vec.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#ifdef OMP_THREADS_NUM
-#include <omp.h>
-#endif
+#include <math.h>
 
 struct vec* vec_new(int n) {
   struct vec* vec = malloc(sizeof(struct vec));
@@ -91,18 +86,9 @@ int vec_mlt(struct vec* ap, struct vec* bp, double* rp) {
 }
 
 int vec_nrm(struct vec* vp, double* rp) {
-  int n = vp->n;
+  vec_mlt(vp, vp, rp);
+  *rp = sqrt(*rp);
 
-  double* vvp = vp->vp;
-  double s = 0;
-
-#ifdef OMP_THREADS_NUM
-#pragma omp parallel for reduction(+ : s) num_threads(OMP_THREADS_NUM)
-#endif  // OMP
-  for (int i = 0; i < n; ++i)
-    s += vvp[i] * vvp[i];
-
-  *rp = sqrt(s);
   return 0;
 }
 

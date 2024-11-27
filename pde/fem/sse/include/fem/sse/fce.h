@@ -1,9 +1,9 @@
 #ifndef FEM_FCE_H
 #define FEM_FCE_H
 
-#include <fem/vtx.h>
-#include <mtx/mtx.h>
-#include <mtx/csj.h>
+#include <fem/sse/vtx.h>
+#include <vec/mtx.h>
+#include <vec/mtx_csj.h>
 
 struct cnd {
   enum type { DIR, NEU, ROB } type;

@@ -1,7 +1,7 @@
 #ifndef MTX_CSR_H
 #define MTX_CSR_H
 
-#include <vec.h>
+#include <vec/vec.h>
 
 #include <stdio.h>
 

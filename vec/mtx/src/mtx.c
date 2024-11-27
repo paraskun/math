@@ -1,4 +1,4 @@
-#include <mtx/mtx.h>
+#include <vec/mtx.h>
 
 #include <math.h>
 #include <stdint.h>

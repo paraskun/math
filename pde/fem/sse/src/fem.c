@@ -1,18 +1,15 @@
-#include <fem/const.h>
-#include <fem/fem.h>
-#include <iss/iss_csj.h>
+#include <fem/sse/const.h>
+#include <fem/sse/fem.h>
+#include <vec/iss_csj.h>
 
 #include <stdlib.h>
 #include <string.h>
-#include "fem/fce.h"
-#include "fem/hex.h"
-#include "sll.h"
 
 int cmp(int a, int b) {
   return a > b ? -1 : a == b ? 0 : 1;
 }
 
-struct fem* fem_new() {
+struct fem* fem_new(double (**fun)(struct vtx*)) {
   struct fem* fem = malloc(sizeof(struct fem));
 
   fem->vs = 0;
@@ -25,6 +22,8 @@ struct fem* fem_new() {
   fem->vtx = NULL;
   fem->hex = NULL;
   fem->fce = NULL;
+
+  fem->fun = fun;
 
   return fem;
 }

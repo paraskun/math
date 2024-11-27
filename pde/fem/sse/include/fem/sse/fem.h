@@ -1,10 +1,10 @@
 #ifndef FEM_H
 #define FEM_H
 
-#include <fem/hex.h>
+#include <fem/sse/hex.h>
 
-#include <mtx/mtx.h>
-#include <mtx/csj.h>
+#include <vec/mtx.h>
+#include <vec/mtx_csj.h>
 
 #include <sll.h>
 
@@ -17,11 +17,13 @@ struct fem {
   struct hex** hex;
   struct fce** fce;
 
+  double (**fun)(struct vtx*);
+
   struct mtx_csj* a;
   struct vec* b;
 };
 
-struct fem* fem_new();
+struct fem* fem_new(double (**fun)(struct vtx*));
 
 int fem_get(FILE* obj, struct fem* fem);
 int fem_evo(struct fem* fem);

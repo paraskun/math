@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 #include <stdio.h>
-#include <vec.h>
+#include <vec/vec.h>
 
 struct mtx {
   int n;

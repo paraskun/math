@@ -1,8 +1,8 @@
 #ifndef DSS_SKY_H
 #define DSS_SKY_H
 
-#include <mtx_sky.h>
-#include <vec.h>
+#include <vec/mtx_sky.h>
+#include <vec/vec.h>
 
 void dss_sky_ldu_solve(
     struct mtx_sky* mp, 

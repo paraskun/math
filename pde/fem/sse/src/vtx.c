@@ -1,4 +1,4 @@
-#include <fem/vtx.h>
+#include <fem/sse/vtx.h>
 
 #include <stdlib.h>
 

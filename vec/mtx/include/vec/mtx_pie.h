@@ -1,7 +1,7 @@
 #ifndef PMTX_H
 #define PMTX_H
 
-#include <vec.h>
+#include <vec/vec.h>
 
 #include <stdio.h>
 

@@ -7,7 +7,10 @@ set(SRC
 )
 
 add_library(mtx ${SRC} ${HDR})
-target_link_libraries(mtx PUBLIC vec -lm)
+
+target_link_libraries(mtx PUBLIC vec)
+target_link_libraries(mtx PUBLIC -lm)
+
 target_include_directories(mtx PUBLIC include/)
 
 add_executable(mtx_csj_test test/mtx_csj_test.cc)

@@ -2,10 +2,6 @@ set(SRC
   src/vec.c
 )
 
-set(HDR
-  include/vec.h
-)
-
 add_library(vec ${SRC} ${HDR})
 target_include_directories(vec PUBLIC include/)
 

@@ -1,7 +1,7 @@
 #ifndef MTX_CDS_H
 #define MTX_CDS_H
 
-#include <vec.h>
+#include <vec/vec.h>
 
 #include <stdio.h>
 

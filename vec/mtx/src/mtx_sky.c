@@ -1,4 +1,4 @@
-#include <mtx_sky.h>
+#include <vec/mtx_sky.h>
 
 #include <math.h>
 #include <stdint.h>

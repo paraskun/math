@@ -1,10 +1,10 @@
 #ifndef FEM_HEX_H
 #define FEM_HEX_H
 
-#include <fem/fce.h>
-#include <fem/vtx.h>
-#include <mtx/mtx.h>
-#include <mtx/csj.h>
+#include <fem/sse/fce.h>
+#include <fem/sse/vtx.h>
+#include <vec/mtx.h>
+#include <vec/mtx_csj.h>
 
 struct hex {
   int vtx[8];

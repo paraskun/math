@@ -1,6 +1,6 @@
-#include <fem/const.h>
-#include <fem/fce.h>
-#include <mtx/mtx.h>
+#include <fem/sse/const.h>
+#include <fem/sse/fce.h>
+#include <vec/mtx.h>
 
 #include <stdlib.h>
 

@@ -1,9 +1,9 @@
 #ifndef ISS_CDS_H
 #define ISS_CDS_H
 
-#include <iss/iss.h>
-#include <mtx_cds.h>
-#include <vec.h>
+#include <vec/iss.h>
+#include <vec/mtx_cds.h>
+#include <vec/vec.h>
 
 struct iss_jac_pps {
   struct iss_pps pps;

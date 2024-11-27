@@ -1,7 +1,7 @@
 #ifndef SMTX_H
 #define SMTX_H
 
-#include <vec.h>
+#include <vec/vec.h>
 
 #include <stddef.h>
 #include <stdio.h>

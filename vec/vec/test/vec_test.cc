@@ -2,7 +2,7 @@
 
 extern "C" {
 #include <math.h>
-#include <vec.h>
+#include <vec/vec.h>
 }
 
 TEST(vec, seq) {

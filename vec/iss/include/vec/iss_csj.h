@@ -1,9 +1,9 @@
 #ifndef ISS_CSJ_H
 #define ISS_CSJ_H
 
-#include <iss/iss.h>
-#include <mtx/csj.h>
-#include <vec.h>
+#include <vec//iss.h>
+#include <vec/mtx_csj.h>
+#include <vec/vec.h>
 
 struct iss_csj_pkt {
   struct iss_pkt pkt;
