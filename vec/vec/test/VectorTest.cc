@@ -5,7 +5,7 @@ extern "C" {
 #include <vec/vec.h>
 }
 
-TEST(vec, seq) {
+TEST(Vector, GenerateSequence) {
   struct vec* vp = vec_new(10000);
 
   vec_seq(vp, 1);
@@ -16,7 +16,7 @@ TEST(vec, seq) {
   vec_cls(vp);
 }
 
-TEST(vec, cmb_pos) {
+TEST(Vector, CombineWithPositiveCoefficient) {
   struct vec* ap = vec_new(3);
   struct vec* bp = vec_new(3);
 
@@ -40,7 +40,7 @@ TEST(vec, cmb_pos) {
   vec_cls(bp);
 }
 
-TEST(vec, cmb_neg) {
+TEST(Vector, CombineWithNegativeCoefficient) {
   struct vec* ap = vec_new(3);
   struct vec* bp = vec_new(3);
 
@@ -64,7 +64,7 @@ TEST(vec, cmb_neg) {
   vec_cls(bp);
 }
 
-TEST(vec, mlt) {
+TEST(Vector, Multiply) {
   struct vec* ap = vec_new(3);
   struct vec* bp = vec_new(3);
 
@@ -86,7 +86,7 @@ TEST(vec, mlt) {
   vec_cls(bp);
 }
 
-TEST(vec, nrm) {
+TEST(Vector, Norm) {
   struct vec* ap = vec_new(3);
 
   double r;
@@ -102,7 +102,7 @@ TEST(vec, nrm) {
   vec_cls(ap);
 }
 
-TEST(vec, cpy) {
+TEST(Vector, Copy) {
   struct vec* ap = vec_new(3);
   struct vec* bp = vec_new(3);
 
@@ -120,7 +120,7 @@ TEST(vec, cpy) {
   vec_cls(bp);
 }
 
-TEST(vec, zer) {
+TEST(Vector, Zero) {
   struct vec* ap = vec_new(3);
 
   ap->vp[0] = 1;

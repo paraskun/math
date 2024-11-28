@@ -9,9 +9,8 @@ if (OPENMP_FOUND)
   target_link_libraries(vec PUBLIC OpenMP::OpenMP_C)
 endif()
 
-add_executable(vec_test test/vec_test.cc)
-target_link_libraries(vec_test vec GTest::gtest_main)
+add_executable(VectorTest test/VectorTest.cc)
+target_link_libraries(VectorTest vec GTest::gtest_main)
 
 include(GoogleTest)
-
-gtest_discover_tests(vec_test)
+gtest_discover_tests(VectorTest)

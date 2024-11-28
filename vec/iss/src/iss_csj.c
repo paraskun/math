@@ -30,11 +30,8 @@ int iss_csj_los_slv(
 
   mtx_csj_vmlt(mp, xp, r);
   vec_cmb(fp, r, r, -1);
-
   vec_cpy(r, z);
-
   mtx_csj_vmlt(mp, z, p);
-
   vec_mlt(r, r, &rr);
 
   for (int k = 0; k < mk && rr >= eps; ++k) {

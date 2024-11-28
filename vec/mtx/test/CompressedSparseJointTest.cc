@@ -4,7 +4,7 @@ extern "C" {
 #include <vec/mtx_csj.h>
 }
 
-TEST(mtx_csj, vmlt) {
+TEST(CompressedSparseJoint, VectorMultiplication) {
   struct mtx_csj_pps pps = {
       .n = 3,
       .ne = 2,
@@ -52,7 +52,7 @@ TEST(mtx_csj, vmlt) {
   vec_cls(fp);
 }
 
-TEST(mtx_csj, ilu) {
+TEST(CompressedSparseJoint, IncompleteLU) {
   struct mtx_csj_pkt pkt = {
       .pps = 0,
       .dr = fopen("mtx/dr.csj.mtx", "r"),

@@ -10,10 +10,19 @@ target_link_libraries(iss PUBLIC mtx)
 target_link_libraries(iss PUBLIC dss)
 target_include_directories(iss PUBLIC include/)
 
-add_executable(iss_csj_test test/iss_csj_test.cc)
-target_link_libraries(iss_csj_test mtx iss GTest::gtest_main)
+add_executable(CompressedSparseJointHilbertTest 
+  test/CompressedSparseJointHilbertTest.cc
+)
+
+add_executable(CompressedSparseJointDominantTest 
+  test/CompressedSparseJointDominantTest.cc
+)
+
+target_link_libraries(CompressedSparseJointHilbertTest mtx iss GTest::gtest_main)
+target_link_libraries(CompressedSparseJointDominantTest mtx iss GTest::gtest_main)
 
 include(GoogleTest)
-gtest_discover_tests(iss_csj_test
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/vec/iss/test/
-)
+gtest_discover_tests(CompressedSparseJointHilbertTest
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/vec/iss/test/)
+gtest_discover_tests(CompressedSparseJointDominantTest
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/vec/iss/test/)
