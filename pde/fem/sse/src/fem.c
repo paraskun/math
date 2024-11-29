@@ -1,23 +1,20 @@
 #include <fem/sse/const.h>
 #include <fem/sse/fem.h>
+#include <ull.h>
 #include <vec/iss_csj.h>
 
 #include <stdlib.h>
 #include <string.h>
 
 const double G[2][2] = {{1.0, -1.0}, {-1.0, 1.0}};
-
 const double M[2][2] = {{2.0 / 6.0, 1.0 / 6.0}, {1.0 / 6.0, 2.0 / 6.0}};
+const double X[2][2] = {{-0.5, 0.5}, {-0.5, 0.5}};
 
 const int MU[8] = {0, 1, 0, 1, 0, 1, 0, 1};
 const int NU[8] = {0, 0, 1, 1, 0, 0, 1, 1};
 const int TT[8] = {0, 0, 0, 0, 1, 1, 1, 1};
 
-const unsigned long C = ULONG_MAX;
-
-int cmp(int a, int b) {
-  return a > b ? -1 : a == b ? 0 : 1;
-}
+const double C = 10e100;
 
 struct fem* fem_new(double (**fun)(struct vtx*)) {
   struct fem* fem = malloc(sizeof(struct fem));
@@ -47,10 +44,8 @@ int fem_get(FILE* obj, struct fem* fem) {
   fem->vtx = malloc(sizeof(struct vtx*) * fem->vs);
 
   for (int i = 0; i < fem->vs; ++i) {
-    fem->vtx[i] = vtx_new();
-
     fgets(buf, sizeof(buf), obj);
-    vtx_get(buf, fem->vtx[i]);
+    fem->vtx[i] = vtx_get(buf);
   }
 
   fgets(buf, sizeof(buf), obj);
@@ -60,10 +55,8 @@ int fem_get(FILE* obj, struct fem* fem) {
   fem->hex = malloc(sizeof(struct hex*) * fem->hs);
 
   for (int i = 0; i < fem->hs; ++i) {
-    fem->hex[i] = hex_new();
-
     fgets(buf, sizeof(buf), obj);
-    hex_get(buf, fem->hex[i]);
+    fem->hex[i] = hex_get(buf, fem->pps.fun);
   }
 
   fgets(buf, sizeof(buf), obj);
@@ -73,10 +66,8 @@ int fem_get(FILE* obj, struct fem* fem) {
   fem->fce = malloc(sizeof(struct fce*) * fem->fs);
 
   for (int i = 0; i < fem->fs; ++i) {
-    fem->fce[i] = fce_new();
-
     fgets(buf, sizeof(buf), obj);
-    fce_get(buf, fem->fce[i], fem->pps.fun);
+    fem->fce[i] = fce_get(buf, fem->pps.fun);
   }
 
   return 0;
@@ -84,18 +75,17 @@ int fem_get(FILE* obj, struct fem* fem) {
 
 int fem_evo(struct fem* fem) {
   struct mtx_csj_pps pps = {fem->vs, 0};
-  struct sll* l = malloc(sizeof(struct sll) * fem->vs);
+  struct ull* l = malloc(sizeof(struct ull) * fem->vs);
 
   for (int i = 0; i < fem->vs; ++i) {
     l[i].beg = NULL;
     l[i].end = NULL;
-    l[i].cmp = &cmp;
   }
 
   for (int i = 0; i < fem->hs; ++i) {
     struct hex* h = fem->hex[i];
 
-    hex_evo(h, fem->vtx, fem->pps.fun[0]);
+    hex_evo(h, fem->vtx);
 
     for (int j = 0; j < 8; ++j) {
       int a = h->vtx[j];
@@ -104,7 +94,7 @@ int fem_evo(struct fem* fem) {
         int b = h->vtx[k];
 
         if (b < a) {
-          sll_ins(&l[a], b);
+          ull_ins(&l[a], b);
           pps.ne += 1;
         }
       }
@@ -133,7 +123,7 @@ int fem_evo(struct fem* fem) {
   fem->a->ia[pps.n] = pps.ne;
 
   for (int i = 0; i < fem->vs; ++i)
-    sll_cls(&l[i]);
+    ull_cls(&l[i]);
 
   free(l);
 
@@ -141,11 +131,10 @@ int fem_evo(struct fem* fem) {
 }
 
 int fem_asm(struct fem* fem) {
-  struct sll dfl;
+  struct ull dir;
 
-  dfl.beg = NULL;
-  dfl.end = NULL;
-  dfl.cmp = NULL;
+  dir.beg = NULL;
+  dir.end = NULL;
 
   for (int i = 0; i < fem->hs; ++i)
     hex_mov(fem->hex[i], fem->a, fem->b);
@@ -155,7 +144,7 @@ int fem_asm(struct fem* fem) {
 
     switch (f->cnd.type) {
       case DIR:
-        sll_ins(&dfl, i);
+        ull_ins(&dir, i);
         continue;
       case NEU:
       case ROB:
@@ -164,7 +153,7 @@ int fem_asm(struct fem* fem) {
     }
   }
 
-  struct lln* n = dfl.beg;
+  struct lln* n = dir.beg;
 
   while (n) {
     struct fce* f = fem->fce[n->e];
@@ -179,7 +168,7 @@ int fem_asm(struct fem* fem) {
     n = n->next;
   }
 
-  sll_cls(&dfl);
+  ull_cls(&dir);
 
   return 0;
 }

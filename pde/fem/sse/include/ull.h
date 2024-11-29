@@ -7,15 +7,13 @@ struct lln {
   struct lln* next;
 };
 
-struct sll {
-  int (*cmp)(int, int);
-
+struct ull {
   struct lln* beg;
   struct lln* end;
 };
 
-int sll_ini(struct sll* l);
-int sll_ins(struct sll* l, int e);
-int sll_cls(struct sll* l);
+int ull_ini(struct ull* l);
+int ull_ins(struct ull* l, int e);
+int ull_cls(struct ull* l);
 
 #endif  // FEM_SLL_H

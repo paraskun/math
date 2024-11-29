@@ -10,15 +10,18 @@ struct hex* hex_new() {
   if (!h)
     return h;
 
-  h->dep.m = mtx_new(8);
-  h->dep.g = mtx_new(8);
-  h->dep.b = vec_new(8);
+  h->loc.m = mtx_new(8);
+  h->loc.b = vec_new(8);
+
+  h->pps.f = NULL;
 
   return h;
 }
 
-int hex_get(const char* buf, struct hex* h) {
-  int pos;
+struct hex* hex_get(const char* buf, double (**fun)(struct vtx*)) {
+  struct hex* h = hex_new();
+
+  int pos, f;
 
   if (buf[0] != 'h')
     return 0;
@@ -32,13 +35,15 @@ int hex_get(const char* buf, struct hex* h) {
     h->vtx[j] = v - 1;
   }
 
-  sscanf(buf, " | %lf | %lf%n", &h->pps.lam, &h->pps.gam, &pos);
+  sscanf(buf, " | %d | %lf | %lf%n", &f, &h->pps.lam, &h->pps.gam, &pos);
   buf += pos;
 
-  return 1;
+  h->pps.f = fun[f - 1];
+
+  return h;
 }
 
-int hex_evo(struct hex* h, struct vtx** v, double (*g)(struct vtx*)) {
+int hex_evo(struct hex* h, struct vtx** v) {
   double lam = h->pps.lam;
   double gam = h->pps.gam;
 
@@ -54,12 +59,6 @@ int hex_evo(struct hex* h, struct vtx** v, double (*g)(struct vtx*)) {
   double my[2][2];
   double mz[2][2];
 
-  struct mtx* d = mtx_new(8);
-  struct vec* q = vec_new(8);
-
-  double X[2][2] = {{v[h->vtx[0]]->x / hx + 0.5, -v[h->vtx[0]]->x / hx - 0.5},
-                    {-1, 1}};
-
   for (int i = 0; i < 2; ++i)
     for (int j = 0; j < 2; ++j) {
       gx[i][j] = G[i][j] / hx;
@@ -71,14 +70,16 @@ int hex_evo(struct hex* h, struct vtx** v, double (*g)(struct vtx*)) {
       mz[i][j] = M[i][j] * hz;
     }
 
-  double** gv = h->dep.g->v;
-  double** mv = h->dep.m->v;
+  double** mloc = h->loc.m->v;
+  double* bloc = h->loc.b->vp;
 
-  double** dv = d->v;
-  double* qv = q->vp;
+  double dec[8];
 
-  for (int i = 0, ib = 0; i < 8; ++i, ib += 8) {
-    qv[i] = g(v[h->vtx[i]]);
+  for (int i = 0; i < 8; ++i)
+    dec[i] = h->pps.f(v[h->vtx[i]]);
+
+  for (int i = 0; i < 8; ++i) {
+    bloc[i] = 0;
 
     int mui = MU[i];
     int nui = NU[i];
@@ -94,69 +95,65 @@ int hex_evo(struct hex* h, struct vtx** v, double (*g)(struct vtx*)) {
       double mzl = mz[tti][ttj];
 
       double gxl = gx[mui][muj];
-      double gyl = gy[mui][muj];
-      double gzl = gz[mui][muj];
+      double gyl = gy[nui][nuj];
+      double gzl = gz[tti][ttj];
 
-      mv[i][j] = gam * mxl * myl * mzl;
-      gv[i][j] = lam * (gxl * myl * mzl + mxl * gyl * mzl + mxl * myl * gzl);
-      dv[i][j] = X[mui][muj] * myl * mzl;
+      mloc[i][j] = gam * mxl * myl * mzl;
+      mloc[i][j] += lam * (gxl * myl * mzl + mxl * gyl * mzl + mxl * myl * gzl);
+      bloc[i] += dec[j] * mxl * myl * mzl;
+
+      //bloc[i] += dec[j] * X[muj][mui] * myl * mzl;
     }
   }
-
-  mtx_vmlt(d, q, h->dep.b);
-
-  mtx_cls(d);
-  vec_cls(q);
 
   return 0;
 }
 
 int hex_mov(struct hex* h, struct mtx_csj* a, struct vec* b) {
-  struct mtx* lg = h->dep.g;
-  struct mtx* lm = h->dep.m;
-  struct vec* lb = h->dep.b;
+  struct mtx* mloc = h->loc.m;
+  struct vec* bloc = h->loc.b;
 
   for (int i = 0; i < 8; ++i) {
-    int gi = h->vtx[i];
+    int iglob = h->vtx[i];
 
-    b->vp[gi] += lb->vp[i];
+    b->vp[iglob] += bloc->vp[i];
 
     for (int j = 0; j < 8; ++j) {
-      int gj = h->vtx[j];
+      int jglob = h->vtx[j];
 
-      if (gj == gi) {
-        a->dr[gi] += lg->v[i][j] + lm->v[i][j];
+      if (jglob == iglob) {
+        a->dr[iglob] += mloc->v[i][j];
         continue;
       }
 
-      if (gi > gj) {
-        int lr0 = a->ia[gi];
-        int lr1 = a->ia[gi + 1];
+      if (iglob > jglob) {
+        int lr0 = a->ia[iglob];
+        int lr1 = a->ia[iglob + 1];
 
         for (int lr = lr0; lr < lr1; ++lr) {
           int lj = a->ja[lr];
 
-          if (lj == gj) {
-            a->lr[lr] += lg->v[i][j] + lm->v[i][j];
+          if (lj == jglob) {
+            a->lr[lr] += mloc->v[i][j];
             break;
           }
 
-          if (lj > gj)
+          if (lj > jglob)
             break;
         }
       } else {
-        int ur0 = a->ia[gj];
-        int ur1 = a->ia[gj + 1];
+        int ur0 = a->ia[jglob];
+        int ur1 = a->ia[jglob + 1];
 
         for (int ur = ur0; ur < ur1; ++ur) {
           int ui = a->ja[ur];
 
-          if (ui == gi) {
-            a->ur[ur] += lg->v[i][j] + lm->v[i][j];
+          if (ui == iglob) {
+            a->ur[ur] += mloc->v[i][j];
             break;
           }
 
-          if (ui > gi)
+          if (ui > iglob)
             break;
         }
       }
@@ -170,14 +167,11 @@ int hex_cls(struct hex* h) {
   if (!h)
     return 0;
 
-  if (h->dep.g)
-    mtx_cls(h->dep.g);
+  if (h->loc.m)
+    mtx_cls(h->loc.m);
 
-  if (h->dep.m)
-    mtx_cls(h->dep.m);
-
-  if (h->dep.b)
-    vec_cls(h->dep.b);
+  if (h->loc.b)
+    vec_cls(h->loc.b);
 
   free(h);
 
