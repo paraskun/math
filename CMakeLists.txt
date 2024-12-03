@@ -31,7 +31,8 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
+add_subdirectory(dsa)
 add_subdirectory(vec)
 add_subdirectory(bas)
 add_subdirectory(pde)
-add_subdirectory(gmp)
+add_subdirectory(bgs)

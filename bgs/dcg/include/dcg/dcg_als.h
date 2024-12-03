@@ -29,18 +29,21 @@ int dcg_sll_cls(struct dcg_sll* l);
 
 struct dcg_als {
   int s;
-  int** map;
 
   struct dcg_sll** als;
 };
 
 struct dcg_als* dcg_als_new(int s);
 
-int dcg_als_get(FILE* f, struct dcg_als* g, int w);
-int dcg_als_map(FILE* f, struct dcg_als* g);
+int dcg_als_fget(FILE* f, struct dcg_als* g, int w);
+int dcg_als_fmap(FILE *f, struct dcg_als* g, int** map);
 
 int dcg_als_add(struct dcg_als* g, int f, int t, int wgt);
-int dcg_als_fwp(struct dcg_als* g, int map);
+int dcg_als_fwp(struct dcg_als* g, int **map);
+
+int dcg_als_ssp_dij(struct dcg_als* g, int **map);
+int dcg_als_asp_dij(struct dcg_als* g, int **map);
+
 int dcg_als_nrm(struct dcg_als* g, double *nrm);
 
 int dcg_als_cls(struct dcg_als* g);

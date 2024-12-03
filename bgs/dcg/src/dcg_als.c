@@ -1,4 +1,4 @@
-#include <dcg_als.h>
+#include <dcg/dcg_als.h>
 
 #include <errno.h>
 #include <limits.h>
@@ -121,7 +121,7 @@ struct dcg_als* dcg_als_new(int s) {
   return g;
 }
 
-int dcg_als_get(FILE* f, struct dcg_als* g, int w) {
+int dcg_als_fget(FILE* f, struct dcg_als* g, int w) {
   if (!f || !g) {
     errno = EINVAL;
     return -1;
@@ -156,8 +156,8 @@ int dcg_als_get(FILE* f, struct dcg_als* g, int w) {
   return 0;
 }
 
-int dcg_als_map(FILE* f, struct dcg_als* g) {
-  if (!f || !g || !g->map) {
+int dcg_als_fmap(FILE* f, struct dcg_als* g, int** map) {
+  if (!f || !g || !map) {
     errno = EINVAL;
     return -1;
   }
@@ -169,13 +169,13 @@ int dcg_als_map(FILE* f, struct dcg_als* g) {
 
     while (e) {
       int t = e->vtx;
-      int n = g->map[i][t];
+      int n = map[i][t];
 
       fprintf(f, "%d -> %d (%d): %d - ", i + 1, t + 1, e->wgt, i + 1);
 
       while (n != t) {
         fprintf(f, "%d - ", n + 1);
-        n = g->map[n][t];
+        n = map[n][t];
       }
 
       fprintf(f, "%d\n", e->vtx + 1);
@@ -202,37 +202,18 @@ int dcg_als_add(struct dcg_als* g, int f, int t, int wgt) {
   return 0;
 }
 
-int dcg_als_fwp(struct dcg_als* g, int map) {
+int dcg_als_fwp(struct dcg_als* g, int** map) {
   int s = g->s;
 
   if (map) {
-    g->map = malloc(sizeof(int*) * s);
-
-    if (!g->map)
-      return -1;
-
-    for (int i = 0; i < s; ++i) {
-      g->map[i] = malloc(sizeof(int) * s);
-
-      if (!g->map[i]) {
-        for (int j = 0; j < i; ++j)
-          free(g->map[j]);
-
-        free(g->map);
-        g->map = NULL;
-
-        return -1;
-      }
-    }
-
-// #ifdef OMP_THREADS_NUM
-// #pragma omp parallel for num_threads(OMP_THREADS_NUM)
-// #endif  // OMP
+#ifdef OMP_THREADS_NUM
+#pragma omp parallel for num_threads(OMP_THREADS_NUM)
+#endif  // OMP
     for (int u = 0; u < s; ++u) {
       struct dcg_edg* ue = g->als[u]->beg;
 
       while (ue) {
-        g->map[u][ue->vtx] = ue->vtx;
+        map[u][ue->vtx] = ue->vtx;
         ue = ue->next;
       }
     }
@@ -241,9 +222,9 @@ int dcg_als_fwp(struct dcg_als* g, int map) {
   for (int i = 0; i < s; ++i) {
     struct dcg_sll* il = g->als[i];
 
-// #ifdef OMP_THREADS_NUM
-// #pragma omp parallel for num_threads(OMP_THREADS_NUM)
-// #endif  // OMP
+#ifdef OMP_THREADS_NUM
+#pragma omp parallel for num_threads(OMP_THREADS_NUM)
+#endif  // OMP
     for (int u = 0; u < s; ++u) {
       if (i == u)
         continue;
@@ -273,7 +254,7 @@ int dcg_als_fwp(struct dcg_als* g, int map) {
           dcg_sll_ins(ul, &pe, v, uiw + ivw);
 
           if (map)
-            g->map[u][v] = g->map[u][i];
+            map[u][v] = map[u][i];
 
           ie = ie->next;
           continue;
@@ -289,7 +270,7 @@ int dcg_als_fwp(struct dcg_als* g, int map) {
           ue->wgt = uiw + ivw;
 
           if (map)
-            g->map[u][v] = g->map[u][i];
+            map[u][v] = map[u][i];
         }
 
         pe = ue;
@@ -298,6 +279,28 @@ int dcg_als_fwp(struct dcg_als* g, int map) {
       }
     }
   }
+
+  return 0;
+}
+
+int dcg_als_dij(struct dcg_als* g, int** map) {
+  int s = g->s;
+
+  if (map) {
+#ifdef OMP_THREADS_NUM
+#pragma omp parallel for num_threads(OMP_THREADS_NUM)
+#endif  // OMP
+    for (int u = 0; u < s; ++u) {
+      struct dcg_edg* ue = g->als[u]->beg;
+
+      while (ue) {
+        map[u][ue->vtx] = ue->vtx;
+        ue = ue->next;
+      }
+    }
+  }
+
+
 
   return 0;
 }

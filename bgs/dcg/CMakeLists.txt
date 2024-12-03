@@ -2,11 +2,7 @@ set(SRC
   src/dcg_als.c
 )
 
-set(HDR
-  include/dcg_als.h
-)
-
-add_library(dcg ${SRC} ${HDR})
+add_library(dcg ${SRC})
 target_include_directories(dcg PUBLIC include)
 
 if (OPENMP_FOUND)
