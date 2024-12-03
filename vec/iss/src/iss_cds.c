@@ -6,9 +6,9 @@ static int step(
     struct vec* fp,
     struct vec* rp, 
     double omg) {
-  int n = mp->n;
-  int c = mp->c;
-  int d = mp->d;
+  int n = mp->pps.n;
+  int c = mp->pps.c;
+  int d = mp->pps.d;
 
   double* fvp = fp->vp;
   double* xvp = xp->vp;

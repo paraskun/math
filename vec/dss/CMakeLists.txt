@@ -1,6 +1,5 @@
 set(SRC 
   src/dss_sky.c
-  src/dss_csj.c
 )
 
 add_library(dss ${SRC} ${HDR})

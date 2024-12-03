@@ -92,8 +92,8 @@ int vec_nrm(struct vec* vp, double* rp) {
   return 0;
 }
 
-int vec_cpy(struct vec* ap, struct vec* bp) {
-  memcpy(bp->vp, ap->vp, sizeof(double) * ap->n);
+int vec_cpy(struct vec* src, struct vec* dst) {
+  memcpy(dst->vp, src->vp, sizeof(double) * src->n);
   return 0;
 }
 

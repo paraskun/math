@@ -17,9 +17,9 @@ struct mtx* mtx_new(int n) {
   return mp;
 }
 
-int mtx_fget(FILE* f, struct mtx* mp) {
-  int n = mp->n;
-  double** v = mp->v;
+int mtx_fget(FILE* f, struct mtx* ap) {
+  int n = ap->n;
+  double** v = ap->v;
 
   for (int i = 0; i < n; ++i)
     for (int j = 0; j < n; ++j)
@@ -28,9 +28,9 @@ int mtx_fget(FILE* f, struct mtx* mp) {
   return 0;
 }
 
-int mtx_fput(FILE* f, struct mtx* mp) {
-  int n = mp->n;
-  double** v = mp->v;
+int mtx_fput(FILE* f, struct mtx* ap) {
+  int n = ap->n;
+  double** v = ap->v;
 
   for (int i = 0; i < n; ++i) {
     for (int j = 0; j < n; ++j)
@@ -42,9 +42,9 @@ int mtx_fput(FILE* f, struct mtx* mp) {
   return 0;
 }
 
-int mtx_nrm(struct mtx* mp, double* rp) {
-  int n = mp->n;
-  double** v = mp->v;
+int mtx_nrm(struct mtx* ap, double* rp) {
+  int n = ap->n;
+  double** v = ap->v;
   double r = 0.0;
 
 #ifdef OMP_THREADS_NUM
@@ -59,12 +59,12 @@ int mtx_nrm(struct mtx* mp, double* rp) {
   return 0;
 }
 
-int mtx_vmlt(struct mtx* ap, struct vec* bp, struct vec* cp) {
+int mtx_vmlt(struct mtx* ap, struct vec* xp, struct vec* fp) {
   int n = ap->n;
 
   double** av = ap->v;
-  double* bv = bp->vp;
-  double* cv = cp->vp;
+  double* xv = xp->vp;
+  double* fv = fp->vp;
 
 #ifdef OMP_THREADS_NUM
 #pragma omp parallel for num_threads(OMP_THREADS_NUM)
@@ -73,9 +73,9 @@ int mtx_vmlt(struct mtx* ap, struct vec* bp, struct vec* cp) {
     double s = 0;
 
     for (int j = 0; j < n; ++j)
-      s += av[i][j] * bv[j];
+      s += av[i][j] * xv[j];
 
-    cv[i] = s;
+    fv[i] = s;
   }
 
   return 0;
@@ -105,14 +105,14 @@ int mtx_mmlt(struct mtx* ap, struct mtx* bp, struct mtx* cp) {
   return 0;
 }
 
-int mtx_cls(struct mtx* mp) {
-  int n = mp->n;
+int mtx_cls(struct mtx* ap) {
+  int n = ap->n;
 
   for (int i = 0; i < n; ++i)
-    free(mp->v[i]);
+    free(ap->v[i]);
 
-  free(mp->v);
-  free(mp);
+  free(ap->v);
+  free(ap);
 
   return 0;
 }

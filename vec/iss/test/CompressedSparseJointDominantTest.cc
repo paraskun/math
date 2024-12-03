@@ -13,14 +13,14 @@ class Env : public testing::Environment {
   static struct mtx_csj_pps DominantProperties;
   static struct iss_csj_pkt DominantPack;
 
-  virtual void SetUp() {
+  virtual void PreCalculate() {
     FILE* f = fopen("mtx/ddm/f.vec", "w+");
 
-    struct mtx_csj* mp = mtx_csj_new(Env::DominantProperties);
+    struct mtx_csj* mp = mtx_csj_new(10, 17);
     struct vec* xp = vec_new(mp->pps.n);
     struct vec* fp = vec_new(mp->pps.n);
 
-    mtx_csj_get(&Env::DominantPack.mtx, mp);
+    mtx_csj_fget(&Env::DominantPack.mtx, mp);
     vec_seq(xp, 1);
     mtx_csj_vmlt(mp, xp, fp);
     vec_put(f, fp);
@@ -28,12 +28,17 @@ class Env : public testing::Environment {
     mtx_csj_cls(mp);
     vec_cls(xp);
     vec_cls(fp);
+
+    fclose(f);
+  }
+
+  virtual void SetUp() {
+    // PreCalculate();
   }
 
   virtual void TearDown() { iss_csj_pkt_cls(&DominantPack); }
 };
 
-struct mtx_csj_pps Env::DominantProperties = {10, 17};
 struct iss_csj_pkt Env::DominantPack = {
     .pkt =
         {
@@ -73,11 +78,11 @@ void CompressedSparseJointDominantTest::Context(FILE* rep,
 
   struct iss_res res = {0, 0};
 
-  struct mtx_csj* mp = mtx_csj_new(Env::DominantProperties);
+  struct mtx_csj* mp = mtx_csj_new(10, 17);
   struct vec* xp = vec_new(mp->pps.n);
   struct vec* fp = vec_new(mp->pps.n);
 
-  mtx_csj_get(&Env::DominantPack.mtx, mp);
+  mtx_csj_fget(&Env::DominantPack.mtx, mp);
   vec_get(Env::DominantPack.pkt.f, fp);
 
   vec_zer(xp);
@@ -99,26 +104,18 @@ void CompressedSparseJointDominantTest::Context(FILE* rep,
   vec_cls(fp);
 }
 
-TEST_F(CompressedSparseJointDominantTest, LocalOptimalTest) {
-  FILE* rep = fopen("out/los_ddm_def.rep", "w+");
+TEST_F(CompressedSparseJointDominantTest, BiConjugateGradientTest) {
+  FILE* rep = fopen("out/bcg_ddm.rep", "w+");
 
-  Context(rep, &iss_csj_los_slv);
-
-  fclose(rep);
-}
-
-TEST_F(CompressedSparseJointDominantTest, LocalOptimalIncompleteLUTest) {
-  FILE* rep = fopen("out/los_ilu_ddm_def.rep", "w+");
-
-  Context(rep, &iss_csj_ilu_los_slv);
+  Context(rep, &iss_csj_bcg_slv);
 
   fclose(rep);
 }
 
-TEST_F(CompressedSparseJointDominantTest, LocalOptimalDiagonalTest) {
-  FILE* rep = fopen("out/los_dgl_ddm_def.rep", "w+");
+TEST_F(CompressedSparseJointDominantTest, BiConjugateGradientIncompleteFactirizationTest) {
+  FILE* rep = fopen("out/bcg_ilu_ddm.rep", "w+");
 
-  Context(rep, &iss_csj_dgl_los_slv);
+  Context(rep, &iss_csj_bcg_ilu_slv);
 
   fclose(rep);
 }

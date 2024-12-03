@@ -112,7 +112,7 @@ TEST_F(SolidStateEquationSingleElementTest, GeneralTest) {
 
   fem_slv(fem, q);
 
-  mtx_csj_put(&Env::pkt.mtx, fem->a);
+  mtx_csj_fput(&Env::pkt.mtx, fem->a);
   vec_put(Env::pkt.pkt.f, fem->b);
   vec_put(Env::pkt.pkt.x, q);
 

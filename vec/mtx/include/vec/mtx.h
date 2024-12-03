@@ -18,7 +18,7 @@ int mtx_fput(FILE* f, struct mtx* mp);
 
 int mtx_nrm(struct mtx* ap, double* rp);
 
-int mtx_vmlt(struct mtx* ap, struct vec* xp, struct vec* rp);
+int mtx_vmlt(struct mtx* ap, struct vec* xp, struct vec* fp);
 int mtx_mmlt(struct mtx* ap, struct mtx* bp, struct mtx* cp);
 
 int mtx_cls(struct mtx* mp);

@@ -6,7 +6,7 @@ static void dss_sky_l(
     struct mtx_sky* mp, 
     struct vec* xp, 
     struct vec* fp) {
-  int n = mp->n;
+  int n = mp->pps.n;
   int* pp = mp->p;
 
   double* lp = mp->lv;
@@ -31,7 +31,7 @@ static void dss_sky_d(
     struct mtx_sky* mp, 
     struct vec* xp, 
     struct vec* fp) {
-  int n = mp->n;
+  int n = mp->pps.n;
 
   double* dvp = mp->dv;
   double* xvp = xp->vp;
@@ -47,7 +47,7 @@ static void dss_sky_u(
     struct mtx_sky* mp, 
     struct vec* xp, 
     struct vec* fp) {
-  int n = mp->n;
+  int n = mp->pps.n;
   int* pp = mp->p;
 
   double* up = mp->uv;

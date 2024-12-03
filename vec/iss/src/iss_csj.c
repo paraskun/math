@@ -1,223 +1,233 @@
-#include <vec/dss_csj.h>
 #include <vec/iss_csj.h>
 
-#include <math.h>
+#include "vec/mtx_csj.h"
+#include "vec/vec.h"
 
-int iss_csj_los_slv(
-    struct mtx_csj* mp, 
-    struct vec* xp, 
-    struct vec* fp,
-    struct iss_pps* pps, 
-    struct iss_res* res,
-    fun_iss_cbk cbk) {
+int iss_csj_bcg_slv(struct mtx_csj* mp, struct vec* xp, struct vec* fp,
+                    struct iss_pps* pps, struct iss_res* res, fun_iss_cbk cbk) {
   int n = mp->pps.n;
 
-  struct vec* r = vec_new(n);
-  struct vec* z = vec_new(n);
-  struct vec* p = vec_new(n);
+  struct vec* rp = vec_new(n);
+  struct vec* zp = vec_new(n);
+  struct vec* pp = vec_new(n);
+  struct vec* sp = vec_new(n);
+  struct vec* hp = vec_new(n);
 
-  double rr;
-  double pr;
-  double pp;
+  double af = 0;
+  double bt = 0;
+  double om = 0;
 
-  double a;
-  double b;
+  double ro = 0;
+  double nn = 0;
 
-  struct vec* t1 = vec_new(n);
+  mtx_csj_vmlt(mp, xp, rp);
+  vec_cmb(fp, rp, rp, -1);
 
-  int mk = pps->mk;
-  double eps = pps->eps;
+  vec_cpy(rp, zp);
+  vec_cpy(rp, pp);
 
-  mtx_csj_vmlt(mp, xp, r);
-  vec_cmb(fp, r, r, -1);
-  vec_cpy(r, z);
-  mtx_csj_vmlt(mp, z, p);
-  vec_mlt(r, r, &rr);
+  vec_mlt(rp, zp, &ro);
 
-  for (int k = 0; k < mk && rr >= eps; ++k) {
-    vec_mlt(p, r, &pr);
-    vec_mlt(p, p, &pp);
+  for (int k = 1; k <= pps->mk; ++k) {
+    mtx_csj_vmlt(mp, pp, hp);
 
-    a = pr / pp;
-    rr = rr - a * a * pp;
+    vec_mlt(hp, zp, &bt);
 
-    vec_cmb(xp, z, xp, a);
-    vec_cmb(r, p, r, -a);
-    mtx_csj_vmlt(mp, r, t1);
-    vec_mlt(p, t1, &pr);
+    af = ro / bt;
 
-    b = -pr / pp;
+    vec_cmb(rp, hp, sp, -af);
 
-    vec_cmb(r, z, z, b);
-    vec_cmb(t1, p, p, b);
-    
-    res->res = rr;
-    res->k = k + 1;
+    mtx_csj_vmlt(mp, sp, rp);
+    vec_mlt(rp, sp, &om);
+    vec_mlt(rp, rp, &bt);
+
+    om = om / bt;
+
+    vec_cmb(xp, pp, xp, af);
+    vec_cmb(xp, sp, xp, om);
+    vec_cmb(sp, rp, rp, -om);
+    vec_nrm(rp, &nn);
+
+    res->k = k;
+    res->res = nn;
 
     if (cbk)
       cbk(res);
+
+    if (nn < pps->eps)
+      break;
+
+    vec_mlt(rp, zp, &bt);
+
+    bt = (bt / ro) * (af / om);
+    ro = bt;
+
+    vec_cmb(pp, hp, pp, -om);
+    vec_cmb(rp, pp, pp, bt);
   }
 
-  vec_cls(r);
-  vec_cls(z);
-  vec_cls(p);
-  vec_cls(t1);
+  vec_cls(rp);
+  vec_cls(zp);
+  vec_cls(pp);
+  vec_cls(sp);
+  vec_cls(hp);
 
   return 0;
 }
 
-int iss_csj_ilu_los_slv(
-    struct mtx_csj* mp, 
-    struct vec* xp, 
-    struct vec* fp,
-    struct iss_pps* pps, 
-    struct iss_res* res,
-    fun_iss_cbk cbk) {
+//static int iss_csj_ilu_lslv(struct mtx_csj* mp, struct vec* xp,
+//                            struct vec* fp) {
+//  int n = mp->pps.n;
+//
+//  int* mia = mp->ia;
+//  int* mja = mp->ja;
+//
+//  double* mdr = mp->dr;
+//  double* mlr = mp->lr;
+//
+//  double* xv = xp->vp;
+//  double* fv = fp->vp;
+//
+//  for (int i = 0; i < n; ++i) {
+//    int lr0 = mia[i];
+//    int lr1 = mia[i + 1];
+//
+//    double s = 0;
+//
+//    for (int lr = lr0; lr < lr1; ++lr) {
+//      int j = mja[lr];
+//
+//      s += mlr[lr] * xv[j];
+//    }
+//
+//    xv[i] = (fv[i] - s) / mdr[i];
+//  }
+//
+//  return 0;
+//}
+//
+//static int iss_csj_ilu_uslv(struct mtx_csj* mp, struct vec* xp,
+//                            struct vec* fp) {
+//  int n = mp->pps.n;
+//
+//  int* mia = mp->ia;
+//  int* mja = mp->ja;
+//
+//  double* mdr = mp->dr;
+//  double* mur = mp->ur;
+//
+//  double* xv = xp->vp;
+//  double* fv = fp->vp;
+//
+//  memcpy(xv, fv, sizeof(double) * n);
+//
+//  for (int j = n - 1; j > -1; --j) {
+//    xv[j] /= mdr[j];
+//
+//    int ur0 = mia[j];
+//    int ur1 = mia[j + 1];
+//
+//    double x = xv[j];
+//
+//    for (int ur = ur0; ur < ur1; ++ur) {
+//      int ui = mja[ur];
+//
+//      xv[ui] -= mur[ur] * x;
+//    }
+//  }
+//
+//  return 0;
+//}
+
+int iss_csj_bcg_ilu_slv(struct mtx_csj* mp, struct vec* xp, struct vec* fp,
+                        struct iss_pps* pps, struct iss_res* res,
+                        fun_iss_cbk cbk) {
   int n = mp->pps.n;
 
-  struct mtx_csj* ilu = mtx_csj_new(mp->pps);
+  struct mtx_csj* ilu = mtx_csj_new(mp->pps.n, mp->pps.ne);
 
-  struct vec* r = vec_new(n);
-  struct vec* z = vec_new(n);
-  struct vec* p = vec_new(n);
+  struct vec* rp = vec_new(n);
+  struct vec* zp = vec_new(n);
+  struct vec* pp = vec_new(n);
+  struct vec* sp = vec_new(n);
+  struct vec* hp = vec_new(n);
 
-  double rr;
-  double pr;
-  double pp;
+  double af = 0;
+  double bt = 0;
+  double om = 0;
 
-  double a;
-  double b;
-
-  struct vec* t1 = vec_new(n);
-  struct vec* t2 = vec_new(n);
-
-  int mk = pps->mk;
-  double eps = pps->eps;
+  double ro = 0;
+  double nn = 0;
 
   mtx_csj_ilu(mp, ilu);
-  mtx_csj_vmlt(mp, xp, r);
-  vec_cmb(fp, r, r, -1);
-  iss_csj_ilu_lslv(ilu, r, r);
-  iss_csj_ilu_uslv(ilu, z, r);
-  mtx_csj_vmlt(mp, z, p);
-  iss_csj_ilu_lslv(ilu, p, p);
 
-  vec_mlt(r, r, &rr);
+  mtx_csj_vmlt(mp, xp, rp);
+  vec_cmb(fp, rp, rp, -1);
 
-  for (int k = 0; k < mk && rr >= eps; ++k) {
-    vec_mlt(p, r, &pr);
-    vec_mlt(p, p, &pp);
+  vec_cpy(rp, zp);
+  vec_cpy(rp, pp);
 
-    a = pr / pp;
-    rr = rr - a * a * pp;
+  vec_mlt(rp, zp, &ro);
 
-    vec_cmb(xp, z, xp, a);
-    vec_cmb(r, p, r, -a);
-    iss_csj_ilu_uslv(ilu, t1, r);
-    mtx_csj_vmlt(mp, t1, t1);
-    iss_csj_ilu_lslv(ilu, t1, t1);
-    vec_mlt(p, t1, &pr);
+  for (int k = 1; k <= pps->mk; ++k) {
+    mtx_csj_vmlt(mp, pp, hp);
 
-    b = -pr / pp;
+    vec_mlt(hp, zp, &bt);
 
-    iss_csj_ilu_uslv(ilu, t2, r);
-    vec_cmb(t2, z, z, b);
-    vec_cmb(t1, p, p, b);
+    af = ro / bt;
 
-    res->res = rr;
-    res->k = k + 1;
+    vec_cmb(rp, hp, sp, -af);
+
+    mtx_csj_vmlt(mp, sp, rp);
+    vec_mlt(rp, sp, &om);
+    vec_mlt(rp, rp, &bt);
+
+    om = om / bt;
+
+    vec_cmb(xp, pp, xp, af);
+    vec_cmb(xp, sp, xp, om);
+    vec_cmb(sp, rp, rp, -om);
+    vec_nrm(rp, &nn);
+
+    res->k = k;
+    res->res = nn;
 
     if (cbk)
       cbk(res);
+
+    if (nn < pps->eps)
+      break;
+
+    vec_mlt(rp, zp, &bt);
+
+    bt = (bt / ro) * (af / om);
+    ro = bt;
+
+    vec_cmb(pp, hp, pp, -om);
+    vec_cmb(rp, pp, pp, bt);
   }
 
-  mtx_csj_cls(ilu);
-
-  vec_cls(r);
-  vec_cls(z);
-  vec_cls(p);
-  vec_cls(t1);
-  vec_cls(t2);
+  vec_cls(rp);
+  vec_cls(zp);
+  vec_cls(pp);
+  vec_cls(sp);
+  vec_cls(hp);
 
   return 0;
 }
 
-int iss_csj_dgl_los_slv(
-    struct mtx_csj* mp, 
-    struct vec* xp, 
-    struct vec* fp,
-    struct iss_pps* pps, 
-    struct iss_res* res,
-    fun_iss_cbk cbk) {
-  int n = mp->pps.n;
-
-  struct mtx_csj_pps dgl_pps = {n, 0};
-  struct mtx_csj* dgl = mtx_csj_new(dgl_pps);
-
-  struct vec* r = vec_new(n);
-  struct vec* z = vec_new(n);
-  struct vec* p = vec_new(n);
-
-  double rr;
-  double pr;
-  double pp;
-
-  double a;
-  double b;
-
-  struct vec* t1 = vec_new(n);
-  struct vec* t2 = vec_new(n);
-
-  mtx_csj_dgl(mp, dgl);
-  mtx_csj_vmlt(mp, xp, r);
-  vec_cmb(fp, r, r, -1);
-  iss_csj_dgl_slv(dgl, r, r);
-  iss_csj_dgl_slv(dgl, z, r);
-  mtx_csj_vmlt(mp, z, p);
-  iss_csj_dgl_slv(dgl, p, p);
-  vec_mlt(r, r, &rr);
-
-  int mk = pps->mk;
-  double eps = pps->eps;
-
-  for (int k = 0; k < mk && rr >= eps; ++k) {
-    vec_mlt(p, r, &pr);
-    vec_mlt(p, p, &pp);
-
-    a = pr / pp;
-    rr = rr - a * a * pp;
-
-    vec_cmb(xp, z, xp, a);
-    vec_cmb(r, p, r, -a);
-    iss_csj_dgl_slv(dgl, t1, r);
-    mtx_csj_vmlt(mp, t1, t1);
-    iss_csj_dgl_slv(dgl, t1, t1);
-    vec_mlt(p, t1, &pr);
-
-    b = -pr / pp;
-
-    iss_csj_dgl_slv(dgl, r, t2);
-    vec_cmb(t2, z, z, b);
-    vec_cmb(t1, p, p, b);
-
-    res->res = rr;
-    res->k = k + 1;
-
-    if (cbk)
-      cbk(res);
-  }
-
-  mtx_csj_cls(dgl);
-
-  vec_cls(r);
-  vec_cls(z);
-  vec_cls(p);
-  vec_cls(t1);
-  vec_cls(t2);
-
-  return 0;
-}
-
+//static int iss_csj_dgl_slv(struct mtx_csj* mp, struct vec* xp, struct vec* fp) {
+//  int n = mp->pps.n;
+//
+//  double* dr = mp->dr;
+//  double* xv = xp->vp;
+//  double* fv = fp->vp;
+//
+//  for (int i = 0; i < n; ++i)
+//    xv[i] = fv[i] / dr[i];
+//
+//  return 0;
+//}
 
 int iss_csj_pkt_cls(struct iss_csj_pkt* pkt) {
   iss_pkt_cls(&pkt->pkt);
