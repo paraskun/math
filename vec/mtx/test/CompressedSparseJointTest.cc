@@ -5,15 +5,10 @@ extern "C" {
 }
 
 TEST(CompressedSparseJoint, VectorMultiplication) {
-  struct mtx_csj_pps pps = {
-      .n = 3,
-      .ne = 2,
-  };
-
   //  1  4  5
   // -1  2  0
   //  1  0  3
-  struct mtx_csj* mp = mtx_csj_new(pps);
+  struct mtx_csj* mp = mtx_csj_new(3, 2);
 
   mp->dr[0] = 1;
   mp->dr[1] = 2;
@@ -62,9 +57,9 @@ TEST(CompressedSparseJoint, IncompleteLU) {
       .ja = fopen("mtx/ja.csj.mtx", "r"),
   };
 
-  struct mtx_csj* m = mtx_csj_new({5, 5});
+  struct mtx_csj* m = mtx_csj_new(5, 5);
 
-  mtx_csj_get(&pkt, m);
+  mtx_csj_fget(&pkt, m);
   mtx_csj_ilu(m, m);
   mtx_csj_pkt_cls(&pkt);
 
@@ -77,7 +72,7 @@ TEST(CompressedSparseJoint, IncompleteLU) {
       .ja = fopen("mtx/ja.csj.ilu.mtx", "w+"),
   };
 
-  mtx_csj_put(&pkt, m);
+  mtx_csj_fput(&pkt, m);
   mtx_csj_pkt_cls(&pkt);
 
   mtx_csj_cls(m);

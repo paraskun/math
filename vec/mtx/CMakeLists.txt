@@ -2,7 +2,6 @@ set(SRC
   src/mtx.c
   src/mtx_cds.c
   src/mtx_sky.c
-  src/mtx_pie.c
   src/mtx_csj.c
 )
 

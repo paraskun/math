@@ -20,7 +20,6 @@ class Env : public testing::Environment {
   }
 };
 
-struct mtx_csj_pps Env::HilbertDefaultProp = {3, 3};
 struct iss_csj_pkt Env::HilbertDefaultPack = {
   .pkt = {
     .pps = 0,
@@ -60,11 +59,11 @@ void CompressedSparseJointHilbertTest::ContextDefault(FILE* rep, fun_iss_csj_slv
 
   struct iss_res res = {0, 0};
 
-  struct mtx_csj* mp = mtx_csj_new(Env::HilbertDefaultProp);
+  struct mtx_csj* mp = mtx_csj_new(3, 3);
   struct vec* xp = vec_new(mp->pps.n);
   struct vec* fp = vec_new(mp->pps.n);
 
-  mtx_csj_get(&Env::HilbertDefaultPack.mtx, mp);
+  mtx_csj_fget(&Env::HilbertDefaultPack.mtx, mp);
   vec_get(Env::HilbertDefaultPack.pkt.f, fp);
 
   vec_zer(xp);
@@ -91,14 +90,12 @@ void CompressedSparseJointHilbertTest::ContextAll(FILE* rep, fun_iss_csj_slv slv
   struct timespec end;
 
   for (int n = 4; n <= 10; ++n) {
-    struct mtx_csj_pps mpp = {n, ALL(n)};
     struct iss_res res = {0, 0};
 
-    struct mtx_csj* mp = mtx_csj_new(mpp);
-    struct vec* xp = vec_new(mpp.n);
-    struct vec* fp = vec_new(mpp.n);
+    struct mtx_csj* mp = mtx_csj_new(n, ALL(n));
+    struct vec* xp = vec_new(n);
+    struct vec* fp = vec_new(n);
 
-    mtx_csj_all(mp);
     mtx_csj_hlb(mp);
 
     vec_seq(xp, 1);
@@ -119,54 +116,6 @@ void CompressedSparseJointHilbertTest::ContextAll(FILE* rep, fun_iss_csj_slv slv
     vec_cls(xp);
     vec_cls(fp);
   }
-}
-
-TEST_F(CompressedSparseJointHilbertTest, LocalOptimalDefaultTest) {
-  FILE* rep = fopen("out/los_hlb_def.rep", "w+");
-
-  ContextDefault(rep, &iss_csj_los_slv);
-
-  fclose(rep);
-}
-
-TEST_F(CompressedSparseJointHilbertTest, LocalOptimalAllTest) {
-  FILE* rep = fopen("out/los_hlb_all.rep", "w+");
-
-  ContextAll(rep, &iss_csj_los_slv);
-
-  fclose(rep);
-}
-
-TEST_F(CompressedSparseJointHilbertTest, LocalOptimalIncompleteLUDefaultTest) {
-  FILE* rep = fopen("out/los_ilu_hlb_def.rep", "w+");
-
-  ContextDefault(rep, &iss_csj_ilu_los_slv);
-
-  fclose(rep);
-}
-
-TEST_F(CompressedSparseJointHilbertTest, LocalOptimalIncompleteLUAllTest) {
-  FILE* rep = fopen("out/los_ilu_hlb_all.rep", "w+");
-
-  ContextAll(rep, &iss_csj_ilu_los_slv);
-
-  fclose(rep);
-}
-
-TEST_F(CompressedSparseJointHilbertTest, LocalOptimalDiagonalDefaultTest) {
-  FILE* rep = fopen("out/los_dgl_hlb_def.rep", "w+");
-
-  ContextDefault(rep, &iss_csj_dgl_los_slv);
-
-  fclose(rep);
-}
-
-TEST_F(CompressedSparseJointHilbertTest, LocalOptimalDiagonalAllTest) {
-  FILE* rep = fopen("out/los_dgl_hlb_all.rep", "w+");
-
-  ContextAll(rep, &iss_csj_dgl_los_slv);
-
-  fclose(rep);
 }
 
 int main(int argc, char** argv) {

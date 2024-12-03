@@ -5,13 +5,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct mtx_csj* mtx_csj_new(struct mtx_csj_pps pps) {
+struct mtx_csj* mtx_csj_new(int n, int ne) {
   struct mtx_csj* mp = malloc(sizeof(struct mtx_csj));
 
-  mp->pps = pps;
-
-  int n = pps.n;
-  int ne = pps.ne;
+  mp->pps.n = n;
+  mp->pps.ne = ne;
 
   mp->dr = malloc(sizeof(double) * n);
 
@@ -37,7 +35,7 @@ struct mtx_csj* mtx_csj_new(struct mtx_csj_pps pps) {
   return mp;
 }
 
-int mtx_csj_put(struct mtx_csj_pkt* pkt, struct mtx_csj* mp) {
+int mtx_csj_fput(struct mtx_csj_pkt* pkt, struct mtx_csj* mp) {
   int n = mp->pps.n;
   int ne = mp->pps.ne;
 
@@ -66,7 +64,7 @@ int mtx_csj_put(struct mtx_csj_pkt* pkt, struct mtx_csj* mp) {
   return 0;
 }
 
-int mtx_csj_get(struct mtx_csj_pkt* pkt, struct mtx_csj* mp) {
+int mtx_csj_fget(struct mtx_csj_pkt* pkt, struct mtx_csj* mp) {
   int n = mp->pps.n;
   int ne = mp->pps.ne;
 
@@ -185,60 +183,6 @@ int mtx_csj_dgl(struct mtx_csj* mp, struct mtx_csj* rp) {
   return 0;
 }
 
-int mtx_csj_all(struct mtx_csj* mp) {
-  int n = mp->pps.n;
-  int ne = mp->pps.ne;
-
-  int* ia = mp->ia;
-  int* ja = mp->ja;
-
-  for (int i = 0, ar = 0; i < n; ++i) {
-    ia[i] = ar;
-
-    for (int j = 0; j < i; ++j, ++ar)
-      ja[ar] = j;
-  }
-
-  ia[n] = ne;
-
-  return 0;
-}
-
-int mtx_csj_ddm(struct mtx_csj* mp, int k) {
-  int n = mp->pps.n;
-
-  int* ia = mp->ia;
-  int* ja = mp->ja;
-
-  double* dr = mp->dr;
-  double* lr = mp->lr;
-  double* ur = mp->ur;
-
-  memset(dr, 0, sizeof(double) * n);
-
-  for (int i = 1; i < n; ++i) {
-    int ar0 = ia[i];
-    int ar1 = ia[i + 1];
-
-    for (int ar = ar0; ar < ar1; ++ar) {
-      int j = ja[ar];
-
-      lr[ar] = -(rand() % 5);
-      ur[ar] = -(rand() % 5);
-
-      dr[i] -= lr[ar];
-      dr[j] -= ur[ar];
-
-      lr[ar] *= k;
-      ur[ar] *= k;
-    }
-  }
-
-  dr[0] += 1;
-
-  return 0;
-}
-
 int mtx_csj_hlb(struct mtx_csj* mp) {
   int n = mp->pps.n;
 
@@ -248,6 +192,15 @@ int mtx_csj_hlb(struct mtx_csj* mp) {
   double* dr = mp->dr;
   double* lr = mp->lr;
   double* ur = mp->ur;
+
+  for (int i = 0, ar = 0; i < n; ++i) {
+    ia[i] = ar;
+
+    for (int j = 0; j < i; ++j, ++ar)
+      ja[ar] = j;
+  }
+
+  ia[n] = mp->pps.ne;
 
   for (int i = 0; i < n; ++i) {
     dr[i] = 1.0 / (i + i + 1);

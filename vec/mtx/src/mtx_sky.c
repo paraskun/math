@@ -1,6 +1,5 @@
 #include <vec/mtx_sky.h>
 
-#include <math.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,8 +10,8 @@
 struct mtx_sky* mtx_sky_new(int n, int s) {
   struct mtx_sky* mp = malloc(sizeof(struct mtx_sky));
 
-  mp->n = n;
-  mp->s = s;
+  mp->pps.n = n;
+  mp->pps.s = s;
   mp->p = malloc(sizeof(int) * (n + 1));
 
   mp->dv = malloc(sizeof(double) * n);
@@ -22,9 +21,9 @@ struct mtx_sky* mtx_sky_new(int n, int s) {
   return mp;
 }
 
-void mtx_sky_fget(FILE* f, struct mtx_sky* mp) {
-  int n = mp->n;
-  int s = mp->s;
+int mtx_sky_fget(FILE* f, struct mtx_sky* mp) {
+  int n = mp->pps.n;
+  int s = mp->pps.s;
 
   int* mpp = mp->p;
 
@@ -43,11 +42,13 @@ void mtx_sky_fget(FILE* f, struct mtx_sky* mp) {
 
   for (int i = 0; i < s; ++i)
     fscanf(f, "%lf", &mup[i]);
+
+  return 0;
 }
 
-void mtx_sky_fput(FILE* f, struct mtx_sky* mp) {
-  int n = mp->n;
-  int s = mp->s;
+int mtx_sky_fput(FILE* f, struct mtx_sky* mp) {
+  int n = mp->pps.n;
+  int s = mp->pps.s;
 
   int* mpp = mp->p;
 
@@ -72,10 +73,12 @@ void mtx_sky_fput(FILE* f, struct mtx_sky* mp) {
 
   for (int i = 0; i < s; ++i)
     fprintf(f, "%.4e ", mup[i]);
+
+  return 0;
 }
 
-void mtx_sky_ldu(struct mtx_sky* mp) {
-  int n = mp->n;
+int mtx_sky_ldu(struct mtx_sky* mp) {
+  int n = mp->pps.n;
 
   int* mpp = mp->p;
 
@@ -109,51 +112,12 @@ void mtx_sky_ldu(struct mtx_sky* mp) {
       }
     }
   }
+
+  return 0;
 }
 
-void mtx_sky_ddm(struct mtx_sky* mp, int k) {
-  int n = mp->n;
-
-  double* mlp = mp->lv;
-  double* mup = mp->uv;
-  double* mdp = mp->dv;
-  int* mpp = mp->p;
-
-  double* sum = malloc(sizeof(double) * n);
-
-  memset(sum, 0, sizeof(double) * n);
-
-  mpp[0] = 0;
-
-  for (int i = 1, ir = 0; i < n; ++i, ir += i - 1) {
-    mpp[i] = ir;
-
-    mlp[ir] = -(rand() % 4) - 1;
-    mup[ir] = -(rand() % 4) - 1;
-
-    sum[i] += mlp[ir];
-    sum[0] += mup[ir];
-
-    for (int j = 1; j < i; ++j) {
-      mlp[ir + j] = -(rand() % 5);
-      mup[ir + j] = -(rand() % 5);
-
-      sum[i] += mlp[ir + j];
-      sum[j] += mup[ir + j];
-    }
-  }
-
-  mpp[n] = n * (n - 1) / 2;
-  mdp[0] = 1.0 / pow(10.0, k) - sum[0];
-
-  for (int i = 1; i < n; ++i)
-    mdp[i] = -sum[i];
-
-  free(sum);
-}
-
-void mtx_sky_hlb(struct mtx_sky* mp) {
-  int n = mp->n;
+int mtx_sky_hlb(struct mtx_sky* mp) {
+  int n = mp->pps.n;
   int ir = 0;
 
   int* mpp = mp->p;
@@ -180,10 +144,12 @@ void mtx_sky_hlb(struct mtx_sky* mp) {
   }
 
   mpp[n] = n * (n - 1) / 2;
+
+  return 0;
 }
 
-void mtx_sky_vmlt(struct mtx_sky* ap, struct vec* bp, struct vec* rp) {
-  int n = ap->n;
+int mtx_sky_vmlt(struct mtx_sky* ap, struct vec* bp, struct vec* rp) {
+  int n = ap->pps.n;
 
   int* app = ap->p;
 
@@ -206,6 +172,8 @@ void mtx_sky_vmlt(struct mtx_sky* ap, struct vec* bp, struct vec* rp) {
       rvp[j] += aup[k] * bvp[i];
     }
   }
+
+  return 0;
 }
 
 void mtx_sky_free(struct mtx_sky* mp) {

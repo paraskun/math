@@ -74,7 +74,7 @@ int fem_get(FILE* obj, struct fem* fem) {
 }
 
 int fem_evo(struct fem* fem) {
-  struct mtx_csj_pps pps = {fem->vs, 0};
+  int ne = 0;
   struct ull* l = malloc(sizeof(struct ull) * fem->vs);
 
   for (int i = 0; i < fem->vs; ++i) {
@@ -95,7 +95,7 @@ int fem_evo(struct fem* fem) {
 
         if (b < a) {
           ull_ins(&l[a], b);
-          pps.ne += 1;
+          ne += 1;
         }
       }
     }
@@ -104,10 +104,10 @@ int fem_evo(struct fem* fem) {
   for (int i = 0; i < fem->fs; ++i)
     fce_evo(fem->fce[i], fem->vtx);
 
-  fem->a = mtx_csj_new(pps);
-  fem->b = vec_new(pps.n);
+  fem->a = mtx_csj_new(fem->vs, ne);
+  fem->b = vec_new(fem->vs);
 
-  for (int i = 0, e = 0; i < pps.n; ++i) {
+  for (int i = 0, e = 0; i < fem->vs; ++i) {
     struct lln* n = l[i].beg;
 
     fem->a->ia[i] = e;
@@ -120,7 +120,7 @@ int fem_evo(struct fem* fem) {
     }
   }
 
-  fem->a->ia[pps.n] = pps.ne;
+  fem->a->ia[fem->vs] = ne;
 
   for (int i = 0; i < fem->vs; ++i)
     ull_cls(&l[i]);
@@ -177,7 +177,7 @@ int fem_slv(struct fem* fem, struct vec* q) {
   struct iss_pps pps = {1e-5, 10000};
   struct iss_res res = {0, 0};
 
-  iss_csj_los_slv(fem->a, q, fem->b, &pps, &res, NULL);
+  iss_csj_bcg_slv(fem->a, q, fem->b, &pps, &res, NULL);
 
   return 0;
 }
