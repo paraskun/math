@@ -19,21 +19,20 @@ class Env : public testing::Environment {
 };
 
 FILE* const Env::obj = fopen("obj/sem.obj", "r");
-struct iss_csj_pkt Env::pkt = {
-  .pkt = {
-    .pps = 0,
-    .x = fopen("out/sem/vec/q.vec", "w+"),
-    .f = fopen("out/sem/vec/b.vec", "w+"),
-  },
-  .mtx = {
-    .pps = 0,
-    .dr = fopen("out/sem/mtx/dr.csj.mtx", "w+"),
-    .lr = fopen("out/sem/mtx/lr.csj.mtx", "w+"),
-    .ur = fopen("out/sem/mtx/ur.csj.mtx", "w+"),
-    .ia = fopen("out/sem/mtx/ia.csj.mtx", "w+"),
-    .ja = fopen("out/sem/mtx/ja.csj.mtx", "w+"),
-  }
-};
+struct iss_csj_pkt Env::pkt = {.pkt =
+                                   {
+                                       .pps = 0,
+                                       .x = fopen("out/sem/vec/q.vec", "w+"),
+                                       .f = fopen("out/sem/vec/b.vec", "w+"),
+                                   },
+                               .mtx = {
+                                   .pps = 0,
+                                   .dr = fopen("out/sem/mtx/dr.csj.mtx", "w+"),
+                                   .lr = fopen("out/sem/mtx/lr.csj.mtx", "w+"),
+                                   .ur = fopen("out/sem/mtx/ur.csj.mtx", "w+"),
+                                   .ia = fopen("out/sem/mtx/ia.csj.mtx", "w+"),
+                                   .ja = fopen("out/sem/mtx/ja.csj.mtx", "w+"),
+                               }};
 
 class SolidStateEquationSingleElementTest : public testing::Test {
  public:
@@ -97,7 +96,7 @@ class SolidStateEquationSingleElementTest : public testing::Test {
     return -10 - 0.3 * x - 4 * y;
   }
 
-  double (*fun[7])(struct vtx*) = {&f,    &tta1, &tta2, &tta3,
+  double (*fun[7])(struct vtx*) = {&g,    &tta1, &tta2, &tta3,
                                    &tmp1, &tmp2, &tmp3};
 };
 

@@ -75,8 +75,10 @@ int hex_evo(struct hex* h, struct vtx** v) {
 
   double dec[8];
 
+  static int sign[2] = {-1, 1};
+
   for (int i = 0; i < 8; ++i)
-    dec[i] = h->pps.f(v[h->vtx[i]]);
+    dec[i] = h->pps.f(v[h->vtx[i]]) * sign[MU[i]] / hx;
 
   for (int i = 0; i < 8; ++i) {
     bloc[i] = 0;
@@ -100,9 +102,7 @@ int hex_evo(struct hex* h, struct vtx** v) {
 
       mloc[i][j] = gam * mxl * myl * mzl;
       mloc[i][j] += lam * (gxl * myl * mzl + mxl * gyl * mzl + mxl * myl * gzl);
-      bloc[i] += dec[j] * mxl * myl * mzl;
-
-      //bloc[i] += dec[j] * X[muj][mui] * myl * mzl;
+      bloc[i] += dec[j] * (hx / 2) * myl * mzl;
     }
   }
 
