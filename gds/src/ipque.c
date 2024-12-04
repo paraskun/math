@@ -18,6 +18,13 @@ static inline void swap(struct ipque* q, unsigned a, unsigned b) {
 
   q->data[a] = q->data[b];
   q->data[b] = t;
+
+  if (q->ind) {
+    unsigned t = q->ind[a];
+
+    q->ind[a] = q->ind[b];
+    q->ind[b] = t;
+  }
 }
 
 int ipque_new(struct ipque** h, unsigned int cap) {
@@ -34,6 +41,7 @@ int ipque_new(struct ipque** h, unsigned int cap) {
     q->cap = cap;
     q->len = 0;
     q->cmp = &cmp;
+    q->ind = NULL;
     q->data = malloc(sizeof(int) * (cap + 1));
 
     if (!q->data) {

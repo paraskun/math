@@ -3,6 +3,8 @@ set(SRC
   src/ppque.c
   src/issll.c
   src/pssll.c
+  src/ihset.c
+  src/phset.c
 )
 
 add_library(gds ${SRC})

@@ -4,6 +4,7 @@ set(SRC
 
 add_library(dcg ${SRC})
 target_include_directories(dcg PUBLIC include)
+target_link_libraries(dcg PUBLIC gds)
 
 if (OPENMP_FOUND)
   target_link_libraries(dcg PUBLIC OpenMP::OpenMP_C)

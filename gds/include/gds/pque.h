@@ -11,6 +11,8 @@ struct ipque {
 
   int (*cmp)(int, int);
 
+  unsigned* ind;
+
   int* data;
 };
 
@@ -28,6 +30,8 @@ struct ppque {
   unsigned cap;
 
   int (*cmp)(void*, void*);
+
+  unsigned* ind;
 
   void** data;
 };
