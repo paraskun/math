@@ -118,6 +118,15 @@ void CompressedSparseJointHilbertTest::ContextAll(FILE* rep, fun_iss_csj_slv slv
   }
 }
 
+TEST_F(CompressedSparseJointHilbertTest, BiConjugateGradientTest) {
+  FILE* rep = fopen("out/bcg_hlb.rep", "w+");
+
+  ContextDefault(rep, &iss_csj_bcg_slv);
+
+  fclose(rep);
+}
+
+
 int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
   testing::AddGlobalTestEnvironment(new Env);
