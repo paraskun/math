@@ -1,6 +1,9 @@
-Iterations: 10
-Residual: 8.2019472e-20
-Time: 0.024295 ms
+N: 10
+Residual: 1.0789378e-20
+Target norm: 1.9621417e+01
+Obtained norm: 1.9621417e+01
+Norm difference: 0.0000000e+00
+Time: 0.364582
 
 1.0000000e+00
 2.0000000e+00

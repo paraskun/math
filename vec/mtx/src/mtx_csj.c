@@ -12,24 +12,22 @@ struct mtx_csj* mtx_csj_new(int n, int ne) {
   mp->pps.ne = ne;
 
   mp->dr = malloc(sizeof(double) * n);
+  mp->ia = malloc(sizeof(int) * (n + 1));
+  mp->ja = malloc(sizeof(int) * ne);
 
   memset(mp->dr, 0, sizeof(double) * n);
+  memset(mp->ia, 0, sizeof(int) * (n + 1));
+  memset(mp->ja, 0, sizeof(int) * ne);
 
   mp->lr = NULL;
   mp->ur = NULL;
-  mp->ia = NULL;
-  mp->ja = NULL;
 
   if (ne > 0) {
     mp->lr = malloc(sizeof(double) * ne);
     mp->ur = malloc(sizeof(double) * ne);
-    mp->ia = malloc(sizeof(int) * (n + 1));
-    mp->ja = malloc(sizeof(int) * ne);
 
     memset(mp->lr, 0, sizeof(double) * ne);
     memset(mp->ur, 0, sizeof(double) * ne);
-    memset(mp->ia, 0, sizeof(int) * (n + 1));
-    memset(mp->ja, 0, sizeof(int) * ne);
   }
 
   return mp;
@@ -251,12 +249,12 @@ int mtx_csj_vmlt(struct mtx_csj* mp, struct vec* xp, struct vec* fp) {
 
 void mtx_csj_cls(struct mtx_csj* mp) {
   free(mp->dr);
+  free(mp->ia);
+  free(mp->ja);
 
   if (mp->pps.ne > 0) {
     free(mp->lr);
     free(mp->ur);
-    free(mp->ia);
-    free(mp->ja);
   }
 
   free(mp);

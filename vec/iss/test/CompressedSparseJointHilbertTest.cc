@@ -12,33 +12,49 @@ extern "C" {
 
 class Env : public testing::Environment {
  public:
-  static struct mtx_csj_pps HilbertDefaultProp;
-  static struct iss_csj_pkt HilbertDefaultPack;
+  static struct mtx_csj* mp;
+  static struct vec* fp;
+
+  static double xn;
+
+  virtual void SetUp() {
+    mp = mtx_csj_new(3, 3);
+    fp = vec_new(3);
+
+    struct mtx_csj_pkt pkt = {
+      .pps = 0,
+      .dr = fopen("mtx/hlb/dr.csj.mtx", "r"),
+      .lr = fopen("mtx/hlb/lr.csj.mtx", "r"),
+      .ur = fopen("mtx/hlb/ur.csj.mtx", "r"),
+      .ia = fopen("mtx/hlb/ia.csj.mtx", "r"),
+      .ja = fopen("mtx/hlb/ja.csj.mtx", "r"),
+    };
+
+    struct vec* xp = vec_new(3);
+
+    vec_seq(xp, 1);
+    vec_nrm(xp, &xn);
+
+    mtx_csj_fget(&pkt, mp);
+    mtx_csj_vmlt(mp, xp, fp);
+
+    vec_cls(xp);
+    mtx_csj_pkt_cls(&pkt);
+  }
 
   virtual void TearDown() {
-    iss_csj_pkt_cls(&HilbertDefaultPack);
+    mtx_csj_cls(mp);
+    vec_cls(fp);
   }
 };
 
-struct iss_csj_pkt Env::HilbertDefaultPack = {
-  .pkt = {
-    .pps = 0,
-    .x = 0,
-    .f = fopen("mtx/hlb/f.vec", "r"),
-  },
-  .mtx = {
-    .pps = 0,
-    .dr = fopen("mtx/hlb/dr.csj.mtx", "r"),
-    .lr = fopen("mtx/hlb/lr.csj.mtx", "r"),
-    .ur = fopen("mtx/hlb/ur.csj.mtx", "r"),
-    .ia = fopen("mtx/hlb/ia.csj.mtx", "r"),
-    .ja = fopen("mtx/hlb/ja.csj.mtx", "r"),
-  }
-};
+struct mtx_csj* Env::mp;
+struct vec* Env::fp;
+double Env::xn;
 
 class CompressedSparseJointHilbertTest : public testing::Test {
  public:
-  static struct iss_pps Properties;
+  static struct iss_pps pps;
 
   static double diff_ms(struct timespec* beg, struct timespec* end) {
     double sec = end->tv_sec - beg->tv_sec;
@@ -46,86 +62,268 @@ class CompressedSparseJointHilbertTest : public testing::Test {
 
     return sec * 1000 + nan / 1000000;
   }
-
-  void ContextDefault(FILE* rep, fun_iss_csj_slv slv);
-  void ContextAll(FILE* rep, fun_iss_csj_slv slv);
 };
 
-struct iss_pps CompressedSparseJointHilbertTest::Properties = {1e-10, 100000};
+struct iss_pps CompressedSparseJointHilbertTest::pps = {1e-15, 200000};
 
-void CompressedSparseJointHilbertTest::ContextDefault(FILE* rep, fun_iss_csj_slv slv) {
+TEST_F(CompressedSparseJointHilbertTest, BiConjGradDefaultTest) {
+  FILE* rep = fopen("out/bcg_hlb.rep", "w+");
+
   struct timespec beg;
   struct timespec end;
 
   struct iss_res res = {0, 0};
-
-  struct mtx_csj* mp = mtx_csj_new(3, 3);
-  struct vec* xp = vec_new(mp->pps.n);
-  struct vec* fp = vec_new(mp->pps.n);
-
-  mtx_csj_fget(&Env::HilbertDefaultPack.mtx, mp);
-  vec_get(Env::HilbertDefaultPack.pkt.f, fp);
-
-  vec_zer(xp);
+  struct vec* xp = vec_new(Env::mp->pps.n);
 
   clock_gettime(CLOCK_MONOTONIC, &beg);
-  slv(mp, xp, fp, &Properties, &res, 0);
+  iss_csj_bcg_slv(Env::mp, xp, Env::fp, &pps, &res, 0);
   clock_gettime(CLOCK_MONOTONIC, &end);
 
-  EXPECT_GT(Properties.eps, fabs(res.res));
-  EXPECT_GT(Properties.mk, res.k);
+  EXPECT_GT(pps.eps, fabs(res.res));
+  EXPECT_GT(pps.mk, res.k);
 
-  fprintf(rep, "Iterations: %d\nResidual: %.7e\nTime: %lf ms\n\n", res.k,
-          res.res, diff_ms(&beg, &end));
+  double nrm;
+
+  vec_nrm(xp, &nrm);
+
+  fprintf(rep, "N: %d\n", res.k);
+  fprintf(rep, "Residual: %.4e\n", res.res);
+  fprintf(rep, "Target norm: %.4e\n", Env::xn);
+  fprintf(rep, "Obtained norm: %.4e\n", nrm);
+  fprintf(rep, "Norm difference: %.4e\n", fabs(nrm - Env::xn));
+  fprintf(rep, "Time: %lf\n\n", diff_ms(&beg, &end));
 
   vec_put(rep, xp);
-
-  mtx_csj_cls(mp);
   vec_cls(xp);
-  vec_cls(fp);
+
+  fclose(rep);
 }
 
-void CompressedSparseJointHilbertTest::ContextAll(FILE* rep, fun_iss_csj_slv slv) {
+TEST_F(CompressedSparseJointHilbertTest, BiConjGradILUDefaultTest) {
+  FILE* rep = fopen("out/bcg_ilu_hlb.rep", "w+");
+
   struct timespec beg;
   struct timespec end;
 
-  for (int n = 4; n <= 10; ++n) {
+  struct iss_res res = {0, 0};
+  struct vec* xp = vec_new(Env::mp->pps.n);
+  struct mtx_csj* con = mtx_csj_new(Env::mp->pps.n, Env::mp->pps.ne);
+
+  mtx_csj_ilu(Env::mp, con);
+
+  clock_gettime(CLOCK_MONOTONIC, &beg);
+  iss_csj_bcg_con_slv(Env::mp, con, xp, Env::fp, &pps, &res, 0);
+  clock_gettime(CLOCK_MONOTONIC, &end);
+
+  EXPECT_GT(pps.eps, fabs(res.res));
+  EXPECT_GT(pps.mk, res.k);
+
+  double nrm;
+
+  vec_nrm(xp, &nrm);
+
+  fprintf(rep, "N: %d\n", res.k);
+  fprintf(rep, "Residual: %.4e\n", res.res);
+  fprintf(rep, "Target norm: %.4e\n", Env::xn);
+  fprintf(rep, "Obtained norm: %.4e\n", nrm);
+  fprintf(rep, "Norm difference: %.4e\n", fabs(nrm - Env::xn));
+  fprintf(rep, "Time: %lf\n\n", diff_ms(&beg, &end));
+
+  vec_put(rep, xp);
+  vec_cls(xp);
+  mtx_csj_cls(con);
+
+  fclose(rep);
+}
+
+TEST_F(CompressedSparseJointHilbertTest, BiConjGradDiagDefaultTest) {
+  FILE* rep = fopen("out/bcg_dgl_hlb.rep", "w+");
+
+  struct timespec beg;
+  struct timespec end;
+
+  struct iss_res res = {0, 0};
+  struct vec* xp = vec_new(Env::mp->pps.n);
+  struct mtx_csj* con = mtx_csj_new(Env::mp->pps.n, 0);
+
+  mtx_csj_dgl(Env::mp, con);
+
+  clock_gettime(CLOCK_MONOTONIC, &beg);
+  iss_csj_bcg_con_slv(Env::mp, con, xp, Env::fp, &pps, &res, 0);
+  clock_gettime(CLOCK_MONOTONIC, &end);
+
+  EXPECT_GT(pps.eps, fabs(res.res));
+  EXPECT_GT(pps.mk, res.k);
+
+  double nrm;
+
+  vec_nrm(xp, &nrm);
+
+  fprintf(rep, "N: %d\n", res.k);
+  fprintf(rep, "Residual: %.4e\n", res.res);
+  fprintf(rep, "Target norm: %.4e\n", Env::xn);
+  fprintf(rep, "Obtained norm: %.4e\n", nrm);
+  fprintf(rep, "Norm difference: %.4e\n", fabs(nrm - Env::xn));
+  fprintf(rep, "Time: %lf\n\n", diff_ms(&beg, &end));
+
+  vec_put(rep, xp);
+  vec_cls(xp);
+  mtx_csj_cls(con);
+
+  fclose(rep);
+}
+
+TEST_F(CompressedSparseJointHilbertTest, BiConjGradAllTest) {
+  FILE* rep = fopen("out/bcg_hlb_all.rep", "w+");
+
+  struct timespec beg;
+  struct timespec end;
+
+  for (int n = 4; n < 10; ++n) {
     struct iss_res res = {0, 0};
 
     struct mtx_csj* mp = mtx_csj_new(n, ALL(n));
     struct vec* xp = vec_new(n);
     struct vec* fp = vec_new(n);
 
+    double tn;
+    double on;
+
     mtx_csj_hlb(mp);
 
     vec_seq(xp, 1);
+    vec_nrm(xp, &tn);
     mtx_csj_vmlt(mp, xp, fp);
     vec_zer(xp);
 
     clock_gettime(CLOCK_MONOTONIC, &beg);
-    slv(mp, xp, fp, &Properties, &res, 0);
+    iss_csj_bcg_slv(mp, xp, fp, &pps, &res, 0);
     clock_gettime(CLOCK_MONOTONIC, &end);
 
-    EXPECT_GT(Properties.eps, fabs(res.res));
-    EXPECT_GT(Properties.mk, res.k);
+    EXPECT_GT(pps.eps, fabs(res.res));
+    EXPECT_GT(pps.mk, res.k);
 
-    fprintf(rep, "N: %d\nIterations: %d\nResidual: %.7e\nTime: %lf ms\n\n", n,
-            res.k, res.res, diff_ms(&beg, &end));
+    vec_nrm(xp, &on);
+
+    fprintf(rep, "K: %d\n", n);
+    fprintf(rep, "N: %d\n", res.k);
+    fprintf(rep, "Residual: %.4e\n", res.res);
+    fprintf(rep, "Target norm: %.4e\n", tn);
+    fprintf(rep, "Obtained norm: %.4e\n", on);
+    fprintf(rep, "Norm difference: %.4e\n", fabs(on - tn));
+    fprintf(rep, "Time: %lf\n\n", diff_ms(&beg, &end));
 
     mtx_csj_cls(mp);
     vec_cls(xp);
     vec_cls(fp);
   }
-}
-
-TEST_F(CompressedSparseJointHilbertTest, BiConjugateGradientTest) {
-  FILE* rep = fopen("out/bcg_hlb.rep", "w+");
-
-  ContextDefault(rep, &iss_csj_bcg_slv);
 
   fclose(rep);
 }
 
+TEST_F(CompressedSparseJointHilbertTest, BiConjGradILUAllTest) {
+  FILE* rep = fopen("out/bcg_ilu_hlb_all.rep", "w+");
+
+  struct timespec beg;
+  struct timespec end;
+
+  for (int n = 4; n < 10; ++n) {
+    struct iss_res res = {0, 0};
+
+    struct mtx_csj* mp = mtx_csj_new(n, ALL(n));
+    struct mtx_csj* con = mtx_csj_new(n, ALL(n));
+    struct vec* xp = vec_new(n);
+    struct vec* fp = vec_new(n);
+
+    double tn;
+    double on;
+
+    mtx_csj_hlb(mp);
+
+    vec_seq(xp, 1);
+    vec_nrm(xp, &tn);
+    mtx_csj_vmlt(mp, xp, fp);
+    vec_zer(xp);
+
+    mtx_csj_ilu(mp, con);
+
+    clock_gettime(CLOCK_MONOTONIC, &beg);
+    iss_csj_bcg_con_slv(mp, con, xp, fp, &pps, &res, 0);
+    clock_gettime(CLOCK_MONOTONIC, &end);
+
+    EXPECT_GT(pps.eps, fabs(res.res));
+    EXPECT_GT(pps.mk, res.k);
+
+    vec_nrm(xp, &on);
+
+    fprintf(rep, "K: %d\n", n);
+    fprintf(rep, "N: %d\n", res.k);
+    fprintf(rep, "Residual: %.4e\n", res.res);
+    fprintf(rep, "Target norm: %.4e\n", tn);
+    fprintf(rep, "Obtained norm: %.4e\n", on);
+    fprintf(rep, "Norm difference: %.4e\n", fabs(on - tn));
+    fprintf(rep, "Time: %lf\n\n", diff_ms(&beg, &end));
+
+    mtx_csj_cls(mp);
+    mtx_csj_cls(con);
+    vec_cls(xp);
+    vec_cls(fp);
+  }
+
+  fclose(rep);
+}
+
+TEST_F(CompressedSparseJointHilbertTest, BiConjGradDiagAllTest) {
+  FILE* rep = fopen("out/bcg_dgl_hlb_all.rep", "w+");
+
+  struct timespec beg;
+  struct timespec end;
+
+  for (int n = 4; n < 10; ++n) {
+    struct iss_res res = {0, 0};
+
+    struct mtx_csj* mp = mtx_csj_new(n, ALL(n));
+    struct mtx_csj* con = mtx_csj_new(n, 0);
+    struct vec* xp = vec_new(n);
+    struct vec* fp = vec_new(n);
+
+    double tn;
+    double on;
+
+    mtx_csj_hlb(mp);
+
+    vec_seq(xp, 1);
+    vec_nrm(xp, &tn);
+    mtx_csj_vmlt(mp, xp, fp);
+    vec_zer(xp);
+
+    mtx_csj_dgl(mp, con);
+
+    clock_gettime(CLOCK_MONOTONIC, &beg);
+    iss_csj_bcg_con_slv(mp, con, xp, fp, &pps, &res, 0);
+    clock_gettime(CLOCK_MONOTONIC, &end);
+
+    EXPECT_GT(pps.eps, fabs(res.res));
+    EXPECT_GT(pps.mk, res.k);
+
+    vec_nrm(xp, &on);
+
+    fprintf(rep, "K: %d\n", n);
+    fprintf(rep, "N: %d\n", res.k);
+    fprintf(rep, "Residual: %.4e\n", res.res);
+    fprintf(rep, "Target norm: %.4e\n", tn);
+    fprintf(rep, "Obtained norm: %.4e\n", on);
+    fprintf(rep, "Norm difference: %.4e\n", fabs(on - tn));
+    fprintf(rep, "Time: %lf\n\n", diff_ms(&beg, &end));
+
+    mtx_csj_cls(mp);
+    mtx_csj_cls(con);
+    vec_cls(xp);
+    vec_cls(fp);
+  };
+
+  fclose(rep);
+}
 
 int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);

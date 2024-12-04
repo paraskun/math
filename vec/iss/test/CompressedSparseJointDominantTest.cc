@@ -10,54 +10,49 @@ extern "C" {
 
 class Env : public testing::Environment {
  public:
-  static struct mtx_csj_pps DominantProperties;
-  static struct iss_csj_pkt DominantPack;
+  static struct mtx_csj* mp;
+  static struct vec* fp;
 
-  virtual void PreCalculate() {
-    FILE* f = fopen("mtx/ddm/f.vec", "w+");
-
-    struct mtx_csj* mp = mtx_csj_new(10, 17);
-    struct vec* xp = vec_new(mp->pps.n);
-    struct vec* fp = vec_new(mp->pps.n);
-
-    mtx_csj_fget(&Env::DominantPack.mtx, mp);
-    vec_seq(xp, 1);
-    mtx_csj_vmlt(mp, xp, fp);
-    vec_put(f, fp);
-
-    mtx_csj_cls(mp);
-    vec_cls(xp);
-    vec_cls(fp);
-
-    fclose(f);
-  }
+  static double xn;
 
   virtual void SetUp() {
-    // PreCalculate();
+    mp = mtx_csj_new(10, 17);
+    fp = vec_new(10);
+
+    struct mtx_csj_pkt pkt = {
+      .pps = 0,
+      .dr = fopen("mtx/ddm/dr.csj.mtx", "r"),
+      .lr = fopen("mtx/ddm/lr.csj.mtx", "r"),
+      .ur = fopen("mtx/ddm/ur.csj.mtx", "r"),
+      .ia = fopen("mtx/ddm/ia.csj.mtx", "r"),
+      .ja = fopen("mtx/ddm/ja.csj.mtx", "r"),
+    };
+
+    struct vec* xp = vec_new(10);
+
+    vec_seq(xp, 1);
+    vec_nrm(xp, &xn);
+
+    mtx_csj_fget(&pkt, mp);
+    mtx_csj_vmlt(mp, xp, fp);
+
+    vec_cls(xp);
+    mtx_csj_pkt_cls(&pkt);
   }
 
-  virtual void TearDown() { iss_csj_pkt_cls(&DominantPack); }
+  virtual void TearDown() {
+    mtx_csj_cls(mp);
+    vec_cls(fp);
+  }
 };
 
-struct iss_csj_pkt Env::DominantPack = {
-    .pkt =
-        {
-            .pps = 0,
-            .x = 0,
-            .f = fopen("mtx/ddm/f.vec", "r"),
-        },
-    .mtx = {
-        .pps = 0,
-        .dr = fopen("mtx/ddm/dr.csj.mtx", "r"),
-        .lr = fopen("mtx/ddm/lr.csj.mtx", "r"),
-        .ur = fopen("mtx/ddm/ur.csj.mtx", "r"),
-        .ia = fopen("mtx/ddm/ia.csj.mtx", "r"),
-        .ja = fopen("mtx/ddm/ja.csj.mtx", "r"),
-    }};
+struct mtx_csj* Env::mp;
+struct vec* Env::fp;
+double Env::xn;
 
 class CompressedSparseJointDominantTest : public testing::Test {
  public:
-  static struct iss_pps Properties;
+  static struct iss_pps pps;
 
   static double diff_ms(struct timespec* beg, struct timespec* end) {
     double sec = end->tv_sec - beg->tv_sec;
@@ -65,57 +60,113 @@ class CompressedSparseJointDominantTest : public testing::Test {
 
     return sec * 1000 + nan / 1000000;
   }
-
-  void Context(FILE* rep, fun_iss_csj_slv slv);
 };
 
-struct iss_pps CompressedSparseJointDominantTest::Properties = {1e-10, 100000};
+struct iss_pps CompressedSparseJointDominantTest::pps = {1e-15, 200000};
 
-void CompressedSparseJointDominantTest::Context(FILE* rep,
-                                                fun_iss_csj_slv slv) {
+TEST_F(CompressedSparseJointDominantTest, BiConjGradTest) {
+  FILE* rep = fopen("out/bcg_ddm.rep", "w+");
+
   struct timespec beg;
   struct timespec end;
 
   struct iss_res res = {0, 0};
-
-  struct mtx_csj* mp = mtx_csj_new(10, 17);
-  struct vec* xp = vec_new(mp->pps.n);
-  struct vec* fp = vec_new(mp->pps.n);
-
-  mtx_csj_fget(&Env::DominantPack.mtx, mp);
-  vec_get(Env::DominantPack.pkt.f, fp);
-
-  vec_zer(xp);
+  struct vec* xp = vec_new(10);
 
   clock_gettime(CLOCK_MONOTONIC, &beg);
-  slv(mp, xp, fp, &Properties, &res, 0);
+  iss_csj_bcg_slv(Env::mp, xp, Env::fp, &pps, &res, 0);
   clock_gettime(CLOCK_MONOTONIC, &end);
 
-  EXPECT_GT(Properties.eps, fabs(res.res));
-  EXPECT_GT(Properties.mk, res.k);
+  EXPECT_GT(pps.eps, fabs(res.res));
+  EXPECT_GT(pps.mk, res.k);
 
-  fprintf(rep, "Iterations: %d\nResidual: %.7e\nTime: %lf ms\n\n", res.k,
-          res.res, diff_ms(&beg, &end));
+  double nrm;
+
+  vec_nrm(xp, &nrm);
+
+  fprintf(rep, "N: %d\n", res.k);
+  fprintf(rep, "Residual: %.7e\n", res.res);
+  fprintf(rep, "Target norm: %.7e\n", Env::xn);
+  fprintf(rep, "Obtained norm: %.7e\n", nrm);
+  fprintf(rep, "Norm difference: %.7e\n", fabs(nrm - Env::xn));
+  fprintf(rep, "Time: %lf\n\n", diff_ms(&beg, &end));
 
   vec_put(rep, xp);
-
-  mtx_csj_cls(mp);
   vec_cls(xp);
-  vec_cls(fp);
-}
-
-TEST_F(CompressedSparseJointDominantTest, BiConjugateGradientTest) {
-  FILE* rep = fopen("out/bcg_ddm.rep", "w+");
-
-  Context(rep, &iss_csj_bcg_slv);
 
   fclose(rep);
 }
 
-TEST_F(CompressedSparseJointDominantTest, BiConjugateGradientIncompleteFactirizationTest) {
+TEST_F(CompressedSparseJointDominantTest, BiConjGradILUTest) {
   FILE* rep = fopen("out/bcg_ilu_ddm.rep", "w+");
 
-  Context(rep, &iss_csj_bcg_ilu_slv);
+  struct timespec beg;
+  struct timespec end;
+
+  struct iss_res res = {0, 0};
+  struct vec* xp = vec_new(10);
+  struct mtx_csj* con = mtx_csj_new(Env::mp->pps.n, Env::mp->pps.ne);
+
+  mtx_csj_ilu(Env::mp, con);
+
+  clock_gettime(CLOCK_MONOTONIC, &beg);
+  iss_csj_bcg_con_slv(Env::mp, con, xp, Env::fp, &pps, &res, 0);
+  clock_gettime(CLOCK_MONOTONIC, &end);
+
+  EXPECT_GT(pps.eps, fabs(res.res));
+  EXPECT_GT(pps.mk, res.k);
+
+  double nrm;
+
+  vec_nrm(xp, &nrm);
+
+  fprintf(rep, "N: %d\n", res.k);
+  fprintf(rep, "Residual: %.7e\n", res.res);
+  fprintf(rep, "Target norm: %.7e\n", Env::xn);
+  fprintf(rep, "Obtained norm: %.7e\n", nrm);
+  fprintf(rep, "Norm difference: %.7e\n", fabs(nrm - Env::xn));
+  fprintf(rep, "Time: %lf\n\n", diff_ms(&beg, &end));
+
+  vec_put(rep, xp);
+  vec_cls(xp);
+  mtx_csj_cls(con);
+
+  fclose(rep);
+}
+
+TEST_F(CompressedSparseJointDominantTest, BiConjGradDiagTest) {
+  FILE* rep = fopen("out/bcg_dgl_ddm.rep", "w+");
+
+  struct timespec beg;
+  struct timespec end;
+
+  struct iss_res res = {0, 0};
+  struct vec* xp = vec_new(Env::mp->pps.n);
+  struct mtx_csj* con = mtx_csj_new(Env::mp->pps.n, 0);
+
+  mtx_csj_dgl(Env::mp, con);
+
+  clock_gettime(CLOCK_MONOTONIC, &beg);
+  iss_csj_bcg_con_slv(Env::mp, con, xp, Env::fp, &pps, &res, 0);
+  clock_gettime(CLOCK_MONOTONIC, &end);
+
+  EXPECT_GT(pps.eps, fabs(res.res));
+  EXPECT_GT(pps.mk, res.k);
+
+  double nrm;
+
+  vec_nrm(xp, &nrm);
+
+  fprintf(rep, "N: %d\n", res.k);
+  fprintf(rep, "Residual: %.7e\n", res.res);
+  fprintf(rep, "Target norm: %.7e\n", Env::xn);
+  fprintf(rep, "Obtained norm: %.7e\n", nrm);
+  fprintf(rep, "Norm difference: %.7e\n", fabs(nrm - Env::xn));
+  fprintf(rep, "Time: %lf\n\n", diff_ms(&beg, &end));
+
+  vec_put(rep, xp);
+  vec_cls(xp);
+  mtx_csj_cls(con);
 
   fclose(rep);
 }
