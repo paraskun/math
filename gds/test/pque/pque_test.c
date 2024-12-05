@@ -1,6 +1,7 @@
 #include <munit.h>
 #include <gds/pque.h>
 
+[[maybe_unused]]
 static int cmp_min(int a, int b) {
   if (a > b)
     return -1;
@@ -11,6 +12,7 @@ static int cmp_min(int a, int b) {
   return 0;
 }
 
+[[maybe_unused]]
 static int cmp_max(int a, int b) {
   if (a < b)
     return -1;
@@ -38,7 +40,6 @@ static MunitResult test_isrt(const MunitParameter[], void*) {
 
   pque_new(&que, 3);
 
-  que.cmp = &cmp_min;
   que.cmp = &cmp_max;
 
   pque_ins(&que, 2);
