@@ -13,11 +13,9 @@ static int cmp(int a, int b) {
   return 0;
 }
 
-int issll_new(struct issll** h) {
-  struct issll* l = malloc(sizeof(struct issll));
-
+int issll_new(struct issll* l) {
   if (!l) {
-    errno = ENOMEM;
+    errno = EINVAL;
     return -1;
   }
 
@@ -25,8 +23,6 @@ int issll_new(struct issll** h) {
   l->cmp = &cmp;
   l->beg = NULL;
   l->end = NULL;
-
-  *h = l;
 
   return 0;
 }
@@ -116,8 +112,6 @@ int issll_cls(struct issll* l) {
 
     free(t);
   }
-
-  free(l);
 
   return 0;
 }

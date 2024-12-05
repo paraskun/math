@@ -5,50 +5,57 @@
 #define PQUE_R(i) (i * 2 + 1)
 #define PQUE_P(i) (i / 2)
 
+typedef unsigned uint;
+
 struct ipque {
-  unsigned len;
-  unsigned cap;
+  uint len;
+  uint cap;
 
   int (*cmp)(int, int);
-
-  unsigned* ind;
 
   int* data;
 };
 
-int ipque_new(struct ipque** h, unsigned cap);
+int ipque_new(struct ipque* q, uint cap);
+int ipque_fix(struct ipque* q);
 
-int ipque_fixu(struct ipque* q, unsigned i);
-int ipque_fixd(struct ipque* q, unsigned i);
+int ipque_fixu(struct ipque* q, uint i);
+int ipque_fixd(struct ipque* q, uint i);
 
 int ipque_ins(struct ipque* q, int e);
 int ipque_ext(struct ipque* q, int* e);
+int ipque_srt(struct ipque* q);
 int ipque_cls(struct ipque* q);
 
 struct ppque {
-  unsigned len;
-  unsigned cap;
+  uint len;
+  uint cap;
 
   int (*cmp)(void*, void*);
-
-  unsigned* ind;
 
   void** data;
 };
 
-int ppque_new(struct ppque** h, unsigned cap);
+int ppque_new(struct ppque* q, uint cap);
+int ppque_fix(struct ppque* q);
 
-int ppque_fixu(struct ppque* q, unsigned i);
-int ppque_fixd(struct ppque* q, unsigned i);
+int ppque_fixu(struct ppque* q, uint i);
+int ppque_fixd(struct ppque* q, uint i);
 
 int ppque_ins(struct ppque* q, void* e);
 int ppque_ext(struct ppque* q, void** e);
+int ppque_srt(struct ppque* q);
 int ppque_cls(struct ppque* q);
 
-#define pque_new(X, c) _Generic((X),  \
-    struct ipque**: ipque_new,        \
-    struct ppque**: ppque_new         \
+#define pque_new(X, c) _Generic((X), \
+    struct ipque*: ipque_new,        \
+    struct ppque*: ppque_new         \
     )(X, c)
+
+#define pque_fix(X) _Generic((X),     \
+    struct ipque*: ipque_fix,         \
+    struct ppque*: ppque_fix          \
+    )(X)
 
 #define pque_fixu(X, i) _Generic((X), \
     struct ipque*: ipque_fixu,        \
@@ -69,6 +76,11 @@ int ppque_cls(struct ppque* q);
     struct ipque*: ipque_ext,         \
     struct ppque*: ppque_ext          \
     )(X, e)
+
+#define pque_srt(X) _Generic((X),     \
+    struct ipque*: ipque_srt,         \
+    struct ppque*: ppque_srt          \
+    )(X)
 
 #define pque_cls(X) _Generic((X), \
     struct ipque*: ipque_cls,     \

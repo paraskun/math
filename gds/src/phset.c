@@ -3,20 +3,13 @@
 #include <errno.h>
 #include <stdlib.h>
 
-static unsigned hash(void* e, unsigned cap) {
+static uint hash(void* e, uint cap) {
   return (unsigned long) e % cap;
 }
 
-int phset_new(struct phset** h, unsigned cap) {
-  if (!h) {
-    errno = EINVAL;
-    return -1;
-  }
-
-  struct phset* s = malloc(sizeof(struct phset));
-
+int phset_new(struct phset* s, uint cap) {
   if (!s) {
-    errno = ENOMEM;
+    errno = EINVAL;
     return -1;
   }
 
@@ -26,13 +19,9 @@ int phset_new(struct phset** h, unsigned cap) {
   s->data = malloc(sizeof(bool) * cap);
 
   if (!s->data) {
-    free(s);
-
     errno = ENOMEM;
     return -1;
   }
-
-  *h = s;
 
   return 0;
 }
@@ -88,7 +77,6 @@ int phset_cls(struct phset* s) {
   }
 
   free(s->data);
-  free(s);
 
   return 0;
 }

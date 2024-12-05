@@ -6,47 +6,35 @@
 #include <errno.h>
 #include <stdlib.h>
 
-int dcg_new(struct dcg** h, unsigned cap) {
-  if (!h) {
+int dcg_new(struct dcg* g, uint cap) {
+  if (!g) {
     errno = EINVAL;
     return -1;
   }
 
-  struct dcg* g = malloc(sizeof(struct dcg));
-
-  if (!g) {
-    errno = ENOMEM;
-    return -1;
-  }
-
   g->cap = cap;
-  g->data = malloc(sizeof(struct pssll*));
+  g->data = malloc(sizeof(struct pssll));
 
   if (!g) {
-    free(g);
-
     errno = ENOMEM;
     return -1;
   }
 
-  for (unsigned i = 0; i < cap; ++i)
+  for (uint i = 0; i < cap; ++i)
     if (ssll_new(&g->data[i])) {
-      for (unsigned j = 0; j < i; ++j)
-        ssll_cls(g->data[j]);
+      for (uint j = 0; j < i; ++j)
+        ssll_cls(&g->data[j]);
 
       free(g->data);
-      free(g);
 
       errno = ENOMEM;
       return -1;
     }
 
-  *h = g;
-
   return 0;
 }
 
-int dcg_add(struct dcg* g, unsigned src, unsigned dst, int wgt) {
+int dcg_add(struct dcg* g, uint src, uint dst, uint wgt) {
   if (!g || src >= g->cap || dst >= g->cap) {
     errno = EINVAL;
     return -1;
@@ -62,7 +50,7 @@ int dcg_add(struct dcg* g, unsigned src, unsigned dst, int wgt) {
   e->vtx = dst;
   e->wgt = wgt;
 
-  if (ssll_add(g->data[src], e)) {
+  if (ssll_add(&g->data[src], e)) {
     free(e);
     return -1;
   }
@@ -70,103 +58,114 @@ int dcg_add(struct dcg* g, unsigned src, unsigned dst, int wgt) {
   return 0;
 }
 
-static int cmp(void* a, void* b) {
-  struct edge* ea = (struct edge*)a;
-  struct edge* eb = (struct edge*)b;
+static int cmp_wgt(void* a, void* b) {
+  struct path* pa = (struct path*)a;
+  struct path* pb = (struct path*)b;
 
-  if (ea->wgt < eb->wgt)
+  if (pa->wgt < pb->wgt)
     return 1;
 
-  if (ea->wgt > eb->wgt)
+  if (pa->wgt > pb->wgt)
     return -1;
 
   return 0;
 }
 
-int dcg_ssp(struct dcg* g, unsigned src, struct edge* map) {
+static int cmp_dst(void* a, void* b) {
+  struct path* pa = (struct path*)a;
+  struct path* pb = (struct path*)b;
+
+  if (pa->dst > pb->dst)
+    return 1;
+
+  if (pa->dst < pb->dst)
+    return -1;
+
+  return 0;
+}
+
+int dcg_ssp(struct dcg* g, uint src, struct path** map) {
   if (!g || !map) {
     errno = EINVAL;
     return -1;
   }
 
-  struct ppque* que = NULL;
-  struct ihset* set = NULL;
-
-  pque_new(&que, g->cap);
-  hset_new(&set, g->cap);
-
-  unsigned* ind = malloc(sizeof(int) * (g->cap + 1));
-
-  if (!ind) {
-    pque_cls(que);
-    hset_cls(set);
-
-    errno = ENOMEM;
-    return -1;
-  }
-
-  que->len = g->cap;
-  que->cmp = &cmp;
-  que->ind = ind;
-
-  for (unsigned i = 0, p = 2; i < g->cap; ++i)
-    if (i != src) {
-      map[i].vtx = 0;
-      map[i].wgt = -1;
-      
-      que->data[p] = &map[i];
-      ind[p] = i;
-
-      p += 1;
+  for (uint i = 0; i < g->cap; ++i)
+    if (i == src) {
+      map[i]->dst = i;
+      map[i]->hop = i;
+      map[i]->wgt = 0;
     } else {
-      map[i].vtx = src;
-      map[i].wgt = 0;
-
-      que->data[1] = &map[i];
-      ind[1] = i;
+      map[i]->dst = i;
+      map[i]->hop = 0;
+      map[i]->wgt = INF;
     }
 
-  struct edge* e = NULL;
+  struct ppque que;
+  struct ihset set;
 
-  while (que->len != 0) {
-    pque_ext(que, (void**)&e);
-    hset_ins(set, ind[1]);
+  que.cap = g->cap;
+  que.len = g->cap;
+  que.cmp = &cmp_wgt;
+  que.data = (void**)map;
 
-    struct pslln* n = g->data[ind[1]]->beg;
+  if (pque_fix(&que))
+    return -1;
+
+  if (hset_new(&set, g->cap))
+    return -1;
+
+  struct path* p = NULL;
+
+  while (que.len != 0) {
+    pque_ext(&que, (void**)&p);
+    hset_ins(&set, p->dst);
+
+    struct pslln* n = g->data[p->dst].beg;
 
     while (n) {
       struct edge* v = (struct edge*)n->e;
 
-      if (!hset_has(set, v->vtx)) {
-        int alt = map[ind[1]].wgt + v->wgt;
+      if (!hset_has(&set, v->vtx)) {
+        uint alt = p->wgt + v->wgt;
+        uint wgt = map[v->vtx]->wgt;
 
-        if (alt < map[v->vtx].wgt) {
-          map[v->vtx].wgt = alt;
+        if (wgt == INF || alt < wgt) {
+          map[v->vtx]->wgt = alt;
+          map[v->vtx]->hop = p->dst;
 
-          for (unsigned i = 1; i <= g->cap; ++i) {
-            if (ind[i] == v->vtx) {
-              pque_fixu(que, i);
+          for (uint i = 1; i <= que.len; ++i) {
+            if (((struct path*)que.data[i])->dst == v->vtx) {
+              pque_fixu(&que, i);
               break;
             }
           }
         }
       }
-       
+
       n = n->next;
     }
   }
 
-  free(ind);
+  que.len = que.cap;
+  que.cmp = &cmp_dst;
+
+  pque_fix(&que);
+  pque_srt(&que);
+  hset_cls(&set);
 
   return 0;
 }
 
-int dcg_asp(struct dcg* g, struct edge** map) {
+int dcg_asp(struct dcg* g, struct path*** map) {
   if (!g || !map) {
     errno = EINVAL;
     return -1;
   }
 
+#ifdef OMP_THREADS_NUM
+#pragma omp parallel for num_threads(OMP_THREADS_NUM)
+#endif  // OMP
   for (unsigned i = 0; i < g->cap; ++i)
     dcg_ssp(g, i, map[i]);
 
@@ -180,19 +179,17 @@ int dcg_cls(struct dcg* g) {
   }
 
   for (unsigned i = 0; i < g->cap; ++i) {
-    struct pslln* n = g->data[i]->beg;
+    struct pslln* n = g->data[i].beg;
 
     while (n) {
       free(n->e);
-
       n = n->next;
     }
 
-    ssll_cls(g->data[i]);
+    ssll_cls(&g->data[i]);
   }
 
   free(g->data);
-  free(g);
 
   return 0;
 }

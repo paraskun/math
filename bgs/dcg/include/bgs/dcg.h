@@ -2,22 +2,33 @@
 #define DCG_ALS_H
 
 #include <gds/ssll.h>
+#include <limits.h>
+
+#define INF UINT_MAX
+
+typedef unsigned uint;
 
 struct edge {
-  unsigned vtx;
-  int wgt;
+  uint vtx;
+  uint wgt;
 };
 
 struct dcg {
-  unsigned cap;
+  uint cap;
 
-  struct pssll** data;
+  struct pssll* data;
 };
 
-int dcg_new(struct dcg** h, unsigned cap);
-int dcg_add(struct dcg* g, unsigned src, unsigned dst, int wgt);
-int dcg_ssp(struct dcg* g, unsigned src, struct edge* map);
-int dcg_asp(struct dcg* g, struct edge** map);
+struct path {
+  uint dst;
+  uint hop;
+  uint wgt;
+};
+
+int dcg_new(struct dcg* g, uint cap);
+int dcg_add(struct dcg* g, uint src, uint dst, uint wgt);
+int dcg_ssp(struct dcg* g, uint src, struct path** map);
+int dcg_asp(struct dcg* g, struct path*** map);
 int dcg_cls(struct dcg* g);
 
 #endif  // DCG_ALS_H

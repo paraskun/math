@@ -1,14 +1,11 @@
 cmake_minimum_required(VERSION 3.21)
-project(math C CXX)
+project(math C)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 set(CMAKE_BUILD_TYPE Debug)
 
 set(CMAKE_C_FLAGS "-Wall -Werror -Wextra -Wpedantic -std=c23")
-set(CMAKE_CXX_FLAGS "-Wall -Werror -Wextra -Wpedantic -std=c++23")
-
 set(CMAKE_C_STANDARD 23)
-set(CMAKE_CXX_STANDARD 23)
 
 find_package(OpenMP)
 
@@ -20,14 +17,8 @@ if (OPENMP_FOUND)
   add_compile_definitions(OMP_THREADS_NUM=8)
 endif()
 
-include(FetchContent)
-
-FetchContent_Declare(
-  googletest
-  URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
-)
-
-FetchContent_MakeAvailable(googletest)
+add_library(munit munit/munit.c munit/munit.h)
+target_include_directories(munit PUBLIC munit/)
 
 enable_testing()
 

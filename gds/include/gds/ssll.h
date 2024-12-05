@@ -1,6 +1,8 @@
 #ifndef GDS_SSLL_H
 #define GDS_SSLL_H
 
+typedef unsigned uint;
+
 struct islln {
   int e;
 
@@ -8,7 +10,7 @@ struct islln {
 };
 
 struct issll {
-  unsigned len;
+  uint len;
 
   int (*cmp)(int, int);
 
@@ -16,7 +18,7 @@ struct issll {
   struct islln* end;
 };
 
-int issll_new(struct issll** h);
+int issll_new(struct issll* l);
 int issll_add(struct issll* l, int e);
 int issll_ins(struct issll* l, struct islln** h, int e);
 int issll_srh(struct issll* l, struct islln** h, int e);
@@ -29,7 +31,7 @@ struct pslln {
 };
 
 struct pssll {
-  unsigned len;
+  uint len;
 
   int (*cmp)(void*, void*);
 
@@ -37,15 +39,15 @@ struct pssll {
   struct pslln* end;
 };
 
-int pssll_new(struct pssll** h);
+int pssll_new(struct pssll* l);
 int pssll_add(struct pssll* l, void* e);
 int pssll_ins(struct pssll* l, struct pslln** h, void* e);
 int pssll_srh(struct pssll* l, struct pslln** h, void* e);
 int pssll_cls(struct pssll* l);
 
 #define ssll_new(X) _Generic((X), \
-    struct issll**: issll_new,    \
-    struct pssll**: pssll_new     \
+    struct issll*: issll_new,     \
+    struct pssll*: pssll_new      \
     )(X)
 
 #define ssll_add(X, e) _Generic((X),  \

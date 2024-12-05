@@ -13,11 +13,9 @@ static int cmp(void* a, void* b) {
   return 0;
 }
 
-int pssll_new(struct pssll** h) {
-  struct pssll* l = malloc(sizeof(struct pssll));
-
+int pssll_new(struct pssll* l) {
   if (!l) {
-    errno = ENOMEM;
+    errno = EINVAL;
     return -1;
   }
 
@@ -25,8 +23,6 @@ int pssll_new(struct pssll** h) {
   l->cmp = &cmp;
   l->beg = NULL;
   l->end = NULL;
-
-  *h = l;
 
   return 0;
 }
@@ -116,8 +112,6 @@ int pssll_cls(struct pssll* l) {
 
     free(t);
   }
-
-  free(l);
 
   return 0;
 }

@@ -1,24 +1,17 @@
 #include <gds/hset.h>
 
 #include <errno.h>
-#include <stdlib.h>
 #include <limits.h>
+#include <stdlib.h>
 
-static unsigned hash(int e, unsigned cap) {
-  unsigned u = e < 0 ? (UINT_MAX / 2 - e) : (unsigned) e;
+static uint hash(int e, uint cap) {
+  uint u = e < 0 ? (UINT_MAX / 2 - e) : (uint)e;
   return u % cap;
 }
 
-int ihset_new(struct ihset** h, unsigned cap) {
-  if (!h) {
-    errno = EINVAL;
-    return -1;
-  }
-
-  struct ihset* s = malloc(sizeof(struct ihset));
-
+int ihset_new(struct ihset* s, uint cap) {
   if (!s) {
-    errno = ENOMEM;
+    errno = EINVAL;
     return -1;
   }
 
@@ -28,13 +21,9 @@ int ihset_new(struct ihset** h, unsigned cap) {
   s->data = malloc(sizeof(bool) * cap);
 
   if (!s->data) {
-    free(s);
-
     errno = ENOMEM;
     return -1;
   }
-
-  *h = s;
 
   return 0;
 }
@@ -90,7 +79,6 @@ int ihset_cls(struct ihset* s) {
   }
 
   free(s->data);
-  free(s);
 
   return 0;
 }

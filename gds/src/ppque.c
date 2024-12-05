@@ -13,62 +13,51 @@ static int cmp(void* a, void* b) {
   return 0;
 }
 
-static inline void swap(struct ppque* q, unsigned a, unsigned b) {
+static inline void swap(struct ppque* q, uint a, uint b) {
   void* t = q->data[a];
 
   q->data[a] = q->data[b];
   q->data[b] = t;
-
-  if (q->ind) {
-    unsigned t = q->ind[a];
-
-    q->ind[a] = q->ind[b];
-    q->ind[b] = t;
-  }
 }
 
-int ppque_new(struct ppque** h, unsigned int cap) {
-  struct ppque* q = *h;
-
+int ppque_new(struct ppque* q, uint cap) {
   if (!q) {
-    q = malloc(sizeof(struct ppque));
-
-    if (!q) {
-      errno = ENOMEM;
-      return -1;
-    }
-
-    q->cap = cap;
-    q->len = 0;
-    q->cmp = &cmp;
-    q->ind = NULL;
-    q->data = malloc(sizeof(void*) * (cap + 1));
-
-    if (!q->data) {
-      free(q);
-
-      errno = ENOMEM;
-      return -1;
-    }
-
-    *h = q;
-
-    return 0;
+    errno = EINVAL;
+    return -1;
   }
 
-  for (unsigned i = q->len / 2; i > 0; --i)
+  q->cap = cap;
+  q->len = 0;
+  q->cmp = &cmp;
+  q->data = malloc(sizeof(void*) * (cap + 1));
+
+  if (!q->data) {
+    errno = ENOMEM;
+    return -1;
+  }
+
+  return 0;
+}
+
+int ppque_fix(struct ppque* q) {
+  if (!q) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  for (uint i = q->len / 2; i > 0; --i)
     ppque_fixd(q, i);
 
   return 0;
 }
 
-int ppque_fixu(struct ppque* q, unsigned i) {
+int ppque_fixu(struct ppque* q, uint i) {
   if (i < 1 || i > q->len) {
     errno = EINVAL;
     return -1;
   }
 
-  unsigned p = PQUE_P(i);
+  uint p = PQUE_P(i);
 
   while (i > 1 && q->cmp(q->data[p], q->data[i]) == -1) {
     swap(q, p, i);
@@ -80,16 +69,16 @@ int ppque_fixu(struct ppque* q, unsigned i) {
   return 0;
 }
 
-int ppque_fixd(struct ppque* q, unsigned i) {
+int ppque_fixd(struct ppque* q, uint i) {
   if (i < 1 || i > q->len) {
     errno = EINVAL;
     return -1;
   }
 
-  unsigned l = PQUE_L(i);
-  unsigned r = PQUE_R(i);
+  uint l = PQUE_L(i);
+  uint r = PQUE_R(i);
 
-  unsigned m;
+  uint m;
 
   if (l < q->len && q->cmp(q->data[l], q->data[i]) == 1)
     m = l;
@@ -128,9 +117,25 @@ int ppque_ext(struct ppque* q, void** e) {
 
   *e = q->data[1];
   q->data[1] = q->data[q->len];
+  q->data[q->len] = *e;
   q->len -= 1;
 
   return ppque_fixd(q, 1);
+}
+
+int ppque_srt(struct ppque* q) {
+  if (!q) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  for (uint i = q->len; i > 1; --i) {
+    swap(q, 1, i);
+    q->len -= 1;
+    ppque_fixd(q, 1);
+  }
+
+  return 0;
 }
 
 int ppque_cls(struct ppque* q) {
@@ -140,7 +145,6 @@ int ppque_cls(struct ppque* q) {
   }
 
   free(q->data);
-  free(q);
 
   return 0;
 }

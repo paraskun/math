@@ -13,62 +13,53 @@ static int cmp(int a, int b) {
   return 0;
 }
 
-static inline void swap(struct ipque* q, unsigned a, unsigned b) {
+static inline void swap(struct ipque* q, uint a, uint b) {
   int t = q->data[a];
 
   q->data[a] = q->data[b];
   q->data[b] = t;
-
-  if (q->ind) {
-    unsigned t = q->ind[a];
-
-    q->ind[a] = q->ind[b];
-    q->ind[b] = t;
-  }
 }
 
-int ipque_new(struct ipque** h, unsigned int cap) {
-  struct ipque* q = *h;
-
+int ipque_new(struct ipque* q, uint cap) {
   if (!q) {
-    q = malloc(sizeof(struct ipque));
-
-    if (!q) {
-      errno = ENOMEM;
-      return -1;
-    }
-
-    q->cap = cap;
-    q->len = 0;
-    q->cmp = &cmp;
-    q->ind = NULL;
-    q->data = malloc(sizeof(int) * (cap + 1));
-
-    if (!q->data) {
-      free(q);
-
-      errno = ENOMEM;
-      return -1;
-    }
-
-    *h = q;
-
-    return 0;
+    errno = EINVAL;
+    return -1;
   }
 
-  for (unsigned i = q->len / 2; i > 0; --i)
+  q->cap = cap;
+  q->len = 0;
+  q->cmp = &cmp;
+  q->data = malloc(sizeof(int) * (cap + 1));
+
+  if (!q->data) {
+    errno = ENOMEM;
+    return -1;
+  }
+
+  return 0;
+}
+
+int ipque_fix(struct ipque* q) {
+  if (!q) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  q->len = q->cap;
+
+  for (uint i = q->len / 2; i > 0; --i)
     ipque_fixd(q, i);
 
   return 0;
 }
 
-int ipque_fixu(struct ipque* q, unsigned i) {
-  if (i < 1 || i > q->len) {
+int ipque_fixu(struct ipque* q, uint i) {
+  if (!q || i < 1 || i > q->len) {
     errno = EINVAL;
     return -1;
   }
 
-  unsigned p = PQUE_P(i);
+  uint p = PQUE_P(i);
 
   while (i > 1 && q->cmp(q->data[p], q->data[i]) == -1) {
     swap(q, p, i);
@@ -80,16 +71,15 @@ int ipque_fixu(struct ipque* q, unsigned i) {
   return 0;
 }
 
-int ipque_fixd(struct ipque* q, unsigned i) {
-  if (i < 1 || i > q->len) {
+int ipque_fixd(struct ipque* q, uint i) {
+  if (!q || i < 1 || i > q->len) {
     errno = EINVAL;
     return -1;
   }
 
-  unsigned l = PQUE_L(i);
-  unsigned r = PQUE_R(i);
-
-  unsigned m;
+  uint l = PQUE_L(i);
+  uint r = PQUE_R(i);
+  uint m;
 
   if (l < q->len && q->cmp(q->data[l], q->data[i]) == 1)
     m = l;
@@ -109,6 +99,11 @@ int ipque_fixd(struct ipque* q, unsigned i) {
 }
 
 int ipque_ins(struct ipque* q, int e) {
+  if (!q) {
+    errno = EINVAL;
+    return -1;
+  }
+
   if (q->len == q->cap) {
     errno = EDQUOT;
     return -1;
@@ -121,6 +116,11 @@ int ipque_ins(struct ipque* q, int e) {
 }
 
 int ipque_ext(struct ipque* q, int* e) {
+  if (!q) {
+    errno = EINVAL;
+    return -1;
+  }
+
   if (q->len == 0) {
     errno = ENOENT;
     return -1;
@@ -128,9 +128,25 @@ int ipque_ext(struct ipque* q, int* e) {
 
   *e = q->data[1];
   q->data[1] = q->data[q->len];
+  q->data[q->len] = *e;
   q->len -= 1;
 
   return ipque_fixd(q, 1);
+}
+
+int ipque_srt(struct ipque* q) {
+  if (!q) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  for (uint i = q->len; i > 1; --i) {
+    swap(q, 1, i);
+    q->len -= 1;
+    ipque_fixd(q, 1);
+  }
+
+  return 0;
 }
 
 int ipque_cls(struct ipque* q) {
@@ -140,7 +156,6 @@ int ipque_cls(struct ipque* q) {
   }
 
   free(q->data);
-  free(q);
 
   return 0;
 }
