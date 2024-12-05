@@ -18,11 +18,12 @@ if (OPENMP_FOUND)
 endif()
 
 add_library(munit munit/munit.c munit/munit.h)
+
 target_include_directories(munit PUBLIC munit/)
 
 enable_testing()
 
-add_subdirectory(gds)
+add_subdirectory(dsa)
 add_subdirectory(vec)
 add_subdirectory(bas)
 add_subdirectory(pde)

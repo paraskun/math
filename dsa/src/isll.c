@@ -1,4 +1,4 @@
-#include <gds/ssll.h>
+#include <dsa/sll.h>
 
 #include <errno.h>
 #include <stdlib.h>
@@ -13,7 +13,7 @@ static int cmp(int a, int b) {
   return 0;
 }
 
-int issll_new(struct issll* l) {
+int isll_new(struct isll* l) {
   if (!l) {
     errno = EINVAL;
     return -1;
@@ -27,7 +27,7 @@ int issll_new(struct issll* l) {
   return 0;
 }
 
-int issll_add(struct issll* l, int e) {
+int isll_add(struct isll* l, int e) {
   if (!l) {
     errno = EINVAL;
     return -1;
@@ -36,17 +36,17 @@ int issll_add(struct issll* l, int e) {
   struct islln* n = NULL;
 
   if (l->len == 0)
-    return issll_ins(l, &n, e);
+    return isll_ins(l, &n, e);
 
   n = l->beg;
 
   while (n->next && l->cmp(n->next->e, e) == 1)
     n = n->next;
 
-  return issll_ins(l, &n, e);
+  return isll_ins(l, &n, e);
 }
 
-int issll_ins(struct issll* l, struct islln** h, int e) {
+int isll_ins(struct isll* l, struct islln** h, int e) {
   if (!l) {
     errno = EINVAL;
     return -1;
@@ -81,7 +81,7 @@ int issll_ins(struct issll* l, struct islln** h, int e) {
   return 0;
 }
 
-int issll_srh(struct issll* l, struct islln** h, int e) {
+int isll_srh(struct isll* l, struct islln** h, int e) {
   if (!l) {
     errno = EINVAL;
     return -1;
@@ -97,7 +97,7 @@ int issll_srh(struct issll* l, struct islln** h, int e) {
   return 0;
 }
 
-int issll_cls(struct issll* l) {
+int isll_cls(struct isll* l) {
   if (!l) {
     errno = EINVAL;
     return -1;

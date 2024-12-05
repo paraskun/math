@@ -1,4 +1,4 @@
-#include <gds/ssll.h>
+#include <dsa/sll.h>
 
 #include <errno.h>
 #include <stdlib.h>
@@ -13,7 +13,7 @@ static int cmp(void* a, void* b) {
   return 0;
 }
 
-int pssll_new(struct pssll* l) {
+int psll_new(struct psll* l) {
   if (!l) {
     errno = EINVAL;
     return -1;
@@ -27,7 +27,7 @@ int pssll_new(struct pssll* l) {
   return 0;
 }
 
-int pssll_add(struct pssll* l, void* e) {
+int psll_add(struct psll* l, void* e) {
   if (!l) {
     errno = EINVAL;
     return -1;
@@ -36,17 +36,17 @@ int pssll_add(struct pssll* l, void* e) {
   struct pslln* n = NULL;
 
   if (l->len == 0)
-    return pssll_ins(l, &n, e);
+    return psll_ins(l, &n, e);
 
   n = l->beg;
 
   while (n->next && l->cmp(n->next->e, e) == 1)
     n = n->next;
 
-  return pssll_ins(l, &n, e);
+  return psll_ins(l, &n, e);
 }
 
-int pssll_ins(struct pssll* l, struct pslln** h, void* e) {
+int psll_ins(struct psll* l, struct pslln** h, void* e) {
   if (!l) {
     errno = EINVAL;
     return -1;
@@ -81,7 +81,7 @@ int pssll_ins(struct pssll* l, struct pslln** h, void* e) {
   return 0;
 }
 
-int pssll_srh(struct pssll* l, struct pslln** h, void* e) {
+int psll_srh(struct psll* l, struct pslln** h, void* e) {
   if (!l) {
     errno = EINVAL;
     return -1;
@@ -97,7 +97,7 @@ int pssll_srh(struct pssll* l, struct pslln** h, void* e) {
   return 0;
 }
 
-int pssll_cls(struct pssll* l) {
+int psll_cls(struct psll* l) {
   if (!l) {
     errno = EINVAL;
     return -1;

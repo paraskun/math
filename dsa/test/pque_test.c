@@ -1,5 +1,5 @@
 #include <munit.h>
-#include <gds/pque.h>
+#include <dsa/pque.h>
 
 static int cmp_min(int a, int b) {
   if (a > b)

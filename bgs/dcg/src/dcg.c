@@ -1,7 +1,7 @@
 #include <bgs/dcg.h>
 
-#include <gds/hset.h>
-#include <gds/pque.h>
+#include <dsa/hset.h>
+#include <dsa/pque.h>
 
 #include <errno.h>
 #include <stdlib.h>
@@ -13,7 +13,7 @@ int dcg_new(struct dcg* g, uint cap) {
   }
 
   g->cap = cap;
-  g->data = malloc(sizeof(struct pssll));
+  g->data = malloc(sizeof(struct psll));
 
   if (!g) {
     errno = ENOMEM;
@@ -21,9 +21,9 @@ int dcg_new(struct dcg* g, uint cap) {
   }
 
   for (uint i = 0; i < cap; ++i)
-    if (ssll_new(&g->data[i])) {
+    if (sll_new(&g->data[i])) {
       for (uint j = 0; j < i; ++j)
-        ssll_cls(&g->data[j]);
+        sll_cls(&g->data[j]);
 
       free(g->data);
 
@@ -50,7 +50,7 @@ int dcg_add(struct dcg* g, uint src, uint dst, uint wgt) {
   e->vtx = dst;
   e->wgt = wgt;
 
-  if (ssll_add(&g->data[src], e)) {
+  if (sll_add(&g->data[src], e)) {
     free(e);
     return -1;
   }
@@ -186,7 +186,7 @@ int dcg_cls(struct dcg* g) {
       n = n->next;
     }
 
-    ssll_cls(&g->data[i]);
+    sll_cls(&g->data[i]);
   }
 
   free(g->data);

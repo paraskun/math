@@ -1,7 +1,7 @@
 #ifndef DCG_ALS_H
 #define DCG_ALS_H
 
-#include <gds/ssll.h>
+#include <dsa/sll.h>
 #include <limits.h>
 
 #define INF UINT_MAX
@@ -16,7 +16,7 @@ struct edge {
 struct dcg {
   uint cap;
 
-  struct pssll* data;
+  struct psll* data;
 };
 
 struct path {

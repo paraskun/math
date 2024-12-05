@@ -1,9 +1,9 @@
-#include <gds/pque.h>
+#include <dsa/pque.h>
 
 #include <errno.h>
 #include <stdlib.h>
 
-static int cmp(int a, int b) {
+static int cmp(void* a, void* b) {
   if (a > b)
     return -1;
 
@@ -13,14 +13,14 @@ static int cmp(int a, int b) {
   return 0;
 }
 
-static inline void swap(struct ipque* q, uint a, uint b) {
-  int t = q->data[a];
+static inline void swap(struct ppque* q, uint a, uint b) {
+  void* t = q->data[a];
 
   q->data[a] = q->data[b];
   q->data[b] = t;
 }
 
-int ipque_new(struct ipque* q, uint cap) {
+int ppque_new(struct ppque* q, uint cap) {
   if (!q) {
     errno = EINVAL;
     return -1;
@@ -29,7 +29,7 @@ int ipque_new(struct ipque* q, uint cap) {
   q->cap = cap;
   q->len = 0;
   q->cmp = &cmp;
-  q->data = malloc(sizeof(int) * (cap + 1));
+  q->data = malloc(sizeof(void*) * (cap + 1));
 
   if (!q->data) {
     errno = ENOMEM;
@@ -39,22 +39,20 @@ int ipque_new(struct ipque* q, uint cap) {
   return 0;
 }
 
-int ipque_fix(struct ipque* q) {
+int ppque_fix(struct ppque* q) {
   if (!q) {
     errno = EINVAL;
     return -1;
   }
 
-  q->len = q->cap;
-
   for (uint i = q->len / 2; i > 0; --i)
-    ipque_fixd(q, i);
+    ppque_fixd(q, i);
 
   return 0;
 }
 
-int ipque_fixu(struct ipque* q, uint i) {
-  if (!q || i < 1 || i > q->len) {
+int ppque_fixu(struct ppque* q, uint i) {
+  if (i < 1 || i > q->len) {
     errno = EINVAL;
     return -1;
   }
@@ -71,14 +69,15 @@ int ipque_fixu(struct ipque* q, uint i) {
   return 0;
 }
 
-int ipque_fixd(struct ipque* q, uint i) {
-  if (!q || i < 1 || i > q->len) {
+int ppque_fixd(struct ppque* q, uint i) {
+  if (i < 1 || i > q->len) {
     errno = EINVAL;
     return -1;
   }
 
   uint l = PQUE_L(i);
   uint r = PQUE_R(i);
+
   uint m;
 
   if (l < q->len && q->cmp(q->data[l], q->data[i]) == 1)
@@ -92,18 +91,13 @@ int ipque_fixd(struct ipque* q, uint i) {
   if (m != i) {
     swap(q, m, i);
 
-    return ipque_fixd(q, m);
+    return ppque_fixd(q, m);
   }
 
   return 0;
 }
 
-int ipque_ins(struct ipque* q, int e) {
-  if (!q) {
-    errno = EINVAL;
-    return -1;
-  }
-
+int ppque_ins(struct ppque* q, void* e) {
   if (q->len == q->cap) {
     errno = EDQUOT;
     return -1;
@@ -112,15 +106,10 @@ int ipque_ins(struct ipque* q, int e) {
   q->len += 1;
   q->data[q->len] = e;
 
-  return ipque_fixu(q, q->len);
+  return ppque_fixu(q, q->len);
 }
 
-int ipque_ext(struct ipque* q, int* e) {
-  if (!q) {
-    errno = EINVAL;
-    return -1;
-  }
-
+int ppque_ext(struct ppque* q, void** e) {
   if (q->len == 0) {
     errno = ENOENT;
     return -1;
@@ -131,10 +120,10 @@ int ipque_ext(struct ipque* q, int* e) {
   q->data[q->len] = *e;
   q->len -= 1;
 
-  return ipque_fixd(q, 1);
+  return ppque_fixd(q, 1);
 }
 
-int ipque_srt(struct ipque* q) {
+int ppque_srt(struct ppque* q) {
   if (!q) {
     errno = EINVAL;
     return -1;
@@ -143,13 +132,13 @@ int ipque_srt(struct ipque* q) {
   for (uint i = q->len; i > 1; --i) {
     swap(q, 1, i);
     q->len -= 1;
-    ipque_fixd(q, 1);
+    ppque_fixd(q, 1);
   }
 
   return 0;
 }
 
-int ipque_cls(struct ipque* q) {
+int ppque_cls(struct ppque* q) {
   if (!q) {
     errno = EINVAL;
     return -1;
