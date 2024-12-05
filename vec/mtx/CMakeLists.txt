@@ -11,14 +11,3 @@ target_link_libraries(mtx PUBLIC vec)
 target_link_libraries(mtx PUBLIC -lm)
 
 target_include_directories(mtx PUBLIC include/)
-
-# add_executable(CompressedSparseJointTest 
-#   test/CompressedSparseJointTest.cc
-# )
-# 
-# target_link_libraries(CompressedSparseJointTest mtx GTest::gtest_main)
-# 
-# include(GoogleTest)
-# gtest_discover_tests(CompressedSparseJointTest
-#   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/vec/mtx/test/
-# )
