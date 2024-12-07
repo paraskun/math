@@ -116,6 +116,16 @@ int dcg_add(struct dcg* g, uint src, uint dst, double wgt) {
   return 0;
 }
 
+
+uint dcg_cap(struct dcg* g) {
+  if (!g) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  return g->cap;
+}
+
 static int cmp_wgt(void* a, void* b) {
   struct path* pa = (struct path*)a;
   struct path* pb = (struct path*)b;

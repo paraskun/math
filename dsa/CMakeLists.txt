@@ -5,6 +5,9 @@ set(SRC
   src/pque/ppque.c
 
   src/hset/ihset.c
+
+  src/sll/isll.c
+  src/sll/psll.c
 )
 
 add_library(dsa ${SRC})

@@ -38,7 +38,7 @@ static MunitResult test_iext(const MunitParameter[], void*) {
 static MunitResult test_isrt(const MunitParameter[], void*) {
   int mem[3] = {3, 1, 2};
 
-  struct ipque* que;
+  struct ipque* que [[gnu::cleanup(ipque_cls)]];
 
   pque_ini(&que);
   pque_cov(que, mem, 3);
@@ -49,8 +49,6 @@ static MunitResult test_isrt(const MunitParameter[], void*) {
   munit_assert_int(mem[0], ==, 1);
   munit_assert_int(mem[1], ==, 2);
   munit_assert_int(mem[2], ==, 3);
-
-  pque_cls(que);
 
   return MUNIT_OK;
 }
