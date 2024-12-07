@@ -36,23 +36,21 @@ static MunitResult test_iext(const MunitParameter[], void*) {
 }
 
 static MunitResult test_isrt(const MunitParameter[], void*) {
-  struct ipque que;
+  int mem[3] = {3, 1, 2};
 
-  pque_new(&que, 3);
+  struct ipque* que;
 
-  que.cmp = &cmp_max;
+  pque_ini(&que);
+  pque_cov(que, mem, 3);
+  pque_cmp(que, &cmp_max);
 
-  pque_ins(&que, 2);
-  pque_ins(&que, 3);
-  pque_ins(&que, 1);
+  pque_srt(que);
 
-  pque_srt(&que);
+  munit_assert_int(mem[0], ==, 1);
+  munit_assert_int(mem[1], ==, 2);
+  munit_assert_int(mem[2], ==, 3);
 
-  munit_assert_int(que.data[1], ==, 1);
-  munit_assert_int(que.data[2], ==, 2);
-  munit_assert_int(que.data[3], ==, 3);
-
-  pque_cls(&que);
+  pque_cls(que);
 
   return MUNIT_OK;
 }

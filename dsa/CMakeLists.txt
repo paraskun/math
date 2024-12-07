@@ -1,10 +1,10 @@
 set(SRC
-  src/ipque.c
-  src/ppque.c
-  src/ihset.c
-  src/phset.c
-  src/isll.c
-  src/psll.c
+  src/pque/ipque.c
+  src/pque/upque.c
+  src/pque/dpque.c
+  src/pque/ppque.c
+
+  src/hset/ihset.c
 )
 
 add_library(dsa ${SRC})

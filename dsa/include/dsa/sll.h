@@ -1,73 +1,97 @@
 #ifndef GDS_SSLL_H
 #define GDS_SSLL_H
 
-typedef unsigned uint;
+#include <dsa/type.h>
 
-struct islln {
-  int e;
+struct isln;
+struct isll;
 
-  struct islln* next;
-};
+int isll_ini(struct isll** h);
+int isll_cls(struct isll** h);
 
-struct isll {
-  uint len;
+int isll_cmp(struct isll* l, int (*cmp)(int, int));
 
-  int (*cmp)(int, int);
+int isll_next(struct isll* l, struct isln** i);
 
-  struct islln* beg;
-  struct islln* end;
-};
+uint isll_len(struct isll* l);
 
-int isll_new(struct isll* l);
 int isll_add(struct isll* l, int e);
-int isll_ins(struct isll* l, struct islln** h, int e);
-int isll_srh(struct isll* l, struct islln** h, int e);
-int isll_cls(struct isll* l);
+int isll_ins(struct isll* l, struct isln** h, int e);
+int isll_pop(struct isll* l, struct isln** h, int* e);
+int isll_get(struct isln* n, int* e);
+int isll_srh(struct isll* l, struct isln** h, int e);
 
-struct pslln {
-  void* e;
+struct psln;
+struct psll;
 
-  struct pslln* next;
-};
+int psll_ini(struct psll** h);
+int psll_cls(struct psll** h);
 
-struct psll {
-  uint len;
+int psll_cmp(struct psll* l, int (*cmp)(void*, void*));
+int psll_ctl(struct psll* l, bool ctl);
 
-  int (*cmp)(void*, void*);
+int psll_next(struct psll* l, struct psln** i);
 
-  struct pslln* beg;
-  struct pslln* end;
-};
+uint psll_len(struct psll* l);
 
-int psll_new(struct psll* l);
 int psll_add(struct psll* l, void* e);
-int psll_ins(struct psll* l, struct pslln** h, void* e);
-int psll_srh(struct psll* l, struct pslln** h, void* e);
-int psll_cls(struct psll* l);
+int psll_ins(struct psll* l, struct psln** h, void* e);
+int psll_pop(struct psll* l, struct psln** h, void** e);
+int psll_get(struct psln* n, void** e);
+int psll_srh(struct psll* l, struct psln** h, void* e);
 
-#define sll_new(X) _Generic((X), \
-    struct isll*: isll_new,     \
-    struct psll*: psll_new      \
+#define sll_ini(X) _Generic((X),  \
+    struct isll**: isll_ini,      \
+    struct psll**: psll_ini       \
     )(X)
 
-#define sll_add(X, e) _Generic((X),  \
+#define sll_cls(X) _Generic((X),  \
+    struct isll**: isll_cls,      \
+    struct psll**: psll_cls       \
+    )(X)
+
+#define sll_cmp(X, c) _Generic((X), \
+    struct isll*: isll_cmp,         \
+    struct psll*: psll_cmp          \
+    )(X, c)
+
+#define sll_ctl(X, c) _Generic((X), \
+    struct psll*: psll_ctl          \
+    )(X, c)
+
+#define sll_next(X, i) _Generic((X), \
+    struct isll*: isll_next,         \
+    struct psll*: psll_next          \
+    )(X, i)
+
+#define sll_len(X) _Generic((X),  \
+    struct isll*: isll_len,       \
+    struct psll*: psll_len        \
+    )(X)
+
+#define sll_add(X, e) _Generic((X), \
     struct isll*: isll_add,         \
     struct psll*: psll_add          \
     )(X, e)
 
-#define sll_ins(X, h, e) _Generic((X), \
-    struct isll*: isll_ins,           \
-    struct psll*: psll_ins            \
+#define sll_ins(X, h, e) _Generic((X),  \
+    struct isll*: isll_ins,             \
+    struct psll*: psll_ins              \
     )(X, h, e)
 
-#define sll_srh(X, h, e) _Generic((X), \
-    struct isll*: isll_srh,           \
-    struct psll*: psll_srh            \
+#define sll_pop(X, h, e) _Generic((X),  \
+    struct isll*: isll_pop,             \
+    struct psll*: psll_pop              \
     )(X, h, e)
 
-#define sll_cls(X) _Generic((X), \
-    struct isll*: isll_cls,     \
-    struct psll*: psll_cls      \
-    )(X)
+#define sll_get(X, e) _Generic((X), \
+    struct isln*: isll_get,         \
+    struct psln*: psll_get          \
+    )(X, e)
+
+#define sll_srh(X, h, e) _Generic((X),  \
+    struct isll*: isll_srh,             \
+    struct psll*: psll_srh              \
+    )(X, h, e)
 
 #endif  // GDS_SSLL_H
