@@ -5,27 +5,26 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct ihset {
+struct uhset {
   uint len;
   uint cap;
 
-  uint (*hash)(int, uint);
+  uint (*hash)(uint, uint);
 
   bool* data;
 };
 
-static uint hash(int e, uint cap) {
-  uint u = e < 0 ? (UINT_MAX / 2 - e) : (uint)e;
-  return u % cap;
+static uint hash(uint e, uint cap) {
+  return e % cap;
 }
 
-int ihset_ini(struct ihset** h) {
+int uhset_ini(struct uhset** h) {
   if (!h) {
     errno = EINVAL;
     return -1;
   }
 
-  struct ihset* s = malloc(sizeof(struct ihset));
+  struct uhset* s = malloc(sizeof(struct uhset));
 
   if (!s) {
     errno = ENOMEM;
@@ -42,7 +41,7 @@ int ihset_ini(struct ihset** h) {
   return 0;
 }
 
-int ihset_cls(struct ihset** h) {
+int uhset_cls(struct uhset** h) {
   if (!h || !(*h)) {
     errno = EINVAL;
     return -1;
@@ -56,7 +55,7 @@ int ihset_cls(struct ihset** h) {
   return 0;
 }
 
-int ihset_new(struct ihset* s, uint cap) {
+int uhset_new(struct uhset* s, uint cap) {
   if (!s) {
     errno = EINVAL;
     return -1;
@@ -76,7 +75,7 @@ int ihset_new(struct ihset* s, uint cap) {
   return 0;
 }
 
-int ihset_hash(struct ihset* s, uint (*hash)(int e, uint cap)) {
+int uhset_hash(struct uhset* s, uint (*hash)(uint e, uint cap)) {
   if (!s) {
     errno = EINVAL;
     return -1;
@@ -87,7 +86,7 @@ int ihset_hash(struct ihset* s, uint (*hash)(int e, uint cap)) {
   return 0;
 }
 
-uint ihset_len(struct ihset* s) {
+uint uhset_len(struct uhset* s) {
   if (!s || !s->data) {
     errno = EINVAL;
     return -1;
@@ -96,7 +95,7 @@ uint ihset_len(struct ihset* s) {
   return s->len;
 }
 
-bool ihset_has(struct ihset* s, int e) {
+bool uhset_has(struct uhset* s, uint e) {
   if (!s || !s->data) {
     errno = EINVAL;
     return false;
@@ -105,13 +104,13 @@ bool ihset_has(struct ihset* s, int e) {
   return s->data[s->hash(e, s->cap)];
 }
 
-int ihset_ins(struct ihset* s, int e) {
+int uhset_ins(struct uhset* s, uint e) {
   if (!s || !s->data) {
     errno = EINVAL;
     return -1;
   }
 
-  if (ihset_has(s, e))
+  if (uhset_has(s, e))
     return 0;
 
   if (s->len == s->cap) {
@@ -125,13 +124,13 @@ int ihset_ins(struct ihset* s, int e) {
   return 0;
 }
 
-int ihset_pop(struct ihset* s, int e) {
+int uhset_pop(struct uhset* s, uint e) {
   if (!s || !s->data) {
     errno = EINVAL;
     return -1;
   }
 
-  if (!ihset_has(s, e))
+  if (!uhset_has(s, e))
     return 0;
 
   s->data[s->hash(e, s->cap)] = false;
@@ -140,7 +139,7 @@ int ihset_pop(struct ihset* s, int e) {
   return 0;
 }
 
-int ihset_rst(struct ihset* s) {
+int uhset_rst(struct uhset* s) {
   if (!s || !s->data) {
     errno = EINVAL;
     return -1;

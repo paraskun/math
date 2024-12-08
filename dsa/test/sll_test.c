@@ -69,8 +69,8 @@ static MunitResult test_iadd_cmp(const MunitParameter[], void*) {
 }
 
 static MunitTest isll_tests[] = {
-  { "/test_add", test_iadd, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL },
   { "/test_add_cmp", test_iadd_cmp, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL },
+  { "/test_add", test_iadd, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL },
   { NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL }
 };
 

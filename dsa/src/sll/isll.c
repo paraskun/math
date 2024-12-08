@@ -109,6 +109,12 @@ int isll_add(struct isll* l, int e) {
 
   n = l->beg;
 
+  if (l->cmp(e, n->e) == 1) {
+    n = nullptr;
+
+    return isll_ins(l, &n, e);
+  }
+
   while (n->next && l->cmp(n->next->e, e) == 1)
     n = n->next;
 

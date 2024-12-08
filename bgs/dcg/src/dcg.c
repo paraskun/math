@@ -185,7 +185,7 @@ int dcg_ssp(struct dcg* g, uint src, struct path** map) {
   }
 
   struct ppque* que [[gnu::cleanup(ppque_cls)]];
-  struct ihset* set [[gnu::cleanup(ihset_cls)]];
+  struct uhset* set [[gnu::cleanup(uhset_cls)]];
 
   pque_ini(&que);
   hset_ini(&set);
