@@ -174,12 +174,12 @@ int ppque_fixd(struct ppque* q, uint i) {
 
   uint m;
 
-  if (l < q->len && q->cmp(q->data[l], q->data[i]) == 1)
+  if (l <= q->len && q->cmp(q->data[l], q->data[i]) == 1)
     m = l;
   else
     m = i;
 
-  if (r < q->len && q->cmp(q->data[r], q->data[m]) == 1)
+  if (r <= q->len && q->cmp(q->data[r], q->data[m]) == 1)
     m = r;
 
   if (m != i) {

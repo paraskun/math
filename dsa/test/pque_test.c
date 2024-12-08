@@ -23,18 +23,6 @@ static int cmp_max(int a, int b) {
   return 0;
 }
 
-static MunitResult test_ifix(const MunitParameter[], void*) {
-  return MUNIT_OK;
-}
-
-static MunitResult test_iins(const MunitParameter[], void*) {
-  return MUNIT_OK;
-}
-
-static MunitResult test_iext(const MunitParameter[], void*) {
-  return MUNIT_OK;
-}
-
 static MunitResult test_isrt(const MunitParameter[], void*) {
   int mem[3] = {3, 1, 2};
 
@@ -44,6 +32,7 @@ static MunitResult test_isrt(const MunitParameter[], void*) {
   pque_cov(que, mem, 3);
   pque_cmp(que, &cmp_max);
 
+  pque_fix(que);
   pque_srt(que);
 
   munit_assert_int(mem[0], ==, 1);
@@ -54,40 +43,12 @@ static MunitResult test_isrt(const MunitParameter[], void*) {
 }
 
 static MunitTest ipque_tests[] = {
-  { "/test_fix", test_ifix, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL },
-  { "/test_ins", test_iins, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL },
-  { "/test_ext", test_iext, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL },
   { "/test_srt", test_isrt, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL },
-  { NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL }
-};
-
-static MunitResult test_pfix(const MunitParameter[], void*) {
-  return MUNIT_OK;
-}
-
-static MunitResult test_pins(const MunitParameter[], void*) {
-  return MUNIT_OK;
-}
-
-static MunitResult test_pext(const MunitParameter[], void*) {
-  return MUNIT_OK;
-}
-
-static MunitResult test_psrt(const MunitParameter[], void*) {
-  return MUNIT_OK;
-}
-
-static MunitTest ppque_tests[] = {
-  { "/test_fix", test_pfix, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL },
-  { "/test_ins", test_pins, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL },
-  { "/test_ext", test_pext, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL },
-  { "/test_srt", test_psrt, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL },
   { NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL }
 };
 
 static MunitSuite suites[] = {
   { "/ipque", ipque_tests, NULL, 1, MUNIT_SUITE_OPTION_NONE },
-  { "/ppque", ppque_tests, NULL, 1, MUNIT_SUITE_OPTION_NONE },
   { NULL, NULL, NULL, 1, MUNIT_SUITE_OPTION_NONE },
 };
 

@@ -19,6 +19,19 @@ struct dcg {
   struct psll** data;
 };
 
+static int cmp(void* a, void* b) {
+  struct edge* ea = (struct edge*) a;
+  struct edge* eb = (struct edge*) b;
+
+  if (ea->dst < eb->dst)
+    return 1;
+
+  if (ea->dst > eb->dst)
+    return -1;
+
+  return 0;
+}
+
 int dcg_ini(struct dcg** h) {
   if (!h) {
     errno = EINVAL;
@@ -68,7 +81,7 @@ int dcg_new(struct dcg* g, uint cap) {
   }
 
   g->cap = cap;
-  g->data = malloc(sizeof(struct psll*));
+  g->data = malloc(sizeof(struct psll*) * cap);
 
   if (!g->data) {
     errno = ENOMEM;
@@ -86,6 +99,7 @@ int dcg_new(struct dcg* g, uint cap) {
       return -1;
     }
 
+    sll_cmp(g->data[i], &cmp);
     sll_ctl(g->data[i], true);
   }
 
@@ -200,10 +214,10 @@ int dcg_ssp(struct dcg* g, uint src, struct path** map) {
 
       for (uint i = 0; i < pque_len(que); ++i) {
         if (map[i]->dst == e->dst) {
-          uint alt = p->wgt + e->wgt;
-          uint wgt = map[i]->wgt;
+          double alt = p->wgt + e->wgt;
+          double wgt = map[i]->wgt;
 
-          if (wgt == INFINITY || alt < wgt) {
+          if (isinf(wgt) || alt < wgt) {
             map[i]->wgt = alt;
             map[i]->hop = p->dst;
 
@@ -233,7 +247,7 @@ int dcg_asp(struct dcg* g, struct path*** map) {
 #ifdef OMP_THREADS_NUM
 #pragma omp parallel for num_threads(OMP_THREADS_NUM)
 #endif  // OMP
-  for (unsigned i = 0; i < g->cap; ++i)
+  for (uint i = 0; i < g->cap; ++i)
     dcg_ssp(g, i, map[i]);
 
   return 0;

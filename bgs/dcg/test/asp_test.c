@@ -26,7 +26,7 @@ static void* setup(const MunitParameter pps[], void*) {
   strcpy(buf, "rep/");
   strcat(buf, pps[0].value);
 
-  fix->rep = fopen(buf, "a+");
+  fix->rep = fopen(buf, "w+");
 
   strcpy(buf, "dat/");
   strcat(buf, pps[0].value);
@@ -74,11 +74,13 @@ static void tear_down(void* data) {
       if (p->wgt < INFINITY) {
         fprintf(fix->rep, "%u -> %u [%lf]: %u", i + 1, j + 1, p->wgt, i + 1);
 
+        uint cur = i;
         uint hop = p->hop;
 
-        while (hop != j) {
+        while (hop != cur) {
           fprintf(fix->rep, " - %u", hop + 1);
 
+          cur = hop;
           hop = fix->map[hop][j]->hop;
         }
 
