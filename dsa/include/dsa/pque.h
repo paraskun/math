@@ -81,6 +81,7 @@ int ppque_new(struct ppque* q, uint cap);
 int ppque_cov(struct ppque* q, void** s, uint cap);
 
 int ppque_cmp(struct ppque* q, int (*cmp)(void*, void*));
+int ppque_anc(struct ppque* q, int (*anc)(void*, uint));
 
 uint ppque_cap(struct ppque* q);
 uint ppque_len(struct ppque* q);
@@ -138,6 +139,10 @@ int ppque_srt(struct ppque* q);
     struct dpque*: dpque_cmp,           \
     struct ppque*: ppque_cmp            \
     )(X, cmp)
+
+#define pque_anc(X, anc) _Generic((X),  \
+    struct ppque*: ppque_anc            \
+    )(X, anc)
 
 // pque_cap gets capacity of the
 // internal array.

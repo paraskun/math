@@ -11,6 +11,7 @@ struct ppque {
   bool cov;
 
   int (*cmp)(void*, void*);
+  int (*anc)(void*, uint);
 
   void** data;
 };
@@ -30,6 +31,11 @@ static inline void swap(struct ppque* q, uint a, uint b) {
 
   q->data[a] = q->data[b];
   q->data[b] = t;
+
+  if (q->anc) {
+    q->anc(q->data[a], a);
+    q->anc(q->data[b], b);
+  }
 }
 
 int ppque_ini(struct ppque** h) {
@@ -48,6 +54,7 @@ int ppque_ini(struct ppque** h) {
   que->cap = 0;
   que->len = 0;
   que->cmp = &cmp;
+  que->anc = nullptr;
   que->cov = false;
   que->data = nullptr;
 
@@ -110,6 +117,17 @@ int ppque_cmp(struct ppque* q, int (*cmp)(void*, void*)) {
   }
 
   q->cmp = cmp;
+
+  return 0;
+}
+
+int ppque_anc(struct ppque* q, int (*anc)(void*, uint)) {
+  if (!q || !anc) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  q->anc = anc;
 
   return 0;
 }
@@ -205,6 +223,9 @@ int ppque_ins(struct ppque* q, void* e) {
   q->len += 1;
   q->data[q->len] = e;
 
+  if (q->anc)
+    q->anc(e, q->len);
+
   return ppque_fixu(q, q->len);
 }
 
@@ -223,6 +244,9 @@ int ppque_ext(struct ppque* q, void** e) {
   q->data[1] = q->data[q->len];
   q->data[q->len] = *e;
   q->len -= 1;
+
+  if (q->anc)
+    q->anc(q->data[1], 1);
 
   return ppque_fixd(q, 1);
 }

@@ -2,6 +2,7 @@
 #include <munit.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include <bgs/dcg.h>
 
@@ -12,7 +13,7 @@ struct fixture {
   struct path*** map;
 };
 
-static char* cases[] = {"case1"};
+static char* cases[] = {"case1", "case2", "case3"};
 
 static MunitParameterEnum pps[] = {{"case", cases}, {NULL, NULL}};
 
@@ -99,6 +100,7 @@ static void tear_down(void* data) {
 
   free(fix->map);
   dcg_cls(&fix->g);
+  free(fix);
 }
 
 static MunitResult test(const MunitParameter[], void* data) {

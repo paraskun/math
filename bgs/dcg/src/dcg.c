@@ -20,8 +20,8 @@ struct dcg {
 };
 
 static int cmp(void* a, void* b) {
-  struct edge* ea = (struct edge*) a;
-  struct edge* eb = (struct edge*) b;
+  struct edge* ea = (struct edge*)a;
+  struct edge* eb = (struct edge*)b;
 
   if (ea->dst < eb->dst)
     return 1;
@@ -130,7 +130,6 @@ int dcg_add(struct dcg* g, uint src, uint dst, double wgt) {
   return 0;
 }
 
-
 uint dcg_cap(struct dcg* g) {
   if (!g) {
     errno = EINVAL;
@@ -153,15 +152,10 @@ static int cmp_wgt(void* a, void* b) {
   return 0;
 }
 
-static int cmp_dst(void* a, void* b) {
+static int anc(void* a, uint i) {
   struct path* pa = (struct path*)a;
-  struct path* pb = (struct path*)b;
 
-  if (pa->dst > pb->dst)
-    return 1;
-
-  if (pa->dst < pb->dst)
-    return -1;
+  pa->anc = i;
 
   return 0;
 }
@@ -171,6 +165,18 @@ int dcg_ssp(struct dcg* g, uint src, struct path** map) {
     errno = EINVAL;
     return -1;
   }
+
+  struct ppque* que [[gnu::cleanup(ppque_cls)]];
+  struct uhset* set [[gnu::cleanup(uhset_cls)]];
+
+  pque_ini(&que);
+  hset_ini(&set);
+
+  pque_new(que, g->cap);
+  hset_new(set, g->cap);
+
+  pque_cmp(que, &cmp_wgt);
+  pque_anc(que, &anc);
 
   for (uint i = 0; i < g->cap; ++i) {
     map[i]->dst = i;
@@ -182,20 +188,9 @@ int dcg_ssp(struct dcg* g, uint src, struct path** map) {
       map[i]->hop = 0;
       map[i]->wgt = INFINITY;
     }
+
+    pque_ins(que, map[i]);
   }
-
-  struct ppque* que [[gnu::cleanup(ppque_cls)]];
-  struct uhset* set [[gnu::cleanup(uhset_cls)]];
-
-  pque_ini(&que);
-  hset_ini(&set);
-
-  pque_cmp(que, &cmp_wgt);
-  pque_cov(que, (void**)map, g->cap);
-  pque_fix(que);
-
-  if (hset_new(set, g->cap))
-    return -1;
 
   struct path* p = nullptr;
 
@@ -212,28 +207,19 @@ int dcg_ssp(struct dcg* g, uint src, struct path** map) {
       if (hset_has(set, e->dst))
         continue;
 
-      for (uint i = 0; i < pque_len(que); ++i) {
-        if (map[i]->dst == e->dst) {
-          double alt = p->wgt + e->wgt;
-          double wgt = map[i]->wgt;
+      struct path* ep = map[e->dst];
 
-          if (isinf(wgt) || alt < wgt) {
-            map[i]->wgt = alt;
-            map[i]->hop = p->dst;
+      double alt = p->wgt + e->wgt;
+      double wgt = ep->wgt;
 
-            pque_fixu(que, i + 1);
-          }
+      if (isinf(wgt) || alt < wgt) {
+        ep->wgt = alt;
+        ep->hop = p->dst;
 
-          break;
-        }
+        pque_fixu(que, ep->anc);
       }
     }
   }
-
-  pque_rst(que);
-  pque_cmp(que, &cmp_dst);
-  pque_fix(que);
-  pque_srt(que);
 
   return 0;
 }

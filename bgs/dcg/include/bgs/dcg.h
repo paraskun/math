@@ -10,6 +10,8 @@ struct path {
   uint hop;
 
   double wgt;
+
+  uint anc;
 };
 
 int dcg_ini(struct dcg** h);
