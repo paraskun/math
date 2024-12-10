@@ -1,10 +1,15 @@
-#ifndef GDS_SSLL_H
-#define GDS_SSLL_H
+#ifndef EXT_SLL_H
+#define EXT_SLL_H
 
-#include <dsa/type.h>
+#include <ext/type.h>
 
-struct isln;
 struct isll;
+
+struct isln {
+  int e;
+
+  struct isln *next;
+};
 
 int isll_ini(struct isll** h);
 int isll_cls(struct isll** h);
@@ -13,13 +18,12 @@ int isll_cmp(struct isll* l, int (*cmp)(int, int));
 
 int isll_next(struct isll* l, struct isln** i);
 
-uint isll_len(struct isll* l);
-
 int isll_add(struct isll* l, int e);
 int isll_ins(struct isll* l, struct isln** h, int e);
 int isll_pop(struct isll* l, struct isln** h, int* e);
-int isll_get(struct isln* n, int* e);
 int isll_srh(struct isll* l, struct isln** h, int e);
+
+uint isll_len(struct isll* l);
 
 struct psln;
 struct psll;
@@ -94,4 +98,4 @@ int psll_srh(struct psll* l, struct psln** h, void* e);
     struct psll*: psll_srh              \
     )(X, h, e)
 
-#endif  // GDS_SSLL_H
+#endif  // EXT_SLL_H
