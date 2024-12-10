@@ -1,8 +1,6 @@
 #ifndef FEM_CONST_H
 #define FEM_CONST_H
 
-#include <limits.h>
-
 extern const double G[2][2];
 extern const double M[2][2];
 extern const double X[2][2];
