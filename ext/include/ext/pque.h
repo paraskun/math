@@ -1,7 +1,7 @@
-#ifndef DSA_PQUE_H
-#define DSA_PQUE_H
+#ifndef EXT_PQUE_H
+#define EXT_PQUE_H
 
-#include <dsa/type.h>
+#include <ext/type.h>
 
 struct ipque;
 
@@ -227,4 +227,4 @@ int ppque_srt(struct ppque* q);
     struct ppque*: ppque_srt      \
     )(X)
 
-#endif  // DSA_PQUE_H
+#endif  //EXT_PQUE_H

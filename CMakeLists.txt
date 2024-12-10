@@ -23,7 +23,7 @@ target_include_directories(munit PUBLIC munit/)
 
 enable_testing()
 
-add_subdirectory(dsa)
+add_subdirectory(ext)
 add_subdirectory(vec)
 add_subdirectory(bas)
 add_subdirectory(pde)

@@ -1,8 +1,7 @@
 #ifndef GDS_HSET_H
 #define GDS_HSET_H
 
-#include <stdbool.h>
-#include <dsa/type.h>
+#include <ext/type.h>
 
 struct ihset;
 
@@ -10,14 +9,16 @@ int ihset_ini(struct ihset** h);
 int ihset_cls(struct ihset** h);
 
 int ihset_new(struct ihset* s, uint cap);
+
 int ihset_hash(struct ihset* s, uint (*hash)(int e, uint cap));
 
-uint ihset_len(struct ihset* s);
 bool ihset_has(struct ihset* s, int e);
 
 int ihset_ins(struct ihset* s, int e);
 int ihset_pop(struct ihset* s, int e);
 int ihset_rst(struct ihset* s);
+
+uint ihset_len(struct ihset* s);
 
 struct uhset;
 
