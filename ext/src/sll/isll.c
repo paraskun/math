@@ -1,13 +1,7 @@
-#include <dsa/sll.h>
+#include <ext/sll.h>
 
 #include <errno.h>
 #include <stdlib.h>
-
-struct isln {
-  int e;
-
-  struct isln* next;
-};
 
 struct isll {
   uint len;

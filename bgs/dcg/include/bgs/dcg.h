@@ -1,7 +1,7 @@
 #ifndef DCG_ALS_H
 #define DCG_ALS_H
 
-#include <dsa/sll.h>
+#include <ext/type.h>
 
 struct dcg;
 

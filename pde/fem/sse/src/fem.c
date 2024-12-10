@@ -1,8 +1,8 @@
 #include "const.h"
 
 #include <fem/sse/fem.h>
-#include <ull.h>
 #include <vec/iss_csj.h>
+#include <ext/sll.h>
 
 #include <stdlib.h>
 #include <string.h>
@@ -46,7 +46,9 @@ int fem_get(FILE* obj, struct fem* fem) {
 
   for (int i = 0; i < fem->vs; ++i) {
     fgets(buf, sizeof(buf), obj);
-    fem->vtx[i] = vtx_get(buf);
+
+    vtx_ini(&fem->vtx[i]);
+    vtx_sget(fem->vtx[i], buf);
   }
 
   fgets(buf, sizeof(buf), obj);
@@ -57,7 +59,10 @@ int fem_get(FILE* obj, struct fem* fem) {
 
   for (int i = 0; i < fem->hs; ++i) {
     fgets(buf, sizeof(buf), obj);
-    fem->hex[i] = hex_get(buf, fem->pps.fun);
+
+    hex_ini(&fem->hex[i]);
+    hex_new(fem->hex[i]);
+    hex_sget(fem->hex[i], buf, fem->pps.fun);
   }
 
   fgets(buf, sizeof(buf), obj);
@@ -68,7 +73,9 @@ int fem_get(FILE* obj, struct fem* fem) {
 
   for (int i = 0; i < fem->fs; ++i) {
     fgets(buf, sizeof(buf), obj);
-    fem->fce[i] = fce_get(buf, fem->pps.fun);
+
+    fce_ini(&fem->fce[i]);
+    fce_sget(fem->fce[i], buf, fem->pps.fun);
   }
 
   return 0;
@@ -76,6 +83,7 @@ int fem_get(FILE* obj, struct fem* fem) {
 
 int fem_evo(struct fem* fem) {
   int ne = 0;
+
   struct ull* l = malloc(sizeof(struct ull) * fem->vs);
 
   for (int i = 0; i < fem->vs; ++i) {

@@ -28,8 +28,6 @@ struct fem {
 int fem_ini(struct fem** h);
 int fem_cls(struct fem** h);
 
-int fem_new(struct fem* fem, uint vs,);
-
 int fem_fget(struct fem* fem, FILE* f);
 
 int fem_evo(struct fem* fem);

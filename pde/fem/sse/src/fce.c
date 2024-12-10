@@ -1,42 +1,94 @@
-#include <fem/sse/const.h>
+#include "const.h"
+
 #include <fem/sse/fce.h>
 #include <vec/mtx.h>
 
+#include <errno.h>
 #include <stdlib.h>
-#include "vec/vec.h"
 
-struct fce* fce_new(enum type type) {
+int fce_ini(struct fce** h) {
+  if (!h) {
+    errno = EINVAL;
+    return -1;
+  }
+
   struct fce* f = malloc(sizeof(struct fce));
+
+  if (!f) {
+    errno = ENOMEM;
+    return -1;
+  }
+
+  f->vtx[0] = 0;
+  f->vtx[1] = 0;
+  f->vtx[2] = 0;
+  f->vtx[3] = 0;
+
+  f->cnd.pps.rob.bet = 0;
+  f->cnd.pps.rob.tmp = nullptr;
+
+  f->loc.rob.b = nullptr;
+  f->loc.rob.m = nullptr;
+
+  return 0;
+}
+
+int fce_cls(struct fce** h) {
+  if (!h || !(*h)) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  struct fce* f = *h;
+
+  switch (f->cnd.type) {
+    case ROB:
+      if (f->loc.rob.m)
+        mtx_cls(f->loc.rob.m);
+    case NEU:
+      if (f->loc.neu.b)
+        vec_cls(f->loc.rob.b);
+    case DIR:
+  }
+
+  free(f);
+  *h = nullptr;
+
+  return 0;
+}
+
+int fce_new(struct fce* f, enum type type) {
+  if (!f) {
+    errno = EINVAL;
+    return -1;
+  }
 
   f->cnd.type = type;
 
-  f->cnd.pps.dir.tmp = NULL;
-  f->cnd.pps.neu.tta = NULL;
-  f->cnd.pps.rob.tmp = NULL;
+  switch (type) {
+    case DIR:
+      return 0;
+    case ROB:
+      f->loc.rob.m = mtx_new(4);
+    case NEU:
+      f->loc.neu.b = vec_new(4);
+  }
 
-  if (type == DIR)
-    return f;
-
-  f->loc.rob.b = vec_new(4);
-
-  if (type == ROB)
-    f->loc.rob.m = mtx_new(4);
-
-  return f;
+  return 0;
 }
 
-struct fce* fce_get(const char* buf, double (**fun)(struct vtx*)) {
-  int pos, pty;
+int fce_sget(struct fce* f, const char* buf, double (**fun)(struct vtx*)) {
+  if (buf[0] != 'f') {
+    errno = EINVAL;
+    return -1;
+  }
 
-  if (buf[0] != 'f')
-    return NULL;
+  int pos, pty;
 
   buf += 1;
 
   sscanf(buf, "%d |%n", &pty, &pos);
   buf += pos;
-
-  struct fce* f = fce_new(pty - 1);
 
   for (int j = 0; j < 4; ++j) {
     sscanf(buf, "%d%n", &pty, &pos);
@@ -72,7 +124,7 @@ struct fce* fce_get(const char* buf, double (**fun)(struct vtx*)) {
       break;
   }
 
-  return f;
+  return 0;
 }
 
 static inline int fce_nrm(struct fce* f, struct vtx** v) {
@@ -255,19 +307,4 @@ int fce_mov(struct fce* f, struct mtx_csj* a, struct vec* b) {
   return 0;
 }
 
-int fce_cls(struct fce* f) {
-  if (!f)
-    return 0;
 
-  if (f->cnd.type == DIR)
-    return 0;
-
-  vec_cls(f->loc.rob.b);
-
-  if (f->cnd.type == ROB)
-    mtx_cls(f->loc.rob.m);
-
-  free(f);
-
-  return 0;
-}

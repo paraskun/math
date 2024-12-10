@@ -1,8 +1,8 @@
 #include <bgs/dcg.h>
 
-#include <dsa/hset.h>
-#include <dsa/pque.h>
-#include <dsa/sll.h>
+#include <ext/hset.h>
+#include <ext/pque.h>
+#include <ext/sll.h>
 
 #include <errno.h>
 #include <math.h>

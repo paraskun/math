@@ -1,4 +1,4 @@
-#include <dsa/pque.h>
+#include <ext/pque.h>
 
 #include <errno.h>
 #include <stdlib.h>

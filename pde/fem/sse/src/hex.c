@@ -1,32 +1,87 @@
-#include <fem/sse/const.h>
+#include "const.h"
+
 #include <fem/sse/hex.h>
 #include <vec/mtx.h>
 
+#include <errno.h>
 #include <stdlib.h>
 
-struct hex* hex_new() {
-  struct hex* h = malloc(sizeof(struct hex));
+int hex_ini(struct hex** h) {
+  if (!h) {
+    errno = EINVAL;
+    return -1;
+  }
 
-  if (!h)
-    return h;
+  struct hex* hex = malloc(sizeof(struct hex));
+
+  if (!hex) {
+    errno = ENOMEM;
+    return -1;
+  }
+
+  hex->vtx[0] = 0;
+  hex->vtx[1] = 0;
+  hex->vtx[2] = 0;
+  hex->vtx[3] = 0;
+  hex->vtx[4] = 0;
+  hex->vtx[5] = 0;
+  hex->vtx[6] = 0;
+  hex->vtx[7] = 0;
+
+  hex->loc.b = nullptr;
+  hex->loc.m = nullptr;
+
+  hex->pps.gam = 0;
+  hex->pps.lam = 0;
+
+  hex->pps.f = nullptr;
+
+  *h = hex;
+
+  return 0;
+}
+
+int hex_cls(struct hex** h) {
+  if (!h || !(*h)) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  struct hex* hex = *h;
+
+  if (hex->loc.m)
+    mtx_cls(hex->loc.m);
+
+  if (hex->loc.b)
+    vec_cls(hex->loc.b);
+
+  *h = nullptr;
+  free(hex);
+
+  return 0;
+}
+
+int hex_new(struct hex* h) {
+  if (!h) {
+    errno = EINVAL;
+    return -1;
+  }
 
   h->loc.m = mtx_new(8);
   h->loc.b = vec_new(8);
 
-  h->pps.f = NULL;
-
-  return h;
+  return 0;
 }
 
-struct hex* hex_get(const char* buf, double (**fun)(struct vtx*)) {
-  struct hex* h = hex_new();
-
-  int pos, f;
-
-  if (buf[0] != 'h')
-    return 0;
+int hex_sget(struct hex* h, const char* buf, double (**fun)(struct vtx*)) {
+  if (!h || !buf || !fun || buf[0] != 'h') {
+    errno = EINVAL;
+    return -1;
+  }
 
   buf += 1;
+
+  int pos, f;
 
   for (int j = 0, v; j < 8; ++j) {
     sscanf(buf, "%d%n", &v, &pos);
@@ -40,7 +95,7 @@ struct hex* hex_get(const char* buf, double (**fun)(struct vtx*)) {
 
   h->pps.f = fun[f - 1];
 
-  return h;
+  return 0;
 }
 
 int hex_evo(struct hex* h, struct vtx** v) {
@@ -75,10 +130,14 @@ int hex_evo(struct hex* h, struct vtx** v) {
 
   double dec[8];
 
-  static int sign[2] = {-1, 1};
+//  static int sign[2] = {-1, 1};
+//
+//  for (int i = 0; i < 8; ++i)
+//    dec[i] = h->pps.f(v[h->vtx[i]]) * sign[MU[i]] / hx;
+//
 
   for (int i = 0; i < 8; ++i)
-    dec[i] = h->pps.f(v[h->vtx[i]]) * sign[MU[i]] / hx;
+    dec[i] = h->pps.f(v[h->vtx[i]]);
 
   for (int i = 0; i < 8; ++i) {
     bloc[i] = 0;
@@ -102,7 +161,8 @@ int hex_evo(struct hex* h, struct vtx** v) {
 
       mloc[i][j] = gam * mxl * myl * mzl;
       mloc[i][j] += lam * (gxl * myl * mzl + mxl * gyl * mzl + mxl * myl * gzl);
-      bloc[i] += dec[j] * (hx / 2) * myl * mzl;
+      bloc[i] += dec[j] * mxl * myl * mzl;
+      // bloc[i] += dec[j] * (hx / 2) * myl * mzl;
     }
   }
 
@@ -159,21 +219,6 @@ int hex_mov(struct hex* h, struct mtx_csj* a, struct vec* b) {
       }
     }
   }
-
-  return 0;
-}
-
-int hex_cls(struct hex* h) {
-  if (!h)
-    return 0;
-
-  if (h->loc.m)
-    mtx_cls(h->loc.m);
-
-  if (h->loc.b)
-    vec_cls(h->loc.b);
-
-  free(h);
 
   return 0;
 }
