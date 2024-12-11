@@ -127,14 +127,12 @@ int hex_evo(struct hex* h, struct vtx** v) {
 
   double** mloc = h->loc.m->v;
   double* bloc = h->loc.b->vp;
-
   double dec[8];
 
-//  static int sign[2] = {-1, 1};
-//
-//  for (int i = 0; i < 8; ++i)
-//    dec[i] = h->pps.f(v[h->vtx[i]]) * sign[MU[i]] / hx;
-//
+  //  static int sign[2] = {-1, 1};
+  //
+  //  for (int i = 0; i < 8; ++i)
+  //    dec[i] = h->pps.f(v[h->vtx[i]]) * sign[MU[i]] / hx;
 
   for (int i = 0; i < 8; ++i)
     dec[i] = h->pps.f(v[h->vtx[i]]);
@@ -161,6 +159,7 @@ int hex_evo(struct hex* h, struct vtx** v) {
 
       mloc[i][j] = gam * mxl * myl * mzl;
       mloc[i][j] += lam * (gxl * myl * mzl + mxl * gyl * mzl + mxl * myl * gzl);
+
       bloc[i] += dec[j] * mxl * myl * mzl;
       // bloc[i] += dec[j] * (hx / 2) * myl * mzl;
     }
@@ -170,19 +169,19 @@ int hex_evo(struct hex* h, struct vtx** v) {
 }
 
 int hex_mov(struct hex* h, struct mtx_csj* a, struct vec* b) {
-  struct mtx* mloc = h->loc.m;
-  struct vec* bloc = h->loc.b;
+  double* bloc = h->loc.b->vp;
+  double** mloc = h->loc.m->v;
 
   for (int i = 0; i < 8; ++i) {
     int iglob = h->vtx[i];
 
-    b->vp[iglob] += bloc->vp[i];
+    b->vp[iglob] += bloc[i];
 
     for (int j = 0; j < 8; ++j) {
       int jglob = h->vtx[j];
 
       if (jglob == iglob) {
-        a->dr[iglob] += mloc->v[i][j];
+        a->dr[iglob] += mloc[i][j];
         continue;
       }
 
@@ -194,12 +193,9 @@ int hex_mov(struct hex* h, struct mtx_csj* a, struct vec* b) {
           int lj = a->ja[lr];
 
           if (lj == jglob) {
-            a->lr[lr] += mloc->v[i][j];
+            a->lr[lr] += mloc[i][j];
             break;
           }
-
-          if (lj > jglob)
-            break;
         }
       } else {
         int ur0 = a->ia[jglob];
@@ -209,12 +205,9 @@ int hex_mov(struct hex* h, struct mtx_csj* a, struct vec* b) {
           int ui = a->ja[ur];
 
           if (ui == iglob) {
-            a->ur[ur] += mloc->v[i][j];
+            a->ur[ur] += mloc[i][j];
             break;
           }
-
-          if (ui > iglob)
-            break;
         }
       }
     }

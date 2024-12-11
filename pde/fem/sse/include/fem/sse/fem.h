@@ -33,5 +33,6 @@ int fem_fget(struct fem* fem, FILE* f);
 int fem_evo(struct fem* fem);
 int fem_asm(struct fem* fem);
 int fem_slv(struct fem* fem, struct vec* q);
+int fem_get(struct fem* fem, struct vec* q, struct vtx* v, uint h, double* r);
 
 #endif  // FEM_H

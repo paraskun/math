@@ -19,22 +19,56 @@ struct args {
 };
 
 static void* ddm_setup(const MunitParameter[], void*) {
-  char *s = malloc(sizeof(char) * 6);
+  struct args* args = malloc(sizeof(struct args));
 
-  memcpy(s, "hello", 5);
-  s[5] = 0;
+  args->pps.mk = 200000;
+  args->pps.eps = 1e-10;
 
-  return s;
+  args->rep = fopen("out/ddm.rep", "a+");
+
+  struct mtx_csj_pkt pkt = {
+    .pps = 0,
+    .dr = fopen("mtx/ddm/dr.csj.mtx", "r"),
+    .lr = fopen("mtx/ddm/lr.csj.mtx", "r"),
+    .ur = fopen("mtx/ddm/ur.csj.mtx", "r"),
+    .ia = fopen("mtx/ddm/ia.csj.mtx", "r"),
+    .ja = fopen("mtx/ddm/ja.csj.mtx", "r"),
+  };
+
+  args->mp = mtx_csj_new(10, 17);
+  args->fp = vec_new(10);
+  args->xp = vec_new(10);
+
+  vec_seq(args->xp, 1);
+
+  mtx_csj_fget(&pkt, args->mp);
+  mtx_csj_vmlt(args->mp, args->xp, args->fp);
+  
+  vec_zer(args->xp);
+  mtx_csj_pkt_cls(&pkt);
+
+  return args;
+
 }
 
 static void ddm_tear_down(void *data) {
-  free(data);
+  struct args* args = (struct args*) data;
+
+  mtx_csj_cls(args->mp);
+  vec_cls(args->xp);
+  vec_cls(args->fp);
+
+  fclose(args->rep);
+  free(args);
 }
 
 static MunitResult test_ddm_bcg(const MunitParameter[], void* data) {
-  const char* s = (char*) data;
+  struct args* args = (struct args*) data;
 
-  munit_assert_string_equal(s, "hello");
+  iss_csj_bcg_slv(args->mp, args->xp, args->fp, &args->pps, &args->res, NULL);
+  fprintf(args->rep, "bcg: %d, %.7e\n", args->res.k, args->res.res);
+  
+  vec_put(args->rep, args->xp);
 
   return MUNIT_OK;
 }

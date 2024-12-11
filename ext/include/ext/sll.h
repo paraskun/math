@@ -15,6 +15,7 @@ int isll_ini(struct isll** h);
 int isll_cls(struct isll** h);
 
 int isll_cmp(struct isll* l, int (*cmp)(int, int));
+int isll_dup(struct isll* l, bool dup);
 
 int isll_next(struct isll* l, struct isln** i);
 
@@ -32,6 +33,7 @@ int psll_ini(struct psll** h);
 int psll_cls(struct psll** h);
 
 int psll_cmp(struct psll* l, int (*cmp)(void*, void*));
+int psll_dup(struct psll* l, bool dup);
 int psll_ctl(struct psll* l, bool ctl);
 
 int psll_next(struct psll* l, struct psln** i);
@@ -58,6 +60,11 @@ int psll_srh(struct psll* l, struct psln** h, void* e);
     struct isll*: isll_cmp,         \
     struct psll*: psll_cmp          \
     )(X, c)
+
+#define sll_dup(X, d) _Generic((X), \
+    struct isll*: isll_dup,         \
+    struct psll*: psll_dup          \
+    )(X, d)
 
 #define sll_ctl(X, c) _Generic((X), \
     struct psll*: psll_ctl          \

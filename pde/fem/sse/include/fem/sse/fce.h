@@ -44,7 +44,7 @@ struct fce {
 int fce_ini(struct fce** h);
 int fce_cls(struct fce** h);
 
-int fce_new(struct fce* f, enum type type);
+int fce_new(struct fce* f);
 
 int fce_sget(struct fce* f, const char* buf, double (**fun)(struct vtx*));
 

@@ -1,3 +1,4 @@
+#include <ext/hset.h>
 #include <ext/sll.h>
 
 #include <errno.h>
@@ -5,11 +6,12 @@
 
 struct isll {
   uint len;
-
-  int (*cmp)(int, int);
+  bool dup;
 
   struct isln* beg;
   struct isln* end;
+
+  int (*cmp)(int, int);
 };
 
 int isll_ini(struct isll** h) {
@@ -26,6 +28,7 @@ int isll_ini(struct isll** h) {
   }
 
   l->len = 0;
+  l->dup = true;
   l->cmp = nullptr;
   l->beg = nullptr;
   l->end = nullptr;
@@ -67,6 +70,17 @@ int isll_cmp(struct isll* l, int (*cmp)(int, int)) {
   return 0;
 }
 
+int isll_dup(struct isll* l, bool dup) {
+  if (!l) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  l->dup = dup;
+
+  return 0;
+}
+
 int isll_next(struct isll* l, struct isln** i) {
   if (!l || !i) {
     errno = EINVAL;
@@ -101,16 +115,18 @@ int isll_add(struct isll* l, int e) {
   if (!l->cmp)
     return isll_ins(l, &l->end, e);
 
-  n = l->beg;
-
-  if (l->cmp(e, n->e) == 1) {
-    n = nullptr;
-
+  if (l->cmp(e, l->beg->e) == 1)
     return isll_ins(l, &n, e);
-  }
+
+  n = l->beg;
 
   while (n->next && l->cmp(n->next->e, e) == 1)
     n = n->next;
+
+  if (!l->dup && (l->cmp(n->e, e) == 0 || (n->next && l->cmp(n->next->e, e) == 0))) {
+    errno = EALREADY;
+    return -1;
+  }
 
   return isll_ins(l, &n, e);
 }
