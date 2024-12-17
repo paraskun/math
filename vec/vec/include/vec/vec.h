@@ -1,26 +1,23 @@
 #ifndef VEC_H
 #define VEC_H
 
-#include <stdio.h>
+typedef unsigned int uint;
 
 struct vec {
-  int n;
-  double* vp;
+  uint cap;
+
+  double* data;
 };
 
-struct vec* vec_new(int n);
+int vec_new(struct vec** h, uint cap);
+int vec_cls(struct vec** h);
 
-int vec_seq(struct vec* vp, int s);
+int vec_cmb(struct vec* a, struct vec* b, struct vec* r, double k);
+int vec_crs(struct vec* a, struct vec* b, struct vec* r);
+int vec_dot(struct vec* a, struct vec* b, double* r);
+int vec_nrm(struct vec* v, double* r);
 
-int vec_get(FILE* f, struct vec* vp);
-int vec_put(FILE* f, struct vec* vp);
-
-int vec_cmb(struct vec* ap, struct vec* bp, struct vec* rp, double k);
-int vec_mlt(struct vec* ap, struct vec* bp, double* rp);
-int vec_nrm(struct vec* vp, double* rp);
-int vec_cpy(struct vec* src, struct vec* dst);
-int vec_zer(struct vec* vp);
-
-int vec_cls(struct vec* vp);
+int vec_cpy(struct vec* s, struct vec* d);
+int vec_rst(struct vec* v);
 
 #endif  // VEC_H

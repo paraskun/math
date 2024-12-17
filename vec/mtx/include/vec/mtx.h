@@ -1,26 +1,18 @@
 #ifndef MTX_H
 #define MTX_H
 
-#include <stddef.h>
-#include <stdio.h>
 #include <vec/vec.h>
 
 struct mtx {
-  int n;
+  uint n;
 
-  double** v;
+  double** data;
 };
 
-struct mtx* mtx_new(int n);
+int mtx_new(struct mtx** h, uint cap);
+int mtx_cls(struct mtx** h);
 
-int mtx_fget(FILE* f, struct mtx* mp);
-int mtx_fput(FILE* f, struct mtx* mp);
-
-int mtx_nrm(struct mtx* ap, double* rp);
-
-int mtx_vmlt(struct mtx* ap, struct vec* xp, struct vec* fp);
-int mtx_mmlt(struct mtx* ap, struct mtx* bp, struct mtx* cp);
-
-int mtx_cls(struct mtx* mp);
+int mtx_vmlt(struct mtx* a, struct vec* x, struct vec* f);
+int mtx_mmlt(struct mtx* a, struct mtx* b, struct mtx* c);
 
 #endif  // MTX_H

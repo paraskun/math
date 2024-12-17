@@ -1,110 +1,128 @@
 #include <vec/vec.h>
 
-#include <stdio.h>
+#include <errno.h>
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 
-struct vec* vec_new(int n) {
-  struct vec* vec = malloc(sizeof(struct vec));
-
-  vec->vp = malloc(sizeof(double) * n);
-  vec->n = n;
-
-  memset(vec->vp, 0, sizeof(double) * n);
-
-  return vec;
-}
-
-int vec_seq(struct vec* vp, int s) {
-  int n = vp->n;
-  double* vvp = vp->vp;
-
-#ifdef OMP_THREADS_NUM
-#pragma omp parallel for num_threads(OMP_THREADS_NUM)
-#endif  // OMP
-  for (int i = 0; i < n; ++i) {
-    vvp[i] = i + s;
+int vec_new(struct vec** h, uint cap) {
+  if (!h || cap == 0) {
+    errno = EINVAL;
+    return -1;
   }
 
+  struct vec* v = malloc(sizeof(struct vec));
+
+  if (!v) {
+    errno = ENOMEM;
+    return -1;
+  }
+
+  v->cap = cap;
+  v->data = malloc(sizeof(double) * cap);
+
+  if (!v->data) {
+    free(v);
+
+    errno = ENOMEM;
+    return -1;
+  }
+
+  memset(v->data, 0, sizeof(double) * cap);
+
+  *h = v;
+
   return 0;
 }
 
-int vec_get(FILE* f, struct vec* vp) {
-  int n = vp->n;
-  double* vvp = vp->vp;
+int vec_cls(struct vec** h) {
+  if (!h || !(*h)) {
+    errno = EINVAL;
+    return -1;
+  }
 
-  for (int i = 0; i < n; ++i)
-    if (fscanf(f, "%lf", &vvp[i]) != 1)
-      return -1;
-
-  return 0;
-}
-
-int vec_put(FILE* f, struct vec* vp) {
-  int n = vp->n;
-  double* vvp = vp->vp;
-
-  for (int i = 0; i < n; ++i)
-    if (fprintf(f, "%.7e\n", vvp[i]) < 0)
-      return -1;
+  free((*h)->data);
+  free(*h);
 
   return 0;
 }
 
-int vec_cmb(struct vec* ap, struct vec* bp, struct vec* rp, double k) {
-  int n = ap->n;
+int vec_cmb(struct vec* a, struct vec* b, struct vec* r, double k) {
+  if (!a || !b || !r || a->cap != r->cap || b->cap != r->cap) {
+    errno = EINVAL;
+    return -1;
+  }
 
-  double* avp = ap->vp;
-  double* bvp = bp->vp;
-  double* rvp = rp->vp;
+  uint cap = a->cap;
+
+  double* ad = a->data;
+  double* bd = b->data;
+  double* rd = r->data;
 
 #ifdef OMP_THREADS_NUM
 #pragma omp parallel for num_threads(OMP_THREADS_NUM)
 #endif  // OMP
-  for (int i = 0; i < n; ++i)
-    rvp[i] = avp[i] + bvp[i] * k;
+  for (uint i = 0; i < cap; ++i)
+    rd[i] = ad[i] + k * bd[i];
 
   return 0;
 }
 
-int vec_mlt(struct vec* ap, struct vec* bp, double* rp) {
-  int n = ap->n;
+int vec_dot(struct vec* a, struct vec* b, double* r) {
+  if (!a || !b || !r) {
+    errno = EINVAL;
+    return -1;
+  }
 
-  double* avp = ap->vp;
-  double* bvp = bp->vp;
+  uint cap = a->cap;
+
+  double* ad = a->data;
+  double* bd = b->data;
+
   double s = 0;
 
 #ifdef OMP_THREADS_NUM
 #pragma omp parallel for reduction(+ : s) num_threads(OMP_THREADS_NUM)
 #endif  // OMP
-  for (int i = 0; i < n; ++i)
-    s += avp[i] * bvp[i];
+  for (uint i = 0; i < cap; ++i)
+    s += ad[i] * bd[i];
 
-  *rp = s;
-  return 0;
-}
-
-int vec_nrm(struct vec* vp, double* rp) {
-  vec_mlt(vp, vp, rp);
-  *rp = sqrt(*rp);
+  *r = s;
 
   return 0;
 }
 
-int vec_cpy(struct vec* src, struct vec* dst) {
-  memcpy(dst->vp, src->vp, sizeof(double) * src->n);
-  return 0;
-}
+int vec_nrm(struct vec* v, double* r) {
+  if (!v || !r) {
+    errno = EINVAL;
+    return -1;
+  }
 
-int vec_zer(struct vec* vp) {
-  memset(vp->vp, 0, sizeof(double) * vp->n);
-  return 0;
-}
-
-int vec_cls(struct vec* vp) {
-  free(vp->vp);
-  free(vp);
+  vec_dot(v, v, r);
+  *r = sqrt(*r);
 
   return 0;
 }
+
+int vec_cpy(struct vec* s, struct vec* d) {
+  if (!s || !d || s->cap != d->cap) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  memcpy(d->data, s->data, sizeof(double) * s->cap);
+
+  return 0;
+}
+
+int vec_rst(struct vec* v) {
+  if (!v) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  memset(v->data, 0, sizeof(double) * v->cap);
+
+  return 0;
+}
+

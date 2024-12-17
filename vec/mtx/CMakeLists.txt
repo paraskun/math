@@ -1,8 +1,8 @@
 set(SRC 
   src/mtx.c
-  src/mtx_cds.c
-  src/mtx_sky.c
-  src/mtx_csj.c
+  # src/mtx_cds.c
+  # src/mtx_sky.c
+  # src/mtx_csj.c
 )
 
 add_library(mtx ${SRC} ${HDR})
