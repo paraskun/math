@@ -1,10 +1,15 @@
-set(SRC 
-  src/dss_sky.c
-)
+file(GLOB SRC src/*.c)
 
-add_library(dss ${SRC} ${HDR})
+add_library(dss ${SRC})
 
-target_link_libraries(dss PUBLIC vec)
-target_link_libraries(dss PUBLIC mtx)
-
+target_link_libraries(dss PUBLIC vec mtx)
 target_include_directories(dss PUBLIC include/)
+
+add_executable(test_imp test/test_imp.c)
+
+target_link_libraries(test_imp dss munit)
+
+add_test(
+  NAME test_imp
+  COMMAND test_imp
+)

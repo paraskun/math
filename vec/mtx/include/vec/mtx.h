@@ -3,16 +3,34 @@
 
 #include <vec/vec.h>
 
-struct mtx {
-  uint n;
+struct imtx {
+  struct ipps {
+    uint dim;
+  } pps;
 
   double** data;
 };
 
-int mtx_new(struct mtx** h, uint cap);
-int mtx_cls(struct mtx** h);
+int imtx_new(struct imtx** h, struct ipps pps);
+int imtx_cls(struct imtx** h);
 
-int mtx_vmlt(struct mtx* a, struct vec* x, struct vec* f);
-int mtx_mmlt(struct mtx* a, struct mtx* b, struct mtx* c);
+int imtx_vmlt(struct imtx* m, struct vec* v, struct vec* r);
+int imtx_mmlt(struct imtx* a, struct imtx* b, struct imtx* r);
+
+#define mtx_new(X, p) _Generic((X), \
+    struct imtx**: imtx_new         \
+    )(X, p)
+
+#define mtx_cls(X) _Generic((X),  \
+    struct imtx**: imtx_cls       \
+    )(X)
+
+#define mtx_vmlt(X, v, r) _Generic((X), \
+    struct imtx*: imtx_vmlt             \
+    )(X, v, r)
+
+#define mtx_mmlt(X, b, r) _Generic((X), \
+    struct imtx*: imtx_mmlt             \
+    )(X, b, r)
 
 #endif  // MTX_H

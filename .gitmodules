@@ -1,3 +1,6 @@
 [submodule "munit"]
 	path = munit
 	url = https://github.com/nemequ/munit.git
+[submodule "stdx"]
+	path = stdx
+	url = https://github.com/paraskun/stdx.git

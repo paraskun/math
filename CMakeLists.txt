@@ -17,14 +17,10 @@ if (OPENMP_FOUND)
   add_compile_definitions(OMP_THREADS_NUM=12)
 endif()
 
-add_library(munit munit/munit.c munit/munit.h)
-
-target_include_directories(munit PUBLIC munit/)
-
-enable_testing()
-
-add_subdirectory(ext)
+add_subdirectory(stdx)
 add_subdirectory(vec)
 add_subdirectory(bas)
-add_subdirectory(pde)
+
+# add_subdirectory(ext)
+# add_subdirectory(pde)
 # add_subdirectory(bgs)

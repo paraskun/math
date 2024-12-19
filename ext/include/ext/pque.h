@@ -5,96 +5,96 @@
 
 struct ipque;
 
-int ipque_ini(struct ipque** h);
-int ipque_cls(struct ipque** h);
+int ipque_ini(struct ipque **h);
+int ipque_cls(struct ipque **h);
 
-int ipque_new(struct ipque* q, uint cap);
-int ipque_cov(struct ipque* q, int* s, uint cap);
+int ipque_new(struct ipque *q, uint cap);
+int ipque_cov(struct ipque *q, int *s, uint cap);
 
-int ipque_cmp(struct ipque* q, int (*cmp)(int, int));
+int ipque_cmp(struct ipque *q, int (*cmp)(int, int));
 
-uint ipque_cap(struct ipque* q);
-uint ipque_len(struct ipque* q);
+uint ipque_cap(struct ipque *q);
+uint ipque_len(struct ipque *q);
 
-int ipque_fix(struct ipque* q);
+int ipque_fix(struct ipque *q);
 
-int ipque_fixu(struct ipque* q, uint i);
-int ipque_fixd(struct ipque* q, uint i);
+int ipque_fixu(struct ipque *q, uint i);
+int ipque_fixd(struct ipque *q, uint i);
 
-int ipque_ins(struct ipque* q, int e);
-int ipque_ext(struct ipque* q, int* e);
-int ipque_rst(struct ipque* q);
-int ipque_srt(struct ipque* q);
+int ipque_ins(struct ipque *q, int e);
+int ipque_ext(struct ipque *q, int *e);
+int ipque_rst(struct ipque *q);
+int ipque_srt(struct ipque *q);
 
 struct upque;
 
-int upque_ini(struct upque** h);
-int upque_cls(struct upque** h);
+int upque_ini(struct upque **h);
+int upque_cls(struct upque **h);
 
-int upque_new(struct upque* q, uint cap);
-int upque_cov(struct upque* q, uint* s, uint cap);
+int upque_new(struct upque *q, uint cap);
+int upque_cov(struct upque *q, uint *s, uint cap);
 
-int upque_cmp(struct upque* q, int (*cmp)(uint, uint));
+int upque_cmp(struct upque *q, int (*cmp)(uint, uint));
 
-uint upque_cap(struct upque* q);
-uint upque_len(struct upque* q);
+uint upque_cap(struct upque *q);
+uint upque_len(struct upque *q);
 
-int upque_fix(struct upque* q);
+int upque_fix(struct upque *q);
 
-int upque_fixu(struct upque* q, uint i);
-int upque_fixd(struct upque* q, uint i);
+int upque_fixu(struct upque *q, uint i);
+int upque_fixd(struct upque *q, uint i);
 
-int upque_ins(struct upque* q, uint e);
-int upque_ext(struct upque* q, uint* e);
-int upque_rst(struct upque* q);
-int upque_srt(struct upque* q);
+int upque_ins(struct upque *q, uint e);
+int upque_ext(struct upque *q, uint *e);
+int upque_rst(struct upque *q);
+int upque_srt(struct upque *q);
 
 struct dpque;
 
-int dpque_ini(struct dpque** h);
-int dpque_cls(struct dpque** h);
+int dpque_ini(struct dpque **h);
+int dpque_cls(struct dpque **h);
 
-int dpque_new(struct dpque* q, uint cap);
-int dpque_cov(struct dpque* q, double* s, uint cap);
+int dpque_new(struct dpque *q, uint cap);
+int dpque_cov(struct dpque *q, double *s, uint cap);
 
-int dpque_cmp(struct dpque* q, int (*cmp)(double, double));
+int dpque_cmp(struct dpque *q, int (*cmp)(double, double));
 
-uint dpque_cap(struct dpque* q);
-uint dpque_len(struct dpque* q);
+uint dpque_cap(struct dpque *q);
+uint dpque_len(struct dpque *q);
 
-int dpque_fix(struct dpque* q);
+int dpque_fix(struct dpque *q);
 
-int dpque_fixu(struct dpque* q, uint i);
-int dpque_fixd(struct dpque* q, uint i);
+int dpque_fixu(struct dpque *q, uint i);
+int dpque_fixd(struct dpque *q, uint i);
 
-int dpque_ins(struct dpque* q, double e);
-int dpque_ext(struct dpque* q, double* e);
-int dpque_rst(struct dpque* q);
-int dpque_srt(struct dpque* q);
+int dpque_ins(struct dpque *q, double e);
+int dpque_ext(struct dpque *q, double *e);
+int dpque_rst(struct dpque *q);
+int dpque_srt(struct dpque *q);
 
 struct ppque;
 
-int ppque_ini(struct ppque** h);
-int ppque_cls(struct ppque** h);
+int ppque_ini(struct ppque **h);
+int ppque_cls(struct ppque **h);
 
-int ppque_new(struct ppque* q, uint cap);
-int ppque_cov(struct ppque* q, void** s, uint cap);
+int ppque_new(struct ppque *q, uint cap);
+int ppque_cov(struct ppque *q, void **s, uint cap);
 
-int ppque_cmp(struct ppque* q, int (*cmp)(void*, void*));
-int ppque_anc(struct ppque* q, int (*anc)(void*, uint));
+int ppque_cmp(struct ppque *q, int (*cmp)(void *, void *));
+int ppque_anc(struct ppque *q, int (*anc)(void *, uint));
 
-uint ppque_cap(struct ppque* q);
-uint ppque_len(struct ppque* q);
+uint ppque_cap(struct ppque *q);
+uint ppque_len(struct ppque *q);
 
-int ppque_fix(struct ppque* q);
+int ppque_fix(struct ppque *q);
 
-int ppque_fixu(struct ppque* q, uint i);
-int ppque_fixd(struct ppque* q, uint i);
+int ppque_fixu(struct ppque *q, uint i);
+int ppque_fixd(struct ppque *q, uint i);
 
-int ppque_ins(struct ppque* q, void* e);
-int ppque_ext(struct ppque* q, void** e);
-int ppque_rst(struct ppque* q);
-int ppque_srt(struct ppque* q);
+int ppque_ins(struct ppque *q, void *e);
+int ppque_ext(struct ppque *q, void **e);
+int ppque_rst(struct ppque *q);
+int ppque_srt(struct ppque *q);
 
 // pque_ini initializes the queue.
 #define pque_ini(X) _Generic((X), \
@@ -112,7 +112,7 @@ int ppque_srt(struct ppque* q);
     struct ppque**: ppque_cls     \
     )(X)
 
-// pque_new allocates new internal array 
+// pque_new allocates new internal array
 // of the given capacity and zero length.
 #define pque_new(X, cap) _Generic((X),  \
     struct ipque*: ipque_new,           \
@@ -121,8 +121,8 @@ int ppque_srt(struct ppque* q);
     struct ppque*: ppque_new            \
     )(X, cap)
 
-// pque_cov sets the given array as an 
-// internal array with the given capacity 
+// pque_cov sets the given array as an
+// internal array with the given capacity
 // as both capacity and length.
 #define pque_cov(X, s, cap) _Generic((X), \
     struct ipque*: ipque_cov,             \
@@ -131,7 +131,7 @@ int ppque_srt(struct ppque* q);
     struct ppque*: ppque_cov              \
     )(X, s, cap)
 
-// pque_cmp sets the given function as 
+// pque_cmp sets the given function as
 // the comparison function for the queue.
 #define pque_cmp(X, cmp) _Generic((X),  \
     struct ipque*: ipque_cmp,           \
@@ -153,7 +153,7 @@ int ppque_srt(struct ppque* q);
     struct ppque*: ppque_cap      \
     )(X)
 
-// pque_len gets current length of 
+// pque_len gets current length of
 // the queue.
 #define pque_len(X) _Generic((X), \
     struct ipque*: ipque_len,     \
@@ -170,8 +170,8 @@ int ppque_srt(struct ppque* q);
     struct ppque*: ppque_fix      \
     )(X)
 
-// pque_fixu fixes the queue structure 
-// in case the priority of the i'th 
+// pque_fixu fixes the queue structure
+// in case the priority of the i'th
 // element is increased.
 #define pque_fixu(X, i) _Generic((X), \
     struct ipque*: ipque_fixu,        \
@@ -180,8 +180,8 @@ int ppque_srt(struct ppque* q);
     struct ppque*: ppque_fixu         \
     )(X, i)
 
-// pque_fixu fixes the queue structure 
-// in case the priority of the i'th 
+// pque_fixu fixes the queue structure
+// in case the priority of the i'th
 // element is decreased.
 #define pque_fixd(X, i) _Generic((X), \
     struct ipque*: ipque_fixd,        \
@@ -217,8 +217,8 @@ int ppque_srt(struct ppque* q);
     struct ppque*: ppque_rst      \
     )(X)
 
-// pque_srt sorts the queue in the 
-// order determined by the provided 
+// pque_srt sorts the queue in the
+// order determined by the provided
 // comparison function.
 #define pque_srt(X) _Generic((X), \
     struct ipque*: ipque_srt,     \
@@ -227,4 +227,4 @@ int ppque_srt(struct ppque* q);
     struct ppque*: ppque_srt      \
     )(X)
 
-#endif  //EXT_PQUE_H
+#endif  // EXT_PQUE_H

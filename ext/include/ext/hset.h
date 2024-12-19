@@ -5,35 +5,35 @@
 
 struct ihset;
 
-int ihset_ini(struct ihset** h);
-int ihset_cls(struct ihset** h);
+int ihset_ini(struct ihset **h);
+int ihset_cls(struct ihset **h);
 
-int ihset_new(struct ihset* s, uint cap);
+int ihset_new(struct ihset *s, uint cap);
 
-int ihset_hash(struct ihset* s, uint (*hash)(int e, uint cap));
+int ihset_hash(struct ihset *s, uint (*hash)(int e, uint cap));
 
-bool ihset_has(struct ihset* s, int e);
+bool ihset_has(struct ihset *s, int e);
 
-int ihset_ins(struct ihset* s, int e);
-int ihset_pop(struct ihset* s, int e);
-int ihset_rst(struct ihset* s);
+int ihset_ins(struct ihset *s, int e);
+int ihset_pop(struct ihset *s, int e);
+int ihset_rst(struct ihset *s);
 
-uint ihset_len(struct ihset* s);
+uint ihset_len(struct ihset *s);
 
 struct uhset;
 
-int uhset_ini(struct uhset** h);
-int uhset_cls(struct uhset** h);
+int uhset_ini(struct uhset **h);
+int uhset_cls(struct uhset **h);
 
-int uhset_new(struct uhset* s, uint cap);
-int uhset_hash(struct uhset* s, uint (*hash)(uint e, uint cap));
+int uhset_new(struct uhset *s, uint cap);
+int uhset_hash(struct uhset *s, uint (*hash)(uint e, uint cap));
 
-uint uhset_len(struct uhset* s);
-bool uhset_has(struct uhset* s, uint e);
+uint uhset_len(struct uhset *s);
+bool uhset_has(struct uhset *s, uint e);
 
-int uhset_ins(struct uhset* s, uint e);
-int uhset_pop(struct uhset* s, uint e);
-int uhset_rst(struct uhset* s);
+int uhset_ins(struct uhset *s, uint e);
+int uhset_pop(struct uhset *s, uint e);
+int uhset_rst(struct uhset *s);
 
 #define hset_ini(X) _Generic((X), \
     struct ihset**: ihset_ini,    \

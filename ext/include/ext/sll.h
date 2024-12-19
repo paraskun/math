@@ -11,40 +11,40 @@ struct isln {
   struct isln *next;
 };
 
-int isll_ini(struct isll** h);
-int isll_cls(struct isll** h);
+int isll_ini(struct isll **h);
+int isll_cls(struct isll **h);
 
-int isll_cmp(struct isll* l, int (*cmp)(int, int));
-int isll_dup(struct isll* l, bool dup);
+int isll_cmp(struct isll *l, int (*cmp)(int, int));
+int isll_dup(struct isll *l, bool dup);
 
-int isll_next(struct isll* l, struct isln** i);
+int isll_next(struct isll *l, struct isln **i);
 
-int isll_add(struct isll* l, int e);
-int isll_ins(struct isll* l, struct isln** h, int e);
-int isll_pop(struct isll* l, struct isln** h, int* e);
-int isll_srh(struct isll* l, struct isln** h, int e);
+int isll_add(struct isll *l, int e);
+int isll_ins(struct isll *l, struct isln **h, int e);
+int isll_pop(struct isll *l, struct isln **h, int *e);
+int isll_srh(struct isll *l, struct isln **h, int e);
 
-uint isll_len(struct isll* l);
+uint isll_len(struct isll *l);
 
 struct psln;
 struct psll;
 
-int psll_ini(struct psll** h);
-int psll_cls(struct psll** h);
+int psll_ini(struct psll **h);
+int psll_cls(struct psll **h);
 
-int psll_cmp(struct psll* l, int (*cmp)(void*, void*));
-int psll_dup(struct psll* l, bool dup);
-int psll_ctl(struct psll* l, bool ctl);
+int psll_cmp(struct psll *l, int (*cmp)(void *, void *));
+int psll_dup(struct psll *l, bool dup);
+int psll_ctl(struct psll *l, bool ctl);
 
-int psll_next(struct psll* l, struct psln** i);
+int psll_next(struct psll *l, struct psln **i);
 
-uint psll_len(struct psll* l);
+uint psll_len(struct psll *l);
 
-int psll_add(struct psll* l, void* e);
-int psll_ins(struct psll* l, struct psln** h, void* e);
-int psll_pop(struct psll* l, struct psln** h, void** e);
-int psll_get(struct psln* n, void** e);
-int psll_srh(struct psll* l, struct psln** h, void* e);
+int psll_add(struct psll *l, void *e);
+int psll_ins(struct psll *l, struct psln **h, void *e);
+int psll_pop(struct psll *l, struct psln **h, void **e);
+int psll_get(struct psln *n, void **e);
+int psll_srh(struct psll *l, struct psln **h, void *e);
 
 #define sll_ini(X) _Generic((X),  \
     struct isll**: isll_ini,      \

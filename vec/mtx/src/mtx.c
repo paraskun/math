@@ -1,118 +1,119 @@
+#include <errno.h>
+#include <stdint.h>
+#include <stdlib.h>
 #include <vec/mtx.h>
 
-#include <math.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-struct mtx* mtx_new(int n) {
-  struct mtx* mp = malloc(sizeof(struct mtx));
-
-  mp->n = n;
-  mp->v = malloc(sizeof(double*) * n);
-
-  for (int i = 0; i < n; ++i)
-    mp->v[i] = malloc(sizeof(double) * n);
-
-  return mp;
-}
-
-int mtx_fget(FILE* f, struct mtx* ap) {
-  int n = ap->n;
-  double** v = ap->v;
-
-  for (int i = 0; i < n; ++i)
-    for (int j = 0; j < n; ++j)
-      fscanf(f, "%lf", &v[i][j]);
-
-  return 0;
-}
-
-int mtx_fput(FILE* f, struct mtx* ap) {
-  int n = ap->n;
-  double** v = ap->v;
-
-  for (int i = 0; i < n; ++i) {
-    for (int j = 0; j < n; ++j)
-      fprintf(f, "%10.3e ", v[i][j]);
-
-    fputc('\n', f);
+int imtx_new(struct imtx** h, struct ipps pps) {
+  if (!h || pps.dim == 0) {
+    errno = EINVAL;
+    return -1;
   }
 
-  return 0;
-}
+  struct imtx* m = malloc(sizeof(struct imtx));
 
-int mtx_nrm(struct mtx* ap, double* rp) {
-  int n = ap->n;
-  double** v = ap->v;
-  double r = 0.0;
-
-#ifdef OMP_THREADS_NUM
-#pragma omp parallel for reduction(+ : r) num_threads(OMP_THREADS_NUM)
-#endif  // OMP
-  for (int i = 0; i < n; ++i)
-    for (int j = 0; j < n; ++j)
-      r += v[i][j] * v[i][j];
-
-  *rp = sqrt(r);
-
-  return 0;
-}
-
-int mtx_vmlt(struct mtx* ap, struct vec* xp, struct vec* fp) {
-  int n = ap->n;
-
-  double** av = ap->v;
-  double* xv = xp->vp;
-  double* fv = fp->vp;
-
-#ifdef OMP_THREADS_NUM
-#pragma omp parallel for num_threads(OMP_THREADS_NUM)
-#endif  // OMP
-  for (int i = 0; i < n; ++i) {
-    double s = 0;
-
-    for (int j = 0; j < n; ++j)
-      s += av[i][j] * xv[j];
-
-    fv[i] = s;
+  if (!m) {
+    errno = ENOMEM;
+    return -1;
   }
 
-  return 0;
-}
+  m->pps  = pps;
+  m->data = malloc(sizeof(double*) * pps.dim);
 
-int mtx_mmlt(struct mtx* ap, struct mtx* bp, struct mtx* cp) {
-  int n = ap->n;
+  if (!m->data) {
+    free(m);
 
-  double** av = ap->v;
-  double** bv = bp->v;
-  double** cv = cp->v;
+    errno = ENOMEM;
+    return -1;
+  }
 
-#ifdef OMP_THREADS_NUM
-#pragma omp parallel for num_threads(OMP_THREADS_NUM)
-#endif  // OMP
-  for (int i = 0; i < n; ++i) {
-    for (int j = 0; j < n; ++j) {
-      double s = 0;
+  for (uint i = 0; i < pps.dim; ++i) {
+    m->data[i] = malloc(sizeof(double) * pps.dim);
 
-      for (int e = 0, er = 0; e < n; ++e, er += n)
-        s += av[i][e] * bv[e][i];
+    if (!m->data[i]) {
+      for (uint j = 0; j < i; ++j)
+        free(m->data[j]);
 
-      cv[i][j] = s;
+      free(m->data);
+      free(m);
+
+      errno = ENOMEM;
+      return -1;
     }
   }
 
+  *h = m;
+
   return 0;
 }
 
-int mtx_cls(struct mtx* ap) {
-  int n = ap->n;
+int imtx_cls(struct imtx** h) {
+  if (!h || !(*h)) {
+    errno = EINVAL;
+    return -1;
+  }
 
-  for (int i = 0; i < n; ++i)
-    free(ap->v[i]);
+  struct imtx* m = *h;
 
-  free(ap->v);
-  free(ap);
+  for (uint i = 0; i < m->pps.dim; ++i)
+    free(m->data[i]);
+
+  free(m->data);
+  free(m);
+
+  return 0;
+}
+
+int imtx_vmlt(struct imtx* m, struct vec* v, struct vec* r) {
+  uint dim = m->pps.dim;
+
+  double** md = m->data;
+  double* vd  = v->data;
+  double* rd  = r->data;
+
+#ifdef OMP_THREADS_NUM
+#  pragma omp parallel for num_threads(OMP_THREADS_NUM)
+#endif  // OMP
+  for (uint i = 0; i < dim; ++i) {
+    double s = 0;
+
+#ifdef OMP_THREADS_NUM
+#  pragma omp parallel for reduction(+ : s) num_threads(OMP_THREADS_NUM)
+#endif  // OMP
+    for (uint j = 0; j < dim; ++j)
+      s += md[i][j] * vd[j];
+
+    rd[i] = s;
+  }
+
+  return 0;
+}
+
+int imtx_mmlt(struct imtx* a, struct imtx* b, struct imtx* r) {
+  uint dim = a->pps.dim;
+
+  double** ad = a->data;
+  double** bd = b->data;
+  double** rd = r->data;
+
+#ifdef OMP_THREADS_NUM
+#  pragma omp parallel for num_threads(OMP_THREADS_NUM)
+#endif  // OMP
+  for (uint i = 0; i < dim; ++i) {
+#ifdef OMP_THREADS_NUM
+#  pragma omp parallel for num_threads(OMP_THREADS_NUM)
+#endif  // OMP
+    for (uint j = 0; j < dim; ++j) {
+      double s = 0;
+
+#ifdef OMP_THREADS_NUM
+#  pragma omp parallel for reduction(+ : s) num_threads(OMP_THREADS_NUM)
+#endif  // OMP
+      for (uint e = 0; e < dim; ++e)
+        s += ad[i][e] * bd[e][i];
+
+      rd[i][j] = s;
+    }
+  }
 
   return 0;
 }

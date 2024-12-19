@@ -4,7 +4,7 @@
 typedef unsigned int uint;
 
 struct vec {
-  uint cap;
+  uint dim;
 
   double* data;
 };
