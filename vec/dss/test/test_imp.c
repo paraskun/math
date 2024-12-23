@@ -2,11 +2,13 @@
 #include <vec/dss.h>
 
 static MunitResult test_red(const MunitParameter[], void*) {
-  struct imtx *m;
+  struct imtx* m;
   struct vec* x;
   struct vec* f;
 
-  mtx_new(&m, (struct ipps){3});
+  struct ipps pps = {3, 3};
+
+  mtx_new(&m, pps);
   vec_new(&x, 3);
   vec_new(&f, 3);
 

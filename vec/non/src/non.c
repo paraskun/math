@@ -70,7 +70,9 @@ int non_new_slv(uint m, double (**f)(struct vec*), struct vec* x, struct non_pps
     return -1;
   }
 
-  if (mtx_new(&jk, (struct ipps){dim})) {
+  struct ipps p = {dim, dim};
+
+  if (mtx_new(&jk, p)) {
     vec_cls(&fk);
     vec_cls(&dk);
 

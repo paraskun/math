@@ -5,7 +5,8 @@
 
 struct imtx {
   struct ipps {
-    uint dim;
+    uint m;
+    uint n;
   } pps;
 
   double** data;
@@ -17,12 +18,28 @@ int imtx_cls(struct imtx** h);
 int imtx_vmlt(struct imtx* m, struct vec* v, struct vec* r);
 int imtx_mmlt(struct imtx* a, struct imtx* b, struct imtx* r);
 
+struct jmtx {
+  struct jpps {
+    uint m;
+    uint n;
+  } pps;
+
+  double (***data)(struct vec*);
+};
+
+int jmtx_new(struct jmtx** h, struct jpps pps);
+int jmtx_cls(struct jmtx** h);
+
+int jmtx_evo(struct jmtx* m, struct vec* x, struct imtx* r);
+
 #define mtx_new(X, p) _Generic((X), \
-    struct imtx**: imtx_new         \
+    struct imtx**: imtx_new,        \
+    struct jmtx**: jmtx_new         \
     )(X, p)
 
 #define mtx_cls(X) _Generic((X),  \
-    struct imtx**: imtx_cls       \
+    struct imtx**: imtx_cls,      \
+    struct jmtx**: jmtx_cls       \
     )(X)
 
 #define mtx_vmlt(X, v, r) _Generic((X), \
@@ -32,5 +49,9 @@ int imtx_mmlt(struct imtx* a, struct imtx* b, struct imtx* r);
 #define mtx_mmlt(X, b, r) _Generic((X), \
     struct imtx*: imtx_mmlt             \
     )(X, b, r)
+
+#define mtx_evo(X, x, r) _Generic((X), \
+    struct jmtx*: jmtx_evo             \
+    )(X, x, r)
 
 #endif  // MTX_H

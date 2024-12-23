@@ -1,11 +1,11 @@
-set(SRC 
-  src/mtx.c
-  # src/mtx_cds.c
-  # src/mtx_sky.c
-  # src/mtx_csj.c
+# file(GLOB SRC src/*.c)
+
+set(SRC
+  src/imtx.c
+  src/jmtx.c
 )
 
-add_library(mtx ${SRC} ${HDR})
+add_library(mtx ${SRC})
 
 target_link_libraries(mtx PUBLIC vec)
 target_link_libraries(mtx PUBLIC -lm)

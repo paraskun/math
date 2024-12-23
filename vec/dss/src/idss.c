@@ -4,12 +4,14 @@
 #include <vec/dss.h>
 
 int idss_red_slv(struct imtx* m, struct vec* x, struct vec* f) {
-  if (!m || !x || !f || m->pps.dim != x->dim || m->pps.dim != f->dim) {
+  if (
+    !m || !x || !f || m->pps.n != m->pps.m || m->pps.n != x->dim ||
+    m->pps.n != f->dim) {
     errno = EINVAL;
     return -1;
   }
 
-  uint dim = m->pps.dim;
+  uint dim = m->pps.n;
   uint* pos = malloc(sizeof(uint) * dim);
 
   double** md = m->data;
@@ -39,12 +41,12 @@ int idss_red_slv(struct imtx* m, struct vec* x, struct vec* f) {
     }
 
     for (uint j = i + 1; j < dim; ++j) {
-//      if (md[pos[i]][i] < 1e-100) {
-//        free(pos);
-//
-//        errno = EINVAL;
-//        return -1;
-//      }
+      if (md[pos[i]][i] < 1e-100) {
+        free(pos);
+
+        errno = EINVAL;
+        return -1;
+      }
 
       double k = md[pos[j]][i] / md[pos[i]][i];
 
@@ -61,12 +63,12 @@ int idss_red_slv(struct imtx* m, struct vec* x, struct vec* f) {
     for (uint j = i + 1; j < dim; ++j)
       sum -= xd[j] * md[pos[i]][j];
 
-//    if (md[pos[i]][i] < 1e-100) {
-//      free(pos);
-//
-//      errno = EINVAL;
-//      return -1;
-//    }
+    if (md[pos[i]][i] < 1e-100) {
+      free(pos);
+
+      errno = EINVAL;
+      return -1;
+    }
 
     xd[i] = sum / md[pos[i]][i];
   }
