@@ -1,97 +1,106 @@
+#include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
-#include <vec/non.h>
 #include <math.h>
+#include <vec/non.h>
 
-#define HEM 1000
-#define EPS 1e-5
+char buf[255];
 
-static int dd;
-static FILE* gp;
-static FILE* st;
+static FILE* plot;
+static FILE* stat;
+
+static int data;
 
 double f1(struct vec* v) {
   double x1 = v->data[0];
   double x2 = v->data[1];
-  double x3 = v->data[2];
 
-  return pow(sqrt(x1 * x1 + x2 * x2) - 2, 2) + x3 * x3 - 1;
+  return sin(10 * x1 + M_PI / 2) - x2;
 }
 
 double f2(struct vec* v) {
   double x1 = v->data[0];
   double x2 = v->data[1];
-  double x3 = v->data[2];
 
-  return (x1 - 2) * (x1 - 2) + x2 * x2 + x3 * x3 - 1;
-}
-
-double f3(struct vec* v) {
-  double x1 = v->data[0];
-  double x2 = v->data[1];
-  double x3 = v->data[2];
-
-  return pow(sqrt((x1 - 2) * (x1 - 2) + x2 * x2) - 0.7, 2) + x3 * x3 - 0.09;
+  return x2 - x1 - 1;
 }
 
 void cbk(struct non_res* res) {
-  char buf[255];
-
   double x1 = res->x->data[0];
   double x2 = res->x->data[1];
-  double x3 = res->x->data[2];
 
-  write(dd, buf, sprintf(buf, "%.7lf %.7lf %.7lf\n", x1, x2, x3));
-  fsync(dd);
+  write(data, buf, sprintf(buf, "%.7lf %.7lf\n", x1, x2));
+  fsync(data);
 
-  fprintf(gp, "replot\n");
-  fflush(gp);
+  fprintf(stat, "%d %.7e %.7e %.7e %.7e\n", res->k, x1, x2, res->del, res->err);
 
-  fprintf(st, "%d %.7lf %.7lf %.7lf %.7lf %.7lf\n", res->k, x1, x2, x3, res->del, res->err);
+  fprintf(plot, "replot\n");
+  fflush(plot);
 
-  usleep(1000000 / 2);
+  usleep(1000000 / 60);
 }
 
+double point[4][2] = {{2, 2}, {0, -3}, {-2, 0}, {1.25, 0}};
+
 int main() {
-  double (*f[3])(struct vec*) = {&f1, &f2, &f3};
+  for (int i = 0; i < 3; ++i) {
+    sprintf(buf, "traj%d.dat", i + 1);
+    close(open(buf, O_RDWR | O_TRUNC | O_CREAT, 0666));
+  }
 
-  dd = open("traj.dat", O_RDWR | O_CREAT | O_TRUNC);
-  gp = popen("gnuplot -persist", "w");
-  st = fopen("stat.dat", "w+");
+  double (*f[2])(struct vec*) = {&f1, &f2};
 
-  fprintf(gp, "set parametric\n");
-  fprintf(gp, "set view equal xyz\n");
-  fprintf(gp, "set view ,,1.7\n");
-  fprintf(gp, "splot (2 + 1*cos(u))*cos(v),(2 + 1*cos(u))*sin(v),sin(u) notitle, ");
-  fprintf(gp, "cos(u)*cos(v)+2,cos(u)*sin(v),sin(u) notitle, ");
-  fprintf(gp, "(0.7 + 0.3*cos(u))*cos(v)+2,(0.7 + 0.3*cos(u))*sin(v),0.3 * sin(u) notitle, ");
-  fprintf(gp, "'traj.dat' using 1:2:3 with points pointtype 1 notitle\n");
-  fflush(gp);
+  plot = popen("gnuplot -persist", "w");
 
-  struct vec* x;
+  fprintf(plot, "set parametric\n");
+  fprintf(plot, "set samples 1000\n");
+  fprintf(plot, "set xrange [-2.5:2.5]\n");
+  fprintf(plot, "set yrange [-4:4]\n");
+  fprintf(plot, "plot ");
+  fprintf(plot, "t,sin(t*10 + pi/2),");
+  fprintf(plot, "t-1,t,");
 
-  vec_new(&x, 3);
+  for (int i = 0; i < 4; ++i) {
+    fprintf(plot, "'traj%d.dat' using 1:2 title '(%.2lf, %.2lf)'", i + 1, point[i][0], point[i][1]);
+    fputc(i != 3 ? ',' : '\n', plot);
+  }
 
-  x->data[0] = 2;
-  x->data[1] = 1;
-  x->data[2] = 1;
+  fflush(plot);
 
   struct non_res res;
+  struct vec* x;
 
-  non_new_slv(3, f, x, (struct non_pps){
-    .res = &res,
-    .cbk = &cbk,
-    .hop = 0.001,
-    .eps = 0.001,
-    .hem = 1000
-  });
+  vec_new(&x, 2);
 
-  close(dd);
-  fclose(gp);
-  fclose(st);
+  for (int i = 0; i < 4; ++i) {
+    sprintf(buf, "traj%d.dat", i + 1);
+    data = open(buf, O_RDWR);
+
+    sprintf(buf, "stat%d.dat", i + 1);
+    stat = fopen(buf, "w+");
+
+    x->data[0] = point[i][0];
+    x->data[1] = point[i][1];
+
+    if (non_new_slv(2, f, x, (struct non_pps){
+      .hem = 300,
+      .eps = 1e-15,
+      .hop = 0.0001,
+      .res = &res,
+      .cbk = &cbk
+    })) {
+      printf("%d: %s\n", i, strerror(errno));
+      return -1;
+    }
+
+    close(data);
+    fclose(stat);
+  }
 
   vec_cls(&x);
+  fclose(plot);
 
   return 0;
 }

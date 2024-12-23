@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <math.h>
 #include <vec/non.h>
 
 char buf[255];
@@ -16,14 +17,14 @@ double f1(struct vec* v) {
   double x1 = v->data[0];
   double x2 = v->data[1];
 
-  return (x1 - 0.8) * (x1 - 0.8) + x2 * x2 - 1;
+  return sin(x1) - x2;
 }
 
 double f2(struct vec* v) {
   double x1 = v->data[0];
   double x2 = v->data[1];
 
-  return (x1 + 0.8) * (x1 + 0.8) + x2 * x2 - 1;
+  return x1 - x2;
 }
 
 void cbk(struct non_res* res) {
@@ -38,13 +39,13 @@ void cbk(struct non_res* res) {
   fprintf(plot, "replot\n");
   fflush(plot);
 
-  usleep(1000000 / 5);
+  usleep(1000000 / 60);
 }
 
 double point[4][2] = {{2, 2}, {0, -3}, {-2, 0}};
 
 int main() {
-  for (int i = 0; i < 4; ++i) {
+  for (int i = 0; i < 3; ++i) {
     sprintf(buf, "traj%d.dat", i + 1);
     close(open(buf, O_RDWR | O_TRUNC | O_CREAT, 0666));
   }
@@ -57,8 +58,8 @@ int main() {
   fprintf(plot, "set xrange [-2.5:2.5]\n");
   fprintf(plot, "set yrange [-4:4]\n");
   fprintf(plot, "plot ");
-  fprintf(plot, "cos(t) - 0.8,sin(t),");
-  fprintf(plot, "cos(t) + 0.8,sin(t),");
+  fprintf(plot, "t,sin(t),");
+  fprintf(plot, "t,t,");
 
   for (int i = 0; i < 3; ++i) {
     fprintf(plot, "'traj%d.dat' using 1:2 title '(%.2lf, %.2lf)'", i + 1, point[i][0], point[i][1]);
@@ -84,7 +85,7 @@ int main() {
 
     if (non_new_slv(2, f, x, (struct non_pps){
       .hem = 300,
-      .eps = 1e-10,
+      .eps = 1e-15,
       .hop = 0.0001,
       .res = &res,
       .cbk = &cbk

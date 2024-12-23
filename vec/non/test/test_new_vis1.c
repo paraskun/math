@@ -85,7 +85,7 @@ int main() {
     if (non_new_slv(2, f, x, (struct non_pps){
       .hem = 300,
       .eps = 1e-10,
-      .hop = 0.0001,
+      .hop = 1,
       .res = &res,
       .cbk = &cbk
     })) {

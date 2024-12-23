@@ -45,7 +45,7 @@ void cbk(struct non_res* res) {
   fprintf(plot, "replot\n");
   fflush(plot);
 
-  usleep(1000000 / 60);
+  usleep(1000000 / 5);
 }
 
 double point[4][2] = {{2, 2}, {0, -3}, {-2, 0}};
