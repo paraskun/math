@@ -3,6 +3,8 @@
 
 #include <vec/vec.h>
 
-int pdif(double (*f)(struct vec*), uint i, double h, struct vec* p, double* r);
+typedef double (*func)(struct vec*);
+
+int pdif(func f, uint i, double h, struct vec* p, double* r);
 
 #endif  // BAS_MAS_H

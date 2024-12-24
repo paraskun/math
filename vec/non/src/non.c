@@ -8,59 +8,157 @@
 #include <vec/non.h>
 
 struct rec {
-  uint i;
+  uint   i;
   double v;
 };
 
-int rec_cmp_dsc(void* a, void* b) {
-  struct rec* ra = (struct rec*)a;
-  struct rec* rb = (struct rec*)b;
+static int rec_cmp_dsc(void* a, void* b) {
+  struct rec* ar = (struct rec*)a;
+  struct rec* br = (struct rec*)b;
 
-  if (fabs(ra->v) > fabs(rb->v))
+  if (fabs(ar->v) > fabs(br->v))
     return 1;
 
-  if (fabs(ra->v) < fabs(rb->v))
+  if (fabs(ar->v) < fabs(br->v))
     return -1;
 
   return 0;
 }
 
-int non_new_slv(
-  uint m, double (**f)(struct vec*), struct vec* x, struct non_pps pps) {
+static int non_evo_exc(
+  struct pcut* r, struct pcut* f, struct vec* x, struct vec* fk, struct imtx* jk,
+  struct non_opt* opt) {
+  uint m = cut_len(f);
+  func l;
+
+  struct rec** rp;
+
+  if (m < x->dim) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  cut_pub(r, (void***)&rp);
+
+  for (uint i = 0; i < m; ++i) {
+    cut_get(f, i, (void**)&l);
+
+    rp[i]->i = i;
+    rp[i]->v = l(x);
+  }
+
+  if (m > x->dim)
+    cut_srt(r);
+
+  for (uint i = 0; i < x->dim; ++i) {
+    cut_get(f, rp[i]->i, (void**)&l);
+
+    fk->data[i] = -rp[i]->v;
+
+    if (opt->jac)
+      for (uint j = 0; j < x->dim; ++j)
+        jk->data[i][j] = opt->jac->data[rp[i]->i][j](x);
+    else
+      for (uint j = 0; j < x->dim; ++j)
+        pdif(l, j, opt->hop, x, &jk->data[i][j]);
+  }
+
+  return 0;
+}
+
+static int non_evo_con(
+  struct pcut* r, struct pcut* f, struct vec* x, struct vec* fk, struct imtx* jk,
+  struct non_opt* opt) {
+  uint m = cut_len(f);
+  func l;
+
+  struct rec** rp;
+
+  if (m < x->dim) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  cut_pub(r, (void***)&rp);
+
+  for (uint i = 0; i < m; ++i) {
+    cut_get(f, i, (void**)&l);
+
+    rp[i]->i = i;
+    rp[i]->v = l(x);
+  }
+
+  uint i1 = x->dim;
+
+  if (m > x->dim) {
+    cut_srt(r);
+    i1 = x->dim - 1;
+  }
+
+  for (uint i = 0; i < i1; ++i) {
+    cut_get(f, rp[i]->i, (void**)&l);
+
+    fk->data[i] = -rp[i]->v;
+
+    if (opt->jac)
+      for (uint j = 0; j < x->dim; ++j)
+        jk->data[i][j] = opt->jac->data[rp[i]->i][j](x);
+    else
+      for (uint j = 0; j < x->dim; ++j)
+        pdif(l, j, opt->hop, x, &jk->data[i][j]);
+  }
+
+  if (m > x->dim) {
+    fk->data[i1] = 0;
+
+    for (uint j = 0; j < x->dim; ++j)
+      jk->data[i1][j] = 0;
+
+    for (uint i = i1; i < m; ++i) {
+      cut_get(f, rp[i]->i, (void**)&l);
+
+      fk->data[i1] -= rp[i]->v * rp[i]->v;
+
+      if (opt->jac)
+        for (uint j = 0; j < x->dim; ++j)
+          jk->data[i1][j] += 2 * opt->jac->data[rp[i]->i][j](x);
+      else {
+        double pd = 0;
+
+        for (uint j = 0; j < x->dim; ++j) {
+          pdif(l, j, opt->hop, x, &pd);
+          jk->data[i1][j] += 2 * pd;
+        }
+      }
+    }
+  }
+
+  return 0;
+}
+
+int non_new_slv(struct pcut* f, struct vec* x, struct non_opt opt) {
   if (!f || !x) {
     errno = EINVAL;
     return -1;
   }
 
-  struct pcut* c;
-  struct rec** r;
+  struct pcut* r;
 
-  if (cut_new(&c))
-    return -1;
+  cut_new(&r);
+  cut_cmp(r, &rec_cmp_dsc);
+  cut_exp(r, cut_len(f));
 
-  if (cut_dev(c, m)) {
-    cut_cls(&c);
-    return -1;
+  for (uint i = 0; i < cut_len(f); ++i) {
+    struct rec* rec = malloc(sizeof(struct rec));
+    cut_set(r, i, rec);
   }
 
-  cut_cmp(c, *rec_cmp_dsc);
-
-  for (uint i = 0; i < m; ++i) {
-    struct rec* r = malloc(sizeof(struct rec));
-
-    r->i = i;
-    r->v = -f[i](x);
-
-    cut_set(c, i, r);
-  }
-
-  uint dim = x->dim;
-
-  struct vec* fk;
-  struct vec* dk;
+  struct vec*  fk;
+  struct vec*  dk;
   struct imtx* jk;
 
-  double nrm;
+  double nrm = 0;
+  uint   dim = x->dim;
 
   if (vec_new(&fk, dim))
     return -1;
@@ -80,29 +178,21 @@ int non_new_slv(
     return -1;
   }
 
-  cut_srt(c);
-  cut_pub(c, (void***)&r);
-
-  for (uint i = 0; i < dim; ++i) {
-    fk->data[i] = r[i]->v;
-
-    for (uint j = 0; j < dim; ++j)
-      if (pps.jac)
-        jk->data[i][j] = pps.jac->data[r[i]->i][j](x);
-      else
-        pdif(f[r[i]->i], j, pps.hop, x, &jk->data[i][j]);
+  switch (opt.mod) {
+    case EXC: non_evo_exc(r, f, x, fk, jk, &opt); break;
+    case CON: non_evo_con(r, f, x, fk, jk, &opt); break;
   }
 
-  pps.itr->k = 0;
-  pps.itr->x = x;
-  pps.itr->del = -1;
+  opt.itr->k = 0;
+  opt.itr->x = x;
+  opt.itr->del = -1;
 
-  vec_nrm(fk, &pps.itr->err);
+  vec_nrm(fk, &opt.itr->err);
 
-  if (pps.cbk)
-    pps.cbk->call(pps.cbk->ctx);
+  if (opt.cbk)
+    opt.cbk->call(opt.cbk->ctx);
 
-  for (uint k = 1; k <= pps.hem; ++k) {
+  for (uint k = 1; k <= opt.hem; ++k) {
     if (dss_red_slv(jk, dk, fk)) {
       vec_cls(&fk);
       vec_cls(&dk);
@@ -115,43 +205,29 @@ int non_new_slv(
     vec_cmb(x, dk, x, 1);
     vec_nrm(dk, &nrm);
 
-    for (uint i = 0; i < m; ++i) {
-      r[i]->i = i;
-      r[i]->v = -f[i](x);
+    switch (opt.mod) {
+      case EXC: non_evo_exc(r, f, x, fk, jk, &opt); break;
+      case CON: non_evo_con(r, f, x, fk, jk, &opt); break;
     }
 
-    cut_srt(c);
+    if (opt.itr) {
+      opt.itr->k = k;
+      opt.itr->del = nrm;
 
-    for (uint i = 0; i < dim; ++i) {
-      fk->data[i] = r[i]->v;
-
-      for (uint j = 0; j < dim; ++j)
-        if (pps.jac)
-          jk->data[i][j] = pps.jac->data[r[i]->i][j](x);
-        else
-          pdif(f[r[i]->i], j, pps.hop, x, &jk->data[i][j]);
+      vec_nrm(fk, &opt.itr->err);
     }
 
-    pps.itr->k = k;
-    pps.itr->del = nrm;
+    if (opt.cbk)
+      opt.cbk->call(opt.cbk->ctx);
 
-    vec_nrm(fk, &pps.itr->err);
-
-    if (pps.cbk)
-      pps.cbk->call(pps.cbk->ctx);
-
-    if (nrm < pps.eps)
+    if (nrm < opt.eps)
       break;
   }
 
   vec_cls(&fk);
   vec_cls(&dk);
   mtx_cls(&jk);
-
-  for (uint i = 0; i < m; ++i)
-    free(r[i]);
-
-  cut_cls(&c);
+  cut_cls(&r);
 
   return 0;
 }

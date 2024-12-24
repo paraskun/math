@@ -27,19 +27,19 @@ static double f3(struct vec* v) {
 }
 
 static MunitResult test_new(const MunitParameter[], void*) {
-  double (*f[3])(struct vec*) = {&f1, &f2, &f3};
-
   struct vec* x;
+  struct pcut* f;
 
   vec_new(&x, 3);
+  cut_new(&f, 3, &f1, &f2, &f3);
   
   x->data[0] = 0.1;
   x->data[1] = 0.1;
   x->data[2] = -0.1;
 
-  non_new_slv(3, f, x, (struct non_pps){
-      .res = nullptr,
-      .cbk = nullptr,
+  non_new_slv(f, x, (struct non_opt){
+      .itr = nullptr,
+      .mod = EXC,
       .hop = 0.001,
       .eps = 0.001,
       .hem = 1000
