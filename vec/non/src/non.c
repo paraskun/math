@@ -1,11 +1,11 @@
 #include <bas/mas.h>
 #include <errno.h>
-#include <stdx.h>
+#include <math.h>
 #include <stdlib.h>
+#include <stdx.h>
 #include <vec/dss.h>
 #include <vec/mtx.h>
 #include <vec/non.h>
-#include <math.h>
 
 struct rec {
   uint i;
@@ -25,7 +25,8 @@ int rec_cmp_dsc(void* a, void* b) {
   return 0;
 }
 
-int non_new_slv(uint m, double (**f)(struct vec*), struct vec* x, struct non_pps pps) {
+int non_new_slv(
+  uint m, double (**f)(struct vec*), struct vec* x, struct non_pps pps) {
   if (!f || !x) {
     errno = EINVAL;
     return -1;
@@ -86,19 +87,20 @@ int non_new_slv(uint m, double (**f)(struct vec*), struct vec* x, struct non_pps
     fk->data[i] = r[i]->v;
 
     for (uint j = 0; j < dim; ++j)
-      pdif(f[r[i]->i], j, pps.hop, x, &jk->data[i][j]);
+      if (pps.jac)
+        jk->data[i][j] = pps.jac->data[r[i]->i][j](x);
+      else
+        pdif(f[r[i]->i], j, pps.hop, x, &jk->data[i][j]);
   }
 
-  if (pps.res) {
-    pps.res->k = 0;
-    pps.res->x = x;
-    pps.res->del = -1;
+  pps.itr->k = 0;
+  pps.itr->x = x;
+  pps.itr->del = -1;
 
-    vec_nrm(fk, &pps.res->err);
-  }
+  vec_nrm(fk, &pps.itr->err);
 
   if (pps.cbk)
-    pps.cbk(pps.res);
+    pps.cbk->call(pps.cbk->ctx);
 
   for (uint k = 1; k <= pps.hem; ++k) {
     if (dss_red_slv(jk, dk, fk)) {
@@ -106,6 +108,7 @@ int non_new_slv(uint m, double (**f)(struct vec*), struct vec* x, struct non_pps
       vec_cls(&dk);
       mtx_cls(&jk);
 
+      errno = EDOM;
       return -1;
     }
 
@@ -123,18 +126,19 @@ int non_new_slv(uint m, double (**f)(struct vec*), struct vec* x, struct non_pps
       fk->data[i] = r[i]->v;
 
       for (uint j = 0; j < dim; ++j)
-        pdif(f[r[i]->i], j, pps.hop, x, &jk->data[i][j]);
+        if (pps.jac)
+          jk->data[i][j] = pps.jac->data[r[i]->i][j](x);
+        else
+          pdif(f[r[i]->i], j, pps.hop, x, &jk->data[i][j]);
     }
 
-    if (pps.res) {
-      pps.res->k = k;
-      pps.res->del = nrm;
+    pps.itr->k = k;
+    pps.itr->del = nrm;
 
-      vec_nrm(fk, &pps.res->err);
-    }
+    vec_nrm(fk, &pps.itr->err);
 
     if (pps.cbk)
-      pps.cbk(pps.res);
+      pps.cbk->call(pps.cbk->ctx);
 
     if (nrm < pps.eps)
       break;

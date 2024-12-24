@@ -66,20 +66,3 @@ int jmtx_cls(struct jmtx** h) {
 
   return 0;
 }
-
-int jmtx_evo(struct jmtx* m, struct vec* x, struct imtx* r) {
-  if (
-    !m || !x || !r || m->pps.m != r->pps.m || m->pps.n != r->pps.n ||
-    m->pps.n != x->dim) {
-    errno = EINVAL;
-    return -1;
-  }
-
-#pragma omp parallel for
-  for (uint i = 0; i < m->pps.m; ++i)
-#pragma omp parallel for
-    for (uint j = 0; j < m->pps.n; ++j)
-      r->data[i][j] = m->data[i][j](x);
-
-  return 0;
-}

@@ -1,7 +1,11 @@
 #ifndef NON_H
 #define NON_H
 
+#include <stdx/fun.h>
+#include <vec/mtx.h>
 #include <vec/vec.h>
+
+enum non_mod { EXC, CON };
 
 struct non_itr {
   uint k;
@@ -12,16 +16,19 @@ struct non_itr {
   struct vec* x;
 };
 
-typedef void (*fun_non_cbk)(struct non_itr*);
-
 struct non_pps {
+  enum non_mod mod;
+  struct non_itr* itr;
+
   uint hem;
   double eps;
   double hop;
-  fun_non_cbk cbk;
-  struct non_itr* res;
+
+  struct jmtx* jac;
+  struct fun* cbk;
 };
 
-int non_new_slv(uint m, double (**f)(struct vec*), struct vec* x, struct non_pps pps);
+int non_new_slv(
+  uint m, double (**f)(struct vec*), struct vec* x, struct non_pps pps);
 
 #endif  // NON_H

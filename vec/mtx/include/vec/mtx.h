@@ -30,8 +30,6 @@ struct jmtx {
 int jmtx_new(struct jmtx** h, struct jpps pps);
 int jmtx_cls(struct jmtx** h);
 
-int jmtx_evo(struct jmtx* m, struct vec* x, struct imtx* r);
-
 #define mtx_new(X, p) _Generic((X), \
     struct imtx**: imtx_new,        \
     struct jmtx**: jmtx_new         \
