@@ -77,12 +77,12 @@ static int non_evo_con(
   mfun*        fp = (mfun*)fun->dat;
 
   if (fun->len > x->dim) {
-    fk->data[l] *= fk->data[l];
+    fk->data[l] = 0;
 
     for (uint j = 0; j < x->dim; ++j)
-      jk->data[l][j] *= 2;
+      jk->data[l][j] = 0;
 
-    for (uint i = l + 1; i < fun->len; ++i) {
+    for (uint i = l; i < fun->len; ++i) {
       fk->data[l] -= rp[i]->v * rp[i]->v;
 
       if (opt->jac)

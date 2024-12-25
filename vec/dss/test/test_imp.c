@@ -1,10 +1,13 @@
+#include <errno.h>
 #include <munit.h>
+#include <stdio.h>
+#include <string.h>
 #include <vec/dss.h>
 
 static MunitResult test_red(const MunitParameter[], void*) {
   struct imtx* m;
-  struct vec* x;
-  struct vec* f;
+  struct vec*  x;
+  struct vec*  f;
 
   struct ipps pps = {3, 3};
 
@@ -26,7 +29,8 @@ static MunitResult test_red(const MunitParameter[], void*) {
   f->data[1] = 3;
   f->data[2] = 6;
 
-  dss_red_slv(m, x, f);
+  if (dss_red_slv(m, x, f))
+    fprintf(stderr, "err: %s\n", strerror(errno));
 
   munit_assert_double_equal(1.0, x->data[0], 3);
   munit_assert_double_equal(2.0, x->data[1], 3);
@@ -44,8 +48,7 @@ static MunitTest itests[] = {
   {NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
 };
 
-static const MunitSuite suite = {
-  "/imp", itests, NULL, 1, MUNIT_SUITE_OPTION_NONE};
+static const MunitSuite suite = {"/imp", itests, NULL, 1, MUNIT_SUITE_OPTION_NONE};
 
 int main(int argc, char** argv) {
   return munit_suite_main(&suite, NULL, argc, argv);

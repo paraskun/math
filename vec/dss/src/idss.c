@@ -41,10 +41,10 @@ int idss_red_slv(struct imtx* m, struct vec* x, struct vec* f) {
     }
 
     for (uint j = i + 1; j < dim; ++j) {
-      if (md[pos[i]][i] < 1e-100) {
+      if (fabs(md[pos[i]][i]) < 1e-100) {
         free(pos);
 
-        errno = EINVAL;
+        errno = EDOM;
         return -1;
       }
 
@@ -63,10 +63,10 @@ int idss_red_slv(struct imtx* m, struct vec* x, struct vec* f) {
     for (uint j = i + 1; j < dim; ++j)
       sum -= xd[j] * md[pos[i]][j];
 
-    if (md[pos[i]][i] < 1e-100) {
+    if (fabs(md[pos[i]][i]) < 1e-100) {
       free(pos);
 
-      errno = EINVAL;
+      errno = EDOM;
       return -1;
     }
 
