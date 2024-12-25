@@ -38,11 +38,13 @@ static MunitResult test_new(const MunitParameter[], void*) {
   x->data[2] = -0.1;
 
   non_new_slv(f, x, (struct non_opt){
-      .itr = nullptr,
       .mod = EXC,
       .hop = 0.001,
       .eps = 0.001,
-      .hem = 1000
+      .hem = 1000,
+      .itr = nullptr,
+      .cbk = nullptr,
+      .jac = nullptr,
   });
 
   munit_assert_double_equal(0.5, x->data[0], 3);

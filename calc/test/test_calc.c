@@ -1,4 +1,4 @@
-#include <bas/mas.h>
+#include <calc.h>
 #include <munit.h>
 
 static double fun(struct vec* v) {
@@ -13,7 +13,7 @@ static MunitResult test_pdif(const MunitParameter[], void*) {
   struct vec* v;
 
   vec_new(&v, 3);
-  
+
   v->data[0] = 3;
   v->data[1] = 2;
   v->data[2] = 1;
@@ -33,8 +33,7 @@ static MunitTest itests[] = {
   {NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
 };
 
-static const MunitSuite suite = {
-  "/mas", itests, NULL, 1, MUNIT_SUITE_OPTION_NONE};
+static const MunitSuite suite = {"/calc", itests, NULL, 1, MUNIT_SUITE_OPTION_NONE};
 
 int main(int argc, char** argv) {
   return munit_suite_main(&suite, NULL, argc, argv);

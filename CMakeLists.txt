@@ -8,8 +8,8 @@ set(CMAKE_C_FLAGS "-Wall -Werror -Wextra -Wpedantic -std=c23 -fopenmp")
 set(CMAKE_C_STANDARD 23)
 
 add_subdirectory(stdx)
+add_subdirectory(calc)
 add_subdirectory(vec)
-add_subdirectory(bas)
 
 # add_subdirectory(ext)
 # add_subdirectory(pde)
