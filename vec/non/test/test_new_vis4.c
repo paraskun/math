@@ -114,7 +114,7 @@ int main() {
     if (non_new_slv(
           fun,
           x,
-          (struct non_opt){.mod = EXC,
+          (struct non_opt){.mod = CON,
                            .hem = 1000,
                            .eps = 1e-5,
                            .hop = 1e-3,

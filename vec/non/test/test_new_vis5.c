@@ -72,7 +72,7 @@ void cbk(void* c, uint n, ...) {
 
 int main() {
   const uint   num = 3;
-  const double point[][2] = {{-2, 2}, {0, -3}, {-2, 0}};
+  const double point[][2] = {{-2, 2}, {0, -2}, {-2, 0}};
 
   for (uint i = 0; i < num; ++i) {
     sprintf(buf, "traj%d.dat", i + 1);
@@ -122,7 +122,7 @@ int main() {
     if (non_new_slv(
           fun,
           x,
-          (struct non_opt){.mod = EXC,
+          (struct non_opt){.mod = CON,
                            .hem = 1000,
                            .eps = 1e-5,
                            .hop = 1e-3,

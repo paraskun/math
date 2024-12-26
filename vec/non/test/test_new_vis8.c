@@ -91,7 +91,7 @@ void cbk(void* c, uint n, ...) {
 }
 
 int main() {
-  const uint   num = 4;
+  const uint num = 4;
   const double point[][2] = {{2, 2}, {0, -3}, {-2, 0}, {1.25, 0}};
 
   for (uint i = 0; i < num; ++i) {
@@ -99,8 +99,8 @@ int main() {
     close(open(buf, O_RDWR | O_TRUNC | O_CREAT, 0666));
   }
 
-  struct ctx   ctx;
-  struct pcut* fun;
+  struct ctx ctx;
+  struct pcut* fun = nullptr;
 
   cut_new(&fun, 3, &f1, &f2, &f3);
 
@@ -122,11 +122,11 @@ int main() {
 
   fflush(ctx.plot);
 
-  struct vcap    cap = cap(&cbk, &ctx);
+  struct vcap cap = cap(&cbk, &ctx);
   struct non_itr itr;
-  struct vec*    x;
-  struct jmtx*   jac;
-  struct jpps    pps = {.m = 3, .n = 2};
+  struct vec* x;
+  struct jmtx* jac;
+  struct jpps pps = {.m = 3, .n = 2};
 
   vec_new(&x, 2);
   mtx_new(&jac, pps);
@@ -148,24 +148,27 @@ int main() {
     x->data[0] = point[i][0];
     x->data[1] = point[i][1];
 
+    errno = 0;
+
     if (non_new_slv(
           fun,
           x,
-          (struct non_opt){.mod = EXC,
+          (struct non_opt){.mod = CON,
                            .hem = 1000,
                            .eps = 1e-5,
                            .hop = 1e-3,
                            .itr = &itr,
                            .cbk = &cap,
-                           .jac = jac}))
+                           .jac = nullptr}))
       fprintf(stderr, "%d: %s\n", i + 1, strerror(errno));
 
     close(ctx.data);
     fclose(ctx.stat);
   }
 
-  vec_cls(&x);
   cut_cls(&fun);
+  vec_cls(&x);
+  mtx_cls(&jac);
 
   fclose(ctx.plot);
 
