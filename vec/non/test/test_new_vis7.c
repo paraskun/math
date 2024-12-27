@@ -56,7 +56,7 @@ void cbk(void* c, uint n, ...) {
   write(ctx->data, buf, sprintf(buf, "%.7lf %.7lf\n", x1, x2));
   fsync(ctx->data);
 
-  fprintf(ctx->stat, "%d %.7e %.7e %.7e %.7e\n", itr->k, x1, x2, itr->del, itr->err);
+  fprintf(ctx->stat, "%3d\t& %16.7e\t& %16.7e\t& %16.7e\t& %16.7e \\\\\n", itr->k, x1, x2, itr->del, itr->err);
 
   fprintf(ctx->plot, "replot\n");
   fflush(ctx->plot);
@@ -66,7 +66,7 @@ void cbk(void* c, uint n, ...) {
 
 int main() {
   const uint   num = 4;
-  const double point[][2] = {{2, 2}, {0, -3}, {-2, 0}, {1.25, 0}};
+  const double point[][2] = {{-2, 2}, {0, -3}, {-2, 0}, {1.25, 0}};
 
   for (uint i = 0; i < num; ++i) {
     sprintf(buf, "traj%d.dat", i + 1);
@@ -117,7 +117,7 @@ int main() {
           fun,
           x,
           (struct non_opt){.mod = CON,
-                           .hem = 100,
+                           .hem = 30,
                            .eps = 1e-5,
                            .hop = 1e-3,
                            .itr = &itr,

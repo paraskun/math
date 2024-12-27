@@ -13,21 +13,21 @@ static char buf[255];
 double f1(struct vec* v) {
   double x2 = v->data[1];
 
-  return x2 + 1;
+  return 100 * x2 + 100;
 }
 
 double f2(struct vec* v) {
   double x1 = v->data[0];
   double x2 = v->data[1];
 
-  return 4 * x2 - tan(M_PI / 3) * 4 * x1 - 8;
+  return x2 - tan(M_PI / 3) * x1 - 2;
 }
 
 double f3(struct vec* v) {
   double x1 = v->data[0];
   double x2 = v->data[1];
 
-  return 4 * x2 + tan(M_PI / 3) * 4 * x1 - 8;
+  return x2 + tan(M_PI / 3) * x1 - 2;
 }
 
 struct ctx {
@@ -56,12 +56,12 @@ void cbk(void* c, uint n, ...) {
   write(ctx->data, buf, sprintf(buf, "%.7lf %.7lf\n", x1, x2));
   fsync(ctx->data);
 
-  fprintf(ctx->stat, "%d %.7e %.7e %.7e %.7e\n", itr->k, x1, x2, itr->del, itr->err);
+  fprintf(ctx->stat, "%3d\t&\t%16.7e\t&\t%16.7e\t&\t%16.7e\t&\t%16.7e\t\\\\\n", itr->k, x1, x2, itr->del, itr->err);
 
   fprintf(ctx->plot, "replot\n");
   fflush(ctx->plot);
 
-  usleep(1000000 / 5);
+  usleep(1000000 / 60);
 }
 
 int main() {
@@ -84,9 +84,9 @@ int main() {
   fprintf(ctx.plot, "set xrange [-2.5:2.5]\n");
   fprintf(ctx.plot, "set yrange [-2.5:2.5]\n");
   fprintf(ctx.plot, "plot ");
-  fprintf(ctx.plot, "t,-1 title 'y = -1',");
-  fprintf(ctx.plot, "t,tan(pi/3)*t+2 title '4t,tag(pi/3)*4t + 8',");
-  fprintf(ctx.plot, "t,-tan(pi/3)*t+2 title '4t,-tag(pi/3)*4t + 8',");
+  fprintf(ctx.plot, "t,-1 title '100*y = -100',");
+  fprintf(ctx.plot, "t,tan(pi/3)*t+2 title 't,tag(pi/3)*t + 2',");
+  fprintf(ctx.plot, "t,-tan(pi/3)*t+2 title 't,-tag(pi/3)*t + 2',");
 
   for (uint i = 0; i < num; ++i) {
     fprintf(
@@ -115,8 +115,8 @@ int main() {
     if (non_new_slv(
           fun,
           x,
-          (struct non_opt){.mod = EXC,
-                           .hem = 1000,
+          (struct non_opt){.mod = CON,
+                           .hem = 50,
                            .eps = 1e-5,
                            .hop = 1e-3,
                            .itr = &itr,

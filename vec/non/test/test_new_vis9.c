@@ -60,7 +60,7 @@ void cbk(void* c, uint n, ...) {
   write(ctx->data, buf, sprintf(buf, "%.7lf %.7lf %.7lf\n", x1, x2, x3));
   fsync(ctx->data);
 
-  fprintf(ctx->stat, "%d %.7e %.7e %.7e %.7e %.7e\n", itr->k, x1, x2, x3, itr->del, itr->err);
+  fprintf(ctx->stat, "%3d\t&\t%16.7e\t&\t%16.7e\t&\t%16.7e\t&\t%16.7e\t&\t%16.7e\t\\\\\n", itr->k, x1, x2, x3, itr->del, itr->err);
 
   fprintf(ctx->plot, "replot\n");
   fflush(ctx->plot);

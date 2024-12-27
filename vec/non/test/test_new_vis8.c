@@ -154,12 +154,12 @@ int main() {
           fun,
           x,
           (struct non_opt){.mod = CON,
-                           .hem = 1000,
+                           .hem = 100,
                            .eps = 1e-5,
                            .hop = 1e-3,
                            .itr = &itr,
                            .cbk = &cap,
-                           .jac = nullptr}))
+                           .jac = jac}))
       fprintf(stderr, "%d: %s\n", i + 1, strerror(errno));
 
     close(ctx.data);

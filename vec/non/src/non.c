@@ -93,7 +93,7 @@ static int non_evo_con(
 
       if (opt->jac)
         for (uint j = 0; j < xk->dim; ++j)
-          jk->data[l][j] += 2 * opt->jac->data[rp[i]->i][j](xk);
+          jk->data[l][j] += 2 * rp[i]->v * opt->jac->data[rp[i]->i][j](xk);
       else {
         double pd = 0;
 
@@ -101,7 +101,7 @@ static int non_evo_con(
           if (pdif(fp[rp[i]->i], j, opt->hop, xk, &pd))
             return -1;
 
-          jk->data[l][j] += 2 * pd;
+          jk->data[l][j] += 2 * rp[i]->v * pd;
         }
       }
     }
