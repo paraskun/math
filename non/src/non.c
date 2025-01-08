@@ -1,7 +1,6 @@
-#include <calc.h>
-#include <errno.h>
+#include <numx/non.h>
 
-int pdif(mfun f, uint i, double hop, struct vec* p, double* r) {
+int pdif(fun f, uint i, double hop, struct vec *p, double *r) {
   if (!f || !p || !r || i >= p->dim) {
     errno = EINVAL;
     return -1;

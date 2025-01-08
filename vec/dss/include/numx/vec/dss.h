@@ -1,8 +1,8 @@
 #ifndef DSS_H
 #define DSS_H
 
-#include <vec/mtx.h>
-#include <vec/vec.h>
+#include <numx/vec/mtx.h>
+#include <numx/vec/vec.h>
 
 int idss_red_slv(struct imtx* m, struct vec* x, struct vec* f);
 

@@ -10,9 +10,5 @@ set(CMAKE_C_STANDARD 23)
 enable_testing()
 
 add_subdirectory(stdx)
-add_subdirectory(calc)
 add_subdirectory(vec)
-
-# add_subdirectory(ext)
-# add_subdirectory(pde)
-# add_subdirectory(bgs)
+# add_subdirectory(non)

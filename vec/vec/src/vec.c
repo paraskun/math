@@ -1,11 +1,12 @@
 #include <errno.h>
 #include <math.h>
+#include <numx/vec/vec.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
-#include <vec/vec.h>
 
-int vec_new(struct vec** h, uint dim) {
-  if (!h || dim == 0) {
+int vec_new_var(struct vec** h, uint n, ...) {
+  if (!h || n == 0) {
     errno = EINVAL;
     return -1;
   }
@@ -17,17 +18,31 @@ int vec_new(struct vec** h, uint dim) {
     return -1;
   }
 
-  v->dim  = dim;
-  v->data = malloc(sizeof(double) * dim);
+  v->n = n;
+  v->dat = malloc(sizeof(double) * n);
 
-  if (!v->data) {
+  if (!v->dat) {
     free(v);
 
     errno = ENOMEM;
     return -1;
   }
 
-  memset(v->data, 0, sizeof(double) * dim);
+  memset(v->dat, 0, sizeof(double) * n);
+
+  va_list arg;
+  va_start(arg, d);
+
+  for (uint i = 0; i < n; ++i) {
+    double a = va_arg(arg, double);
+
+    if (a == DBL_MAX)
+      break;
+
+    v->dat[i] = a;
+  }
+
+  va_end(arg);
 
   *h = v;
 
@@ -40,28 +55,28 @@ int vec_cls(struct vec** h) {
     return -1;
   }
 
-  free((*h)->data);
+  free((*h)->dat);
   free(*h);
+
+  *h = nullptr;
 
   return 0;
 }
 
 int vec_cmb(struct vec* a, struct vec* b, struct vec* r, double k) {
-  if (!a || !b || !r || a->dim != r->dim || b->dim != r->dim) {
+  if (!a || !b || !r || a->n != r->n || b->n != r->n) {
     errno = EINVAL;
     return -1;
   }
 
-  uint dim = a->dim;
+  uint n = a->n;
 
-  double* ad = a->data;
-  double* bd = b->data;
-  double* rd = r->data;
+  double* ad = a->dat;
+  double* bd = b->dat;
+  double* rd = r->dat;
 
-#ifdef OMP_THREADS_NUM
-#  pragma omp parallel for num_threads(OMP_THREADS_NUM)
-#endif  // OMP
-  for (uint i = 0; i < dim; ++i)
+#pragma omp parallel for
+  for (uint i = 0; i < n; ++i)
     rd[i] = ad[i] + k * bd[i];
 
   return 0;
@@ -73,16 +88,14 @@ int vec_dot(struct vec* a, struct vec* b, double* r) {
     return -1;
   }
 
-  uint dim = a->dim;
+  uint dim = a->n;
 
-  double* ad = a->data;
-  double* bd = b->data;
+  double* ad = a->dat;
+  double* bd = b->dat;
 
   double s = 0;
 
-#ifdef OMP_THREADS_NUM
-#  pragma omp parallel for reduction(+ : s) num_threads(OMP_THREADS_NUM)
-#endif  // OMP
+#pragma omp parallel for reduction(+ : s)
   for (uint i = 0; i < dim; ++i)
     s += ad[i] * bd[i];
 
@@ -104,12 +117,12 @@ int vec_nrm(struct vec* v, double* r) {
 }
 
 int vec_cpy(struct vec* s, struct vec* d) {
-  if (!s || !d || s->dim != d->dim) {
+  if (!s || !d || s->n != d->n) {
     errno = EINVAL;
     return -1;
   }
 
-  memcpy(d->data, s->data, sizeof(double) * s->dim);
+  memcpy(d->dat, s->dat, sizeof(double) * s->n);
 
   return 0;
 }
@@ -120,7 +133,7 @@ int vec_rst(struct vec* v) {
     return -1;
   }
 
-  memset(v->data, 0, sizeof(double) * v->dim);
+  memset(v->dat, 0, sizeof(double) * v->n);
 
   return 0;
 }

@@ -1,7 +1,7 @@
-#ifndef MTX_H
-#define MTX_H
+#ifndef NUMX_MTX_H
+#define NUMX_MTX_H
 
-#include <vec/vec.h>
+#include <numx/vec/vec.h>
 
 struct imtx {
   struct ipps {
@@ -9,7 +9,7 @@ struct imtx {
     uint n;
   } pps;
 
-  double** data;
+  double** dat;
 };
 
 int imtx_new(struct imtx** h, struct ipps pps);
@@ -52,4 +52,4 @@ int jmtx_cls(struct jmtx** h);
     struct jmtx*: jmtx_evo             \
     )(X, x, r)
 
-#endif  // MTX_H
+#endif  // NUMX_MTX_H

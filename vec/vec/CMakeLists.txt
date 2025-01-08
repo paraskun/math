@@ -1,12 +1,6 @@
-set(SRC
-  src/vec.c
-)
+set(SRC src/vec.c)
 
 add_library(vec ${SRC} ${HDR})
 
 target_link_libraries(vec PUBLIC -lm)
 target_include_directories(vec PUBLIC include/)
-
-if (OPENMP_FOUND)
-  target_link_libraries(vec PUBLIC OpenMP::OpenMP_C)
-endif()
