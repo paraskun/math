@@ -1,12 +1,12 @@
-#include <calc.h>
 #include <errno.h>
 #include <math.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdx.h>
-#include <vec/dss.h>
-#include <vec/mtx.h>
-#include <vec/non.h>
+
+#include <numx/vec/dss.h>
+#include <numx/vec/mtx.h>
+#include <numx/vec/non.h>
 
 struct rec {
   uint i;

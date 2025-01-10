@@ -1,4 +1,6 @@
-file(GLOB SRC src/*.c)
+set(SRC 
+  src/idss.c
+)
 
 add_library(dss ${SRC})
 

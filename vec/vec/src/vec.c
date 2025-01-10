@@ -5,16 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-int vec_new_var(struct vec** h, uint n, ...) {
-  if (!h || n == 0) {
+int vec_new_ini(struct vec* v, uint n, ...) {
+  if (!v || n == 0) {
     errno = EINVAL;
-    return -1;
-  }
-
-  struct vec* v = malloc(sizeof(struct vec));
-
-  if (!v) {
-    errno = ENOMEM;
     return -1;
   }
 
@@ -22,8 +15,6 @@ int vec_new_var(struct vec** h, uint n, ...) {
   v->dat = malloc(sizeof(double) * n);
 
   if (!v->dat) {
-    free(v);
-
     errno = ENOMEM;
     return -1;
   }
@@ -44,21 +35,16 @@ int vec_new_var(struct vec** h, uint n, ...) {
 
   va_end(arg);
 
-  *h = v;
-
   return 0;
 }
 
-int vec_cls(struct vec** h) {
-  if (!h || !(*h)) {
+int vec_cls(struct vec* v) {
+  if (!v) {
     errno = EINVAL;
     return -1;
   }
 
-  free((*h)->dat);
-  free(*h);
-
-  *h = nullptr;
+  free(v->dat);
 
   return 0;
 }

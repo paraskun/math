@@ -2,7 +2,7 @@ file(GLOB SRC src/*.c)
 
 add_library(non ${SRC})
 
-target_link_libraries(non PUBLIC vec mtx calc dss stdx)
+target_link_libraries(non PUBLIC vec mtx dss stdx)
 target_include_directories(non PUBLIC include/)
 
 add_executable(test_new test/test_new.c)
