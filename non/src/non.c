@@ -117,16 +117,16 @@ int non_new_slv(struct pcut* fun, struct vec* x, struct non_new_opt opt) {
     return -1;
   }
 
-  struct pcut* rec = nullptr;
+  struct pcut rec;
 
   if (cut_new(&rec))
     goto err;
 
-  if (cut_exp(rec, fun->len))
+  if (cut_exp(&rec, fun->len))
     goto err;
 
-  rec->ctl = true;
-  rec->cmp.call = &rec_cmp_dsc;
+  rec.ctl = true;
+  rec.cmp.call = &rec_cmp_dsc;
 
   for (uint i = 0; i < fun->len; ++i) {
     struct rec* r = malloc(sizeof(struct rec));
@@ -136,7 +136,7 @@ int non_new_slv(struct pcut* fun, struct vec* x, struct non_new_opt opt) {
       goto err;
     }
 
-    if (cut_add(rec, r))
+    if (cut_add(&rec, r))
       goto err;
   }
 
@@ -160,12 +160,12 @@ int non_new_slv(struct pcut* fun, struct vec* x, struct non_new_opt opt) {
 
   switch (opt.mod) {
     case EXC:
-      if (non_evo_exc(rec, fun, x, &fk, &jk, &opt))
+      if (non_evo_exc(&rec, fun, x, &fk, &jk, &opt))
         goto err;
 
       break;
     case CON:
-      if (non_evo_con(rec, fun, x, &fk, &jk, &opt))
+      if (non_evo_con(&rec, fun, x, &fk, &jk, &opt))
         goto err;
 
       break;
@@ -195,12 +195,12 @@ int non_new_slv(struct pcut* fun, struct vec* x, struct non_new_opt opt) {
 
     switch (opt.mod) {
       case EXC:
-        if (non_evo_exc(rec, fun, x, &fk, &jk, &opt))
+        if (non_evo_exc(&rec, fun, x, &fk, &jk, &opt))
           goto err;
 
         break;
       case CON:
-        if (non_evo_con(rec, fun, x, &fk, &jk, &opt))
+        if (non_evo_con(&rec, fun, x, &fk, &jk, &opt))
           goto err;
 
         break;

@@ -11,8 +11,6 @@ struct vec {
   double* dat;
 };
 
-#define vec_new(v, ...) (vec_new_ini)(v, __VA_ARGS__, DBL_MAX)
-
 int vec_new_ini(struct vec* v, uint n, ...);
 int vec_cls(struct vec* v);
 
@@ -24,5 +22,6 @@ int vec_nrm(struct vec* v, double* r);
 int vec_cpy(struct vec* s, struct vec* d);
 int vec_rst(struct vec* v);
 
+#define vec_new(v, ...) vec_new_ini(v, __VA_ARGS__, DBL_MAX)
 
 #endif  // NUMX_VEC_VEC_H

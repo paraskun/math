@@ -1,6 +1,7 @@
 #include <errno.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <numx/vec/mtx.h>
 
@@ -30,6 +31,8 @@ int imtx_new(struct imtx* m, struct imtx_pps pps) {
       errno = ENOMEM;
       return -1;
     }
+
+    memset(m->dat[i], 0, sizeof(double) * pps.n);
   }
 
   return 0;

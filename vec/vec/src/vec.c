@@ -22,7 +22,7 @@ int vec_new_ini(struct vec* v, uint n, ...) {
   memset(v->dat, 0, sizeof(double) * n);
 
   va_list arg;
-  va_start(arg, d);
+  va_start(arg, n);
 
   for (uint i = 0; i < n; ++i) {
     double a = va_arg(arg, double);
