@@ -47,7 +47,7 @@ struct jmtx {
     uint n;
   } pps;
 
-  fun** dat;
+  double (***dat)(struct vec*);
 };
 
 int jmtx_new(struct jmtx* m, struct jmtx_pps pps);

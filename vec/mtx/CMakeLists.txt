@@ -1,8 +1,4 @@
-set(SRC
-  src/imtx.c
-  src/jmtx.c
-  src/smtx.c
-)
+file(GLOB SRC src/*.c)
 
 add_library(mtx ${SRC})
 

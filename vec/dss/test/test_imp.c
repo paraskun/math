@@ -2,39 +2,39 @@
 #include <munit.h>
 #include <stdio.h>
 #include <string.h>
-#include <vec/dss.h>
+#include <numx/vec/dss.h>
 
 static MunitResult test_red(const MunitParameter[], void*) {
-  struct imtx* m;
-  struct vec*  x;
-  struct vec*  f;
+  struct imtx m;
+  struct vec x;
+  struct vec f;
 
-  struct ipps pps = {3, 3};
+  struct imtx_pps pps = {3, 3};
 
   mtx_new(&m, pps);
   vec_new(&x, 3);
   vec_new(&f, 3);
 
-  m->data[0][0] = 4;
-  m->data[0][1] = 3;
-  m->data[0][2] = 5;
-  m->data[1][0] = 0;
-  m->data[1][1] = 0;
-  m->data[1][2] = 1;
-  m->data[2][0] = 2;
-  m->data[2][1] = -1;
-  m->data[2][2] = 2;
+  m.dat[0][0] = 4;
+  m.dat[0][1] = 3;
+  m.dat[0][2] = 5;
+  m.dat[1][0] = 0;
+  m.dat[1][1] = 0;
+  m.dat[1][2] = 1;
+  m.dat[2][0] = 2;
+  m.dat[2][1] = -1;
+  m.dat[2][2] = 2;
 
-  f->data[0] = 25;
-  f->data[1] = 3;
-  f->data[2] = 6;
+  f.dat[0] = 25;
+  f.dat[1] = 3;
+  f.dat[2] = 6;
 
-  if (dss_red_slv(m, x, f))
+  if (dss_red_slv(&m, &x, &f))
     fprintf(stderr, "err: %s\n", strerror(errno));
 
-  munit_assert_double_equal(1.0, x->data[0], 3);
-  munit_assert_double_equal(2.0, x->data[1], 3);
-  munit_assert_double_equal(3.0, x->data[2], 3);
+  munit_assert_double_equal(1.0, x.dat[0], 3);
+  munit_assert_double_equal(2.0, x.dat[1], 3);
+  munit_assert_double_equal(3.0, x.dat[2], 3);
 
   mtx_cls(&m);
   vec_cls(&x);

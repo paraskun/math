@@ -1,5 +1,5 @@
-#ifndef NUMX_VEC_NON_H
-#define NUMX_VEC_NON_H
+#ifndef NUMX_NON_NON_H
+#define NUMX_NON_NON_H
 
 #include <numx/vec/mtx.h>
 #include <numx/vec/vec.h>
@@ -31,4 +31,5 @@ struct non_new_opt {
 
 int non_new_slv(struct pcut* f, struct vec* x, struct non_new_opt opt);
 
-#endif  // NUMX_VEC_NON_H
+
+#endif // NUMX_NON_NON_H

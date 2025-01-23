@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(math C)
+project(numx C)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 set(CMAKE_BUILD_TYPE Debug)
@@ -11,4 +11,5 @@ enable_testing()
 
 add_subdirectory(stdx)
 add_subdirectory(vec)
-# add_subdirectory(non)
+add_subdirectory(non)
+# add_subdirectory(pde)

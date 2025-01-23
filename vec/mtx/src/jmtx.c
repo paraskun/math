@@ -11,7 +11,7 @@ int jmtx_new(struct jmtx* m, struct jmtx_pps pps) {
   }
 
   m->pps = pps;
-  m->dat = malloc(sizeof(fun*) * pps.m);
+  m->dat = malloc(sizeof(double (*)(struct vec*)) * pps.m);
 
   if (!m->dat) {
     errno = ENOMEM;
@@ -19,7 +19,7 @@ int jmtx_new(struct jmtx* m, struct jmtx_pps pps) {
   }
 
   for (uint i = 0; i < pps.m; ++i) {
-    m->dat[i] = malloc(sizeof(fun) * pps.n);
+    m->dat[i] = malloc(sizeof(double (*)(struct vec*)) * pps.n);
 
     if (!m->dat[i]) {
       for (uint j = 0; j < i; ++j)
@@ -31,7 +31,7 @@ int jmtx_new(struct jmtx* m, struct jmtx_pps pps) {
       return -1;
     }
 
-    memset(m->dat[i], 0, sizeof(fun) * pps.n);
+    memset(m->dat[i], 0, sizeof(double (*)(struct vec*)) * pps.n);
   }
 
   return 0;

@@ -11,8 +11,6 @@ struct vec {
   double* dat;
 };
 
-typedef double (*fun)(struct vec*);
-
 #define vec_new(v, ...) (vec_new_ini)(v, __VA_ARGS__, DBL_MAX)
 
 int vec_new_ini(struct vec* v, uint n, ...);
